@@ -10,7 +10,7 @@ import zio.test.Assertion._
 object UserIdSpec extends ZIOSpecDefault {
   override def spec: ZSpec[TestEnvironment with Scope, Any] =
     suite("UserId serde suite")(
-      test("We should be able to parse an external cover as json") {
+      test("We should be able to parse a user id as json") {
         val json: String =
           s"""{
              |    "object": "user",
