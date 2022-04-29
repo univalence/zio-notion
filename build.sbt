@@ -55,7 +55,7 @@ addCommandAlias("testSpecificWithCoverage", "; clean; coverage; test; coverageRe
 val zio       = "2.0.0-RC5"
 val zioConfig = "3.0.0-RC8"
 val zioHttp   = "2.0.0-RC7"
-val zioJson   = "0.3.0-RC7"
+val circe     = "0.14.1"
 val sttp      = "3.5.2"
 
 // -- Main project settings
@@ -72,12 +72,16 @@ lazy val core =
         "dev.zio"                       %% "zio-config"                    % zioConfig,
         "dev.zio"                       %% "zio-config"                    % zioConfig,
         "dev.zio"                       %% "zio-config-magnolia"           % zioConfig,
-        "dev.zio"                       %% "zio-json"                      % zioJson,
         "io.d11"                        %% "zhttp"                         % zioHttp,
+        "io.circe"                      %% "circe-core"                    % circe,
+        "io.circe"                      %% "circe-parser"                  % circe,
+        "io.circe"                      %% "circe-generic"                 % circe,
+        "io.circe"                      %% "circe-generic-extras"          % circe,
         "dev.zio"                       %% "zio-test"                      % zio     % Test,
         "dev.zio"                       %% "zio-test-sbt"                  % zio     % Test,
         "io.d11"                        %% "zhttp-test"                    % zioHttp % Test
-      )
+      ),
+      scalacOptions ++= Seq("-Ymacro-annotations")
     )
 
 /**

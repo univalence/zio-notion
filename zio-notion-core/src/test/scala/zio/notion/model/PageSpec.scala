@@ -1,13 +1,14 @@
 package zio.notion.model
 
+import io.circe.parser.decode
+
 import zio.Scope
-import zio.json._
 import zio.test._
 import zio.test.Assertion.isRight
 
 object PageSpec extends ZIOSpecDefault {
   override def spec: ZSpec[TestEnvironment with Scope, Any] =
-    suite("Page Serde Suite")(
+    suite("Page serde suite")(
       test("We should be able to parse a page json") {
         val json: String =
           """{
@@ -145,7 +146,7 @@ object PageSpec extends ZIOSpecDefault {
             |    "url": "https://www.notion.so/Les-num-rations-en-Scala-2-X-1c2d0a80332146419615f345185de05a"
             |}""".stripMargin
 
-        assert(json.fromJson[Page])(isRight)
+        assert(decode[Page](json))(isRight)
       }
     )
 }
