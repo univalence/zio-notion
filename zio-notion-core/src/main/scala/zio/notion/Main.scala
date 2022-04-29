@@ -6,7 +6,6 @@ import sttp.model.Uri
 
 import zio._
 
-
 trait NotionDatabaseFilter
 
 trait NotionDatabaseSort
