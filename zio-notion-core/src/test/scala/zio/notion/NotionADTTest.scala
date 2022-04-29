@@ -1,9 +1,8 @@
 package zio.notion
 
-import NotionADT._
-
 import zio.Scope
 import zio.json._
+import zio.notion.model.Parent
 import zio.test._
 import zio.test.Assertion._
 
