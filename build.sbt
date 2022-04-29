@@ -81,6 +81,7 @@ lazy val core =
         "dev.zio"                       %% "zio-test-sbt"                  % zio     % Test,
         "io.d11"                        %% "zhttp-test"                    % zioHttp % Test
       ),
+      testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")),
       scalacOptions ++= Seq("-Ymacro-annotations")
     )
 

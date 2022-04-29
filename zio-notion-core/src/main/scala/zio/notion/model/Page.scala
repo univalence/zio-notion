@@ -15,6 +15,6 @@ final case class Page(
     icon:           Option[Icon],
     parent:         Parent,
     archived:       Boolean,
-    // properties:  Seq[Any],
-    url: String
+    properties:     Map[String, Property],
+    url:            String
 )
