@@ -1,3 +1,3 @@
-# Notion companion
+# ZIO Notion
 
-My fantastic project
+A strongly typed interface to interact with Notion using ZIO

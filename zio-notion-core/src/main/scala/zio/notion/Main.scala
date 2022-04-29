@@ -1,13 +1,12 @@
-package io.univalence.notion_companion
+package zio.notion
 
 import org.json4s._
 import org.json4s.native.JsonMethods._
 import sttp.client3._
 import sttp.client3.asynchttpclient.zio.{AsyncHttpClientZioBackend, SttpClient}
 
-import io.univalence.notion_companion.Hole.???
-
 import zio._
+import zio.notion.Hole.???
 import zio.prelude.Validation
 
 import scala.language.reflectiveCalls

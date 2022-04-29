@@ -1,14 +1,15 @@
-package io.univalence.notion_companion
+package zio.notion
 
-import org.json4s.native.JsonMethods._
+import org.json4s.native.JsonMethods.parse
+
 import zio.Scope
-import zio.test._
-
+import zio.test.{assertTrue, TestEnvironment, ZIOSpecDefault, ZSpec}
 
 object MainTest extends ZIOSpecDefault {
-    override def spec: ZSpec[TestEnvironment with Scope, Any] = suite("suite")(
-        test("test conversion"){
-            val json = """
+  override def spec: ZSpec[TestEnvironment with Scope, Any] =
+    suite("suite")(
+      test("test conversion") {
+        val json = """
             {
               "object": "page",
               "id": "1c2d0a80-3321-4641-9615-f345185de05a",
@@ -145,9 +146,9 @@ object MainTest extends ZIOSpecDefault {
           }
             """
 
-            val parsedJson = parse(json)
-            assertTrue(parsedJson == ???)
-        }
+        val parsedJson = parse(json)
+        assertTrue(parsedJson == ???)
+      }
     )
 
 }

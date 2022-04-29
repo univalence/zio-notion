@@ -1,4 +1,4 @@
-package io.univalence.notion_companion
+package zio.notion
 
 import zio.json._
 
