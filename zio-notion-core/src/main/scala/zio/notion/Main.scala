@@ -1,41 +1,11 @@
 package zio.notion
 
-import org.json4s._
-import org.json4s.native.JsonMethods._
 import sttp.client3._
 import sttp.client3.asynchttpclient.zio.{AsyncHttpClientZioBackend, SttpClient}
+import sttp.model.Uri
 
 import zio._
-import zio.notion.Hole.???
-import zio.prelude.Validation
 
-import scala.language.reflectiveCalls
-
-object Hole {
-  type ??? = Nothing
-}
-
-trait NotionDecoder[+T] {
-
-  import NotionDecoder.DecodeError
-
-  def fromPayload(payload: ???): Validation[DecodeError, T]
-}
-
-object NotionDecoder {
-  type DecodeError = String
-}
-
-trait PageId[T] {
-  def id: String
-}
-
-object PageId {
-  implicit def getId[T <: { def id: String }](obj: T): PageId[T] =
-    new PageId[T] {
-      override def id: String = obj.id
-    }
-}
 
 trait NotionDatabaseFilter
 
@@ -50,17 +20,14 @@ sealed trait Notion {
       databaseId: DatabaseId,
       filter: Option[NotionDatabaseFilter],
       sort: Option[NotionDatabaseSort]
-  ): Task[JValue]
+  ): Task[String]
 
-  // [Page: PageId]
-  def savePage(page: Page, parentId: String): Task[Unit]
-
-  def retrievePageBlocks(pageId: String): Task[JValue]
+  def retrievePageBlocks(pageId: String): Task[String]
 }
 
-case class Configuration(notion: NotionConfiguration)
+final case class Configuration(notion: NotionConfiguration)
 
-case class NotionConfiguration(bearer: String)
+final case class NotionConfiguration(bearer: String)
 
 //TODO
 
@@ -97,8 +64,8 @@ object Notion extends Accessible[Notion] {
     }
 }
 
-case class LiveNotionAPI(config: NotionConfiguration, sttpClient: SttpClient) extends Notion {
-  val endpoint = uri"https://api.notion.com/v1"
+final case class LiveNotionAPI(config: NotionConfiguration, sttpClient: SttpClient) extends Notion {
+  val endpoint: Uri = uri"https://api.notion.com/v1"
 
   private def defaultRequest =
     basicRequest.auth
@@ -107,7 +74,7 @@ case class LiveNotionAPI(config: NotionConfiguration, sttpClient: SttpClient) ex
       .header("Content-Type", "application/json")
 
   // https://developers.notion.com/reference/retrieve-a-page
-  override def retrievePageBlocks(pageId: String): Task[JValue] = {
+  override def retrievePageBlocks(pageId: String): Task[String] = {
     val request: Request[Either[String, String], Any] =
       defaultRequest
         .get(uri"$endpoint/blocks/$pageId/children")
@@ -118,7 +85,6 @@ case class LiveNotionAPI(config: NotionConfiguration, sttpClient: SttpClient) ex
       .map(_.body)
       .absolve
       .mapError(e => new Exception(e))
-      .map(parse(_))
       .resurrect
   }
 
@@ -126,7 +92,7 @@ case class LiveNotionAPI(config: NotionConfiguration, sttpClient: SttpClient) ex
       databaseId: DatabaseId,
       filter: Option[NotionDatabaseFilter],
       sort: Option[NotionDatabaseSort]
-  ): Task[JValue] = {
+  ): Task[String] = {
     val request: Request[Either[String, String], Any] =
       defaultRequest
         .body("{}")
@@ -138,26 +104,8 @@ case class LiveNotionAPI(config: NotionConfiguration, sttpClient: SttpClient) ex
       .map(_.body)
       .absolve
       .mapError(e => new Exception(e))
-      .map(parse(_))
       .resurrect
   }
-
-  override def savePage(page: Page, parentId: String): Task[Unit] = ??? /*{
-    val req = defaultRequest
-      .body(page.toJson)
-      .post(endpoint)
-
-    val effect: ZIO[Any, Throwable, Response[Either[String, String]]] =
-      sttpClient.send(req).mapError(e => new Throwable(e))
-
-    effect.flatMap {
-      response =>
-        response.body match {
-          case Right(body) => Task.succeed()
-          case Left(_) => Task.fail()
-        }
-    }
-  }*/
 }
 
 object Main extends ZIOAppDefault {
@@ -172,8 +120,8 @@ object Main extends ZIOAppDefault {
     for {
       page     <- Notion(_.retrievePageBlocks("1c2d0a80-3321-4641-9615-f345185de05a")).orDie
       database <- Notion(_.database("3868f708ae46461fbfcf72d34c9536f9", None, None)).orDie
-      _        <- Console.printLine(page.toString).orDie
-      _        <- Console.printLine(database.toString).orDie
+      _        <- Console.printLine(page).orDie
+      _        <- Console.printLine(database).orDie
 
     } yield ()
 

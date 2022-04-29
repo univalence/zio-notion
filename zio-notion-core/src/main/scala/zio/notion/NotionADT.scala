@@ -3,7 +3,7 @@ package zio.notion
 import zio.json._
 
 sealed trait NotionADT
-case class RichTextElement(
+final case class RichTextElement(
 )
 
 object NotionADT {
@@ -13,10 +13,10 @@ object NotionADT {
 
   object Parent {
     @jsonHint("page_id")
-    case class Page(@jsonField("page_id") pageId: String) extends Parent
+    final case class Page(@jsonField("page_id") pageId: String) extends Parent
 
     @jsonHint("database_id")
-    case class Database(@jsonField("database_id") databaseId: String) extends Parent
+    final case class Database(@jsonField("database_id") databaseId: String) extends Parent
 
     @jsonHint("workspace")
     case object Workspace extends Parent
