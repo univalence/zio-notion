@@ -10,5 +10,4 @@ object MentionData {
   final case class TemplateMention(templateMention: TemplateMentionData)
   final case class Page(page: Id)         extends MentionData
   final case class Database(database: Id) extends MentionData
-
 }
