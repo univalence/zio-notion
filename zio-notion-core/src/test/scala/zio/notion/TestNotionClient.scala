@@ -5,7 +5,7 @@ import sttp.client3.Response
 import zio._
 import zio.notion.NotionClient.NotionResponse
 
-case class TestNotionClient() extends NotionClient {
+final case class TestNotionClient() extends NotionClient {
   override def retrievePage(pageId: String): IO[NotionError, NotionResponse] =
     ZIO.succeed {
       Response.ok(
