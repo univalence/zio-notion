@@ -10,7 +10,7 @@ import zio.test.Assertion._
 
 object ParentSpec extends ZIOSpecDefault {
   override def spec: ZSpec[TestEnvironment with Scope, Any] =
-    suite("Parent deserialization suite")(
+    suite("Parent serde suite")(
       test("We should be able to parse a page parent json") {
         val raw: String =
           s"""{

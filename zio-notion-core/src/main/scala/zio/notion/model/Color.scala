@@ -9,16 +9,17 @@ sealed trait BaseColor       extends Color
 sealed trait BackgroundColor extends Color
 
 object Color {
-  final case object Default          extends BaseColor
-  final case object Gray             extends BaseColor
-  final case object Brown            extends BaseColor
-  final case object Orange           extends BaseColor
-  final case object Yellow           extends BaseColor
-  final case object Green            extends BaseColor
-  final case object Blue             extends BaseColor
-  final case object Purple           extends BaseColor
-  final case object Pink             extends BaseColor
-  final case object Red              extends BaseColor
+  final case object Default extends BaseColor
+  final case object Gray    extends BaseColor
+  final case object Brown   extends BaseColor
+  final case object Orange  extends BaseColor
+  final case object Yellow  extends BaseColor
+  final case object Green   extends BaseColor
+  final case object Blue    extends BaseColor
+  final case object Purple  extends BaseColor
+  final case object Pink    extends BaseColor
+  final case object Red     extends BaseColor
+
   final case object GrayBackground   extends BackgroundColor
   final case object BrownBackground  extends BackgroundColor
   final case object OrangeBackground extends BackgroundColor

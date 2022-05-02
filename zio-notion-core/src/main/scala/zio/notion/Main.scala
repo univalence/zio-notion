@@ -32,8 +32,7 @@ import zio._
 object Main extends ZIOAppDefault {
 
   val sttpLayer: Layer[Throwable, SttpClient] = AsyncHttpClientZioBackend.layer()
-  val configuration: NotionConfiguration =
-    NotionConfiguration(bearer = "secret_tx3gYOBSeFlYJOV0QtQKmAfoYzXQ9XTAuPZRt9XGwYF")
+  val configuration: NotionConfiguration      = NotionConfiguration(bearer = "secret_tx3gYOBSeFlYJOV0QtQKmAfoYzXQ9XTAuPZRt9XGwYF")
 
   def app: ZIO[Notion, NotionError, Unit] =
     for {
@@ -41,6 +40,5 @@ object Main extends ZIOAppDefault {
       _    <- Console.printLine(page.url).orDie
     } yield ()
 
-  override def run: ZIO[ZIOAppArgs, Any, Any] =
-    app.provide(sttpLayer, ZLayer.succeed(configuration), NotionClient.live, Notion.live)
+  override def run: ZIO[ZIOAppArgs, Any, Any] = app.provide(sttpLayer, ZLayer.succeed(configuration), NotionClient.live, Notion.live)
 }

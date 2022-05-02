@@ -4,7 +4,7 @@ import io.circe.parser.decode
 
 import zio.Scope
 import zio.notion.Faker.fakeDate
-import zio.notion.model.FormulaData._
+import zio.notion.model.FormulaData.{Date, Number}
 import zio.test._
 import zio.test.Assertion._
 
@@ -18,7 +18,7 @@ object FormulaDataSpec extends ZIOSpecDefault {
             |    "string": "string"
             |}""".stripMargin
 
-        val expected: string = string(string = Some("string"))
+        val expected = FormulaData.String(string = Some("string"))
 
         assert(decode[FormulaData](json))(isRight(equalTo(expected)))
       },
@@ -55,7 +55,7 @@ object FormulaDataSpec extends ZIOSpecDefault {
              |    "boolean": true
              |}""".stripMargin
 
-        val expected: boolean = boolean(boolean = Some(true))
+        val expected = FormulaData.Boolean(boolean = Some(true))
 
         assert(decode[FormulaData](json))(isRight(equalTo(expected)))
       }

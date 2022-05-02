@@ -31,7 +31,6 @@ object Notion extends Accessible[Notion] {
         )
         .flatMap(decodeJson[T])
 
-    override def retrievePage(pageId: String): IO[NotionError, Page] =
-      decodeResponse[Page](notionClient.retrievePage(pageId))
+    override def retrievePage(pageId: String): IO[NotionError, Page] = decodeResponse[Page](notionClient.retrievePage(pageId))
   }
 }
