@@ -1,6 +1,7 @@
 package zio.notion.model
 
 import io.circe.parser.decode
+
 import zio.Scope
 import zio.notion.Faker.fakeDate
 import zio.notion.model.FormulaData.{Date, Number}
