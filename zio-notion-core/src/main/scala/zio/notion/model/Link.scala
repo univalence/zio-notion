@@ -6,5 +6,5 @@ import io.circe.generic.extras._
 
 object Link {
   final case class File(name: String, file: ExpirableUrl) extends Link
-  final case class External(name: String, external: Url) extends Link
+  final case class External(name: String, external: Url)  extends Link
 }
