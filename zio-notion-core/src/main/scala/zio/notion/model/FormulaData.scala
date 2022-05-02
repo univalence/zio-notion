@@ -5,8 +5,8 @@ import io.circe.generic.extras._
 @ConfiguredJsonCodec sealed trait FormulaData
 
 object FormulaData {
-  final case class string(string: Option[String])    extends FormulaData
-  final case class Date(date: Option[DateData])      extends FormulaData
-  final case class Number(number: Option[Double])    extends FormulaData
-  final case class boolean(boolean: Option[Boolean]) extends FormulaData
+  final case class String(string: Option[Predef.String])   extends FormulaData
+  final case class Date(date: Option[DateData])            extends FormulaData
+  final case class Number(number: Option[Double])          extends FormulaData
+  final case class Boolean(boolean: Option[scala.Boolean]) extends FormulaData
 }
