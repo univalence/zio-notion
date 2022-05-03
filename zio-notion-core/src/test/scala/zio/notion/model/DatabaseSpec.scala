@@ -1,6 +1,5 @@
 package zio.notion.model
 
-import io.circe
 import io.circe.parser.decode
 
 import zio.Scope
