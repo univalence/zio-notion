@@ -24,7 +24,8 @@ final case class Page(
     properties:     Map[String, Property],
     url:            String
 ) { self =>
-  def updateProperty[T <: Property](name: String)(update: T => IO[NotionError, T]): IO[NotionError, Page.Patch] = Page.Patch(self).updateProperty(name)(update)
+  def updateProperty[T <: Property: ClassTag](name: String)(update: T => IO[NotionError, T]): IO[NotionError, Page.Patch] =
+    Page.Patch(self).updateProperty(name)(update)
 }
 
 object Page {

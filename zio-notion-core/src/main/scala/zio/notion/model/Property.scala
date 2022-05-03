@@ -2,7 +2,7 @@ package zio.notion.model
 
 import io.circe.generic.extras._
 
-import zio.{Clock, UIO}
+import zio.{Clock, UIO, ZIO}
 
 import java.time.LocalDate
 
@@ -39,17 +39,16 @@ object Property {
   object Date {
     def update(f: Date => Date): Date => Date = f
 
-    def now: Date => UIO[Date] =
-      date =>
-        Clock.localDateTime.map(dateTime =>
-          Date(id = date.id, date = Some(DateData(start = dateTime.toLocalDate, date.date.flatMap(_.end), date.date.flatMap(_.timeZone))))
-        )
-
     def startAt(newDate: LocalDate): Date => Date = date => date.copy(date = date.date.map(_.copy(start = newDate)))
 
     def endAt(newDate: LocalDate): Date => Date = date => date.copy(date = date.date.map(_.copy(end = Some(newDate))))
 
     def between(from: LocalDate, to: LocalDate): Date => Date = startAt(from) andThen endAt(to)
+
+    def now: Date => UIO[Date] = date => Clock.localDateTime.map(datetime => startAt(datetime.toLocalDate)(date))
+
+    def betweenNowAnd(to: LocalDate => LocalDate): Date => UIO[Date] =
+      date => Clock.localDateTime.map(datetime => between(datetime.toLocalDate, to(datetime.toLocalDate))(date))
   }
 
   final case class Email(id: String, email: Option[String]) extends Property
@@ -99,7 +98,7 @@ object Property {
   final case class Title(id: String, title: Seq[RichTextData]) extends Property
 
   object Title {
-    def update(f: Title => Title): Title => Title = f
+    def update(f: Title => Title): Title => UIO[Title] = title => ZIO.succeed(f(title))
 
     def rename(newTitle: String): Title => Title =
       _.copy(title = Seq(RichTextData.Text(RichTextData.Text.TextData(newTitle, None), Annotations.default, newTitle, None)))

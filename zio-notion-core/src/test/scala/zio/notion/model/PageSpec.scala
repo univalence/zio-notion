@@ -175,7 +175,7 @@ object PageSpec extends ZIOSpecDefault {
              |  }
              |}""".stripMargin
 
-        assertTrue(printer.print(patch.asJson) == expected)
+        patch.map(p => assertTrue(printer.print(p.asJson) == expected))
       }
     )
 }
