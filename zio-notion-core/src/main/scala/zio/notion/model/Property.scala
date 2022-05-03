@@ -39,7 +39,11 @@ object Property {
   object Date {
     def update(f: Date => Date): Date => Date = f
 
-    def now: Date => UIO[Date] = _ => Clock.localDateTime.map(dateTime => Date(id = "", date = Some(DateData(start = dateTime.toLocalDate, None, None))))
+    def now: Date => UIO[Date] =
+      date =>
+        Clock.localDateTime.map(dateTime =>
+          Date(id = date.id, date = Some(DateData(start = dateTime.toLocalDate, date.date.flatMap(_.end), date.date.flatMap(_.timeZone))))
+        )
 
     def startAt(newDate: LocalDate): Date => Date = date => date.copy(date = date.date.map(_.copy(start = newDate)))
 
