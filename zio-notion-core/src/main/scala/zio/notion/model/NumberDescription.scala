@@ -3,6 +3,7 @@ package zio.notion.model
 import io.circe.Codec
 import io.circe.generic.extras.ConfiguredJsonCodec
 import io.circe.generic.extras.semiauto.deriveEnumerationCodec
+
 import zio.notion.model.NumberDescription.NumberFormat
 
 @ConfiguredJsonCodec final case class NumberDescription(format: NumberFormat)

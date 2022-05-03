@@ -1,7 +1,6 @@
 package zio.notion.model
 
 import io.circe._
-import io.circe.generic.extras.{Configuration => CirceConfiguration}
 import io.circe.generic.extras.semiauto.deriveEnumerationCodec
 
 sealed trait Color
@@ -30,7 +29,7 @@ object Color {
   final case object PinkBackground   extends BackgroundColor
   final case object RedBackground    extends BackgroundColor
 
-  //CirceConfiguration.default.withSnakeCaseConstructorNames
+  // CirceConfiguration.default.withSnakeCaseConstructorNames
 
   implicit val codecBaseColor: Codec[BaseColor] = deriveEnumerationCodec[BaseColor]
   implicit val codecColor: Codec[Color]         = deriveEnumerationCodec[Color]

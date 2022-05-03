@@ -2,6 +2,7 @@ package zio.notion.model
 
 import io.circe
 import io.circe.parser.decode
+
 import zio.Scope
 import zio.test._
 import zio.test.Assertion.isRight

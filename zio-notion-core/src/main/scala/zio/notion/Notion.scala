@@ -2,6 +2,7 @@ package zio.notion
 
 import io.circe.Decoder
 import io.circe.parser.decode
+
 import zio._
 import zio.notion.NotionClient.NotionResponse
 import zio.notion.model.{Database, Page}
