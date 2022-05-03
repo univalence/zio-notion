@@ -9,6 +9,7 @@ import zio.notion.NotionClient.NotionResponse
 
 trait NotionClient {
   def retrievePage(pageId: String): IO[NotionError, NotionResponse]
+  def retrieveDatabase(databaseId: String): IO[NotionError, NotionResponse]
 }
 
 object NotionClient extends Accessible[NotionClient] {
@@ -29,7 +30,8 @@ object NotionClient extends Accessible[NotionClient] {
       def handle: IO[NotionError, NotionResponse] = handleRequest(sttpClient.send(request))
     }
 
-    private def handleRequest(request: Task[Response[Either[String, String]]]): IO[NotionError, NotionResponse] = request.mapError(t => ConnectionError(t))
+    private def handleRequest(request: Task[Response[Either[String, String]]]): IO[NotionError, NotionResponse] =
+      request.mapError(t => ConnectionError(t))
 
     private def defaultRequest: RequestT[Empty, Either[String, String], Any] =
       basicRequest.auth
@@ -40,6 +42,11 @@ object NotionClient extends Accessible[NotionClient] {
     override def retrievePage(pageId: String): IO[NotionError, NotionResponse] =
       defaultRequest
         .get(uri"$endpoint/pages/$pageId")
+        .handle
+
+    override def retrieveDatabase(databaseId: String): IO[NotionError, NotionResponse] =
+      defaultRequest
+        .get(uri"$endpoint/databases/$databaseId")
         .handle
   }
 }
