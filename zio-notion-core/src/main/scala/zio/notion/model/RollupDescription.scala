@@ -10,5 +10,4 @@ object RollupDescription {
       relationPropertyId:   String,
       function:             RollupFunction
   )
-
 }

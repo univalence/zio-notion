@@ -185,21 +185,13 @@ final case class TestNotionClient() extends NotionClient {
                                      |        }
                                      |    ],
                                      |    "properties": {
-                                     |        "Property 7": {
-                                     |            "id": "%3BGTP",
-                                     |            "name": "Property 7",
-                                     |            "type": "email",
-                                     |            "email": {}
+                                     |            "Property 8": {
+                                     |            "id": "JYsh",
+                                     |            "name": "Property 8",
+                                     |            "type": "phone_number",
+                                     |            "phone_number": {}
                                      |        },
-                                     |        "Property": {
-                                     |            "id": "%3Cqli",
-                                     |            "name": "Property",
-                                     |            "type": "number",
-                                     |            "number": {
-                                     |                "format": "number"
-                                     |            }
-                                     |        },
-                                     |        "Property 2": {
+                                     |            "Property 2": {
                                      |            "id": "CUj~",
                                      |            "name": "Property 2",
                                      |            "type": "multi_select",
@@ -218,27 +210,21 @@ final case class TestNotionClient() extends NotionClient {
                                      |                ]
                                      |            }
                                      |        },
-                                     |        "Property 8": {
-                                     |            "id": "JYsh",
-                                     |            "name": "Property 8",
-                                     |            "type": "phone_number",
-                                     |            "phone_number": {}
+                                     |            "Property 7": {
+                                     |            "id": "%3BGTP",
+                                     |            "name": "Property 7",
+                                     |            "type": "email",
+                                     |            "email": {}
                                      |        },
-                                     |        "Property 1": {
-                                     |            "id": "KwBT",
-                                     |            "name": "Property 1",
-                                     |            "type": "select",
-                                     |            "select": {
-                                     |                "options": [
-                                     |                    {
-                                     |                        "id": "e3600dbb-f3c2-47d3-8928-d59519c637af",
-                                     |                        "name": "single select",
-                                     |                        "color": "green"
-                                     |                    }
-                                     |                ]
+                                     |            "Property": {
+                                     |            "id": "%3Cqli",
+                                     |            "name": "Property",
+                                     |            "type": "number",
+                                     |            "number": {
+                                     |                "format": "number"
                                      |            }
                                      |        },
-                                     |        "Property 3": {
+                                     |            "Property 3": {
                                      |            "id": "M%3E%3B%5B",
                                      |            "name": "Property 3",
                                      |            "type": "date",
@@ -262,19 +248,55 @@ final case class TestNotionClient() extends NotionClient {
                                      |            "type": "url",
                                      |            "url": {}
                                      |        },
-                                     |        "Property 9": {
-                                     |            "id": "g~Ph",
-                                     |            "name": "Property 9",
-                                     |            "type": "formula",
-                                     |            "formula": {
-                                     |                "expression": "prop(\"Property\") + 1"
-                                     |            }
-                                     |        },
                                      |        "people": {
                                      |            "id": "wWmU",
                                      |            "name": "people",
                                      |            "type": "people",
                                      |            "people": {}
+                                     |        },
+                                     |                "Property 1": {
+                                     |            "id": "KwBT",
+                                     |            "name": "Property 1",
+                                     |            "type": "select",
+                                     |            "select": {
+                                     |                "options": [
+                                     |                    {
+                                     |                        "id": "e3600dbb-f3c2-47d3-8928-d59519c637af",
+                                     |                        "name": "single select",
+                                     |                        "color": "green"
+                                     |                    }
+                                     |                ]
+                                     |            }
+                                     |        },
+                                     |                "Property 9": {
+                                     |            "id": "g~Ph",
+                                     |            "name": "Property 9",
+                                     |            "type": "formula",
+                                     |            "formula": {
+                                     |                "expression": "prop(\\"Property\\") + 1"
+                                     |            }
+                                     |        },
+                                     |        "Property 11": {
+                                     |            "id": "IB%7Dx",
+                                     |            "name": "Property 11",
+                                     |            "type": "rollup",
+                                     |            "rollup": {
+                                     |                "rollup_property_name": "Name",
+                                     |                "relation_property_name": "Property 10",
+                                     |                "rollup_property_id": "title",
+                                     |                "relation_property_id": "Krck",
+                                     |                "function": "count"
+                                     |            }
+                                     |        },
+                                     |        "Property 10": {
+                                     |            "id": "Krck",
+                                     |            "name": "Property 10",
+                                     |            "type": "relation",
+                                     |            "relation": {
+                                     |                "database_id": "678cf788-8470-4798-8336-a285836c9de6",
+                                     |                "synced_property_name": "Related to Pages (Property 10)",
+                                     |                "synced_property_id": "D;@M"
+                                     |            }
                                      |        },
                                      |        "name": {
                                      |            "id": "title",
@@ -295,3 +317,14 @@ final case class TestNotionClient() extends NotionClient {
 object TestNotionClient {
   val layer: ULayer[NotionClient] = ZLayer.succeed(TestNotionClient())
 }
+
+/*
+
+
+
+
+
+
+
+
+ */

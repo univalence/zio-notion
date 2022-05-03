@@ -2,7 +2,6 @@ package zio.notion.model
 
 import io.circe.JsonObject
 import io.circe.generic.extras.ConfiguredJsonCodec
-import zio.notion.model.NumberDescription.NumberDescription
 
 @ConfiguredJsonCodec sealed trait PropertyDescription
 
