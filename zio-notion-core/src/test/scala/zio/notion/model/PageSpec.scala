@@ -1,8 +1,10 @@
 package zio.notion.model
 
 import io.circe.parser.decode
+import io.circe.syntax.EncoderOps
 
 import zio.Scope
+import zio.notion.Faker._
 import zio.test._
 import zio.test.Assertion.isRight
 
@@ -147,6 +149,33 @@ object PageSpec extends ZIOSpecDefault {
             |}""".stripMargin
 
         assert(decode[Page](json))(isRight)
+      },
+      test("We should be able to encode an empty page patch") {
+        val patch = Page.Patch(fakePage)
+
+        val expected =
+          s"""{
+             |  
+             |}""".stripMargin
+
+        assertTrue(printer.print(patch.asJson) == expected)
+      },
+      test("We should be able to encode a page patch") {
+        val patch = Page.Patch(fakePage).updateProperty("Test")(Property.Title.update(identity))
+
+        val expected =
+          s"""{
+             |  "properties" : {
+             |    "Test" : {
+             |      "id" : "abc",
+             |      "title" : [
+             |      ],
+             |      "type" : "title"
+             |    }
+             |  }
+             |}""".stripMargin
+
+        assertTrue(printer.print(patch.asJson) == expected)
       }
     )
 }

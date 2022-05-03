@@ -1,14 +1,18 @@
 package zio.notion
 
+import io.circe.syntax.EncoderOps
 import sttp.client3._
 import sttp.client3.asynchttpclient.zio.SttpClient
 import sttp.model.Uri
 
 import zio._
 import zio.notion.NotionClient.NotionResponse
+import zio.notion.model.{printer, Page}
 
 trait NotionClient {
   def retrievePage(pageId: String): IO[NotionError, NotionResponse]
+
+  def updatePage(patch: Page.Patch): IO[NotionError, NotionResponse]
 }
 
 object NotionClient extends Accessible[NotionClient] {
@@ -40,6 +44,12 @@ object NotionClient extends Accessible[NotionClient] {
     override def retrievePage(pageId: String): IO[NotionError, NotionResponse] =
       defaultRequest
         .get(uri"$endpoint/pages/$pageId")
+        .handle
+
+    override def updatePage(patch: Page.Patch): IO[NotionError, NotionResponse] =
+      defaultRequest
+        .patch(uri"$endpoint/pages/${patch.page.id}")
+        .body(printer.print(patch.asJson))
         .handle
   }
 }

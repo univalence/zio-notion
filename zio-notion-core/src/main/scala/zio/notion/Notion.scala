@@ -15,6 +15,8 @@ sealed trait Notion {
     }
 
   def retrievePage(pageId: String): IO[NotionError, Page]
+
+  def updatePage(patch: Page.Patch): IO[NotionError, Unit]
 }
 
 object Notion extends Accessible[Notion] {
@@ -32,5 +34,7 @@ object Notion extends Accessible[Notion] {
         .flatMap(decodeJson[T])
 
     override def retrievePage(pageId: String): IO[NotionError, Page] = decodeResponse[Page](notionClient.retrievePage(pageId))
+
+    override def updatePage(patch: Page.Patch): IO[NotionError, Unit] = notionClient.updatePage(patch).unit
   }
 }

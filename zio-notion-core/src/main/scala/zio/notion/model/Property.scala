@@ -41,4 +41,11 @@ object Property {
   final case class People(id: String, people: Seq[UserId]) extends Property
 
   final case class Rollup(id: String, rollup: RollupData) extends Property
+
+  object Title {
+    def update(f: Title => Title): Title => Title = f
+
+    def rename(newTitle: String): Title => Title =
+      update(title => title.copy(title = Seq(RichTextData.Text(RichTextData.Text.TextData(newTitle, None), Annotations.default, newTitle, None))))
+  }
 }

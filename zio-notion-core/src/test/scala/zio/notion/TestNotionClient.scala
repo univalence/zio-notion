@@ -4,6 +4,7 @@ import sttp.client3.Response
 
 import zio._
 import zio.notion.NotionClient.NotionResponse
+import zio.notion.model.Page
 
 final case class TestNotionClient() extends NotionClient {
   override def retrievePage(pageId: String): IO[NotionError, NotionResponse] =
@@ -147,6 +148,8 @@ final case class TestNotionClient() extends NotionClient {
         )
       )
     }
+
+  override def updatePage(patch: Page.Patch): IO[NotionError, NotionResponse] = ZIO.succeed(Response.ok(Right("")))
 }
 
 object TestNotionClient {

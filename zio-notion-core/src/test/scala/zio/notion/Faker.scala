@@ -1,5 +1,8 @@
 package zio.notion
 
+import zio.notion.model.{Page, Parent, UserId}
+import zio.notion.model.Property.Title
+
 import java.time.{LocalDate, OffsetDateTime, ZoneOffset}
 
 object Faker {
@@ -28,5 +31,23 @@ object Faker {
       2022,
       2,
       22
+    )
+
+  val fakePage: Page =
+    Page(
+      createdTime    = fakeDatetime,
+      lastEditedTime = fakeDatetime,
+      createdBy      = UserId(fakeUUID),
+      lastEditedBy   = UserId(fakeUUID),
+      id             = fakeUUID,
+      cover          = None,
+      icon           = None,
+      parent         = Parent.Workspace,
+      archived       = false,
+      properties =
+        Map(
+          "Test" -> Title("abc", Seq.empty)
+        ),
+      url = fakeUrl
     )
 }
