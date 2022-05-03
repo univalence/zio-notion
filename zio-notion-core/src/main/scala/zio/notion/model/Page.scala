@@ -3,6 +3,11 @@ package zio.notion.model
 import io.circe.Encoder
 import io.circe.generic.extras._
 
+import zio.{IO, ZIO}
+import zio.notion.{NotionError, PropertyNotExist, PropertyWrongType}
+
+import scala.reflect.ClassTag
+
 import java.time.OffsetDateTime
 
 @ConfiguredJsonCodec
@@ -19,10 +24,15 @@ final case class Page(
     properties:     Map[String, Property],
     url:            String
 ) { self =>
-  def updateProperty[T <: Property](name: String)(update: T => T): Page.Patch = Page.Patch(self).updateProperty(name)(update)
+  def updateProperty[T <: Property](name: String)(update: T => IO[NotionError, T]): IO[NotionError, Page.Patch] = Page.Patch(self).updateProperty(name)(update)
 }
 
 object Page {
+  implicit class IOPatchOps(io: IO[NotionError, Page.Patch]) {
+    def updateProperty[T <: Property: ClassTag](key: String)(update: T => IO[NotionError, T]): IO[NotionError, Page.Patch] =
+      io.flatMap(_.updateProperty(key)(update))
+  }
+
   final case class Patch(
       page:       Page,
       properties: Map[String, Property],
@@ -30,14 +40,14 @@ object Page {
       icon:       Option[Icon],
       cover:      Option[Cover]
   ) { self =>
-    def updateProperty[T <: Property](key: String)(update: T => T): Page.Patch =
+    def updateProperty[T <: Property: ClassTag](key: String)(update: T => IO[NotionError, T]): IO[NotionError, Page.Patch] =
       page.properties.get(key) match {
         case Some(value) =>
           value match {
-            case value: T => copy(properties = properties + (key -> update(value)))
-            case _        => self // TODO: should return error
+            case value: T => update(value).map(v => copy(properties = properties + (key -> v)))
+            case _        => ZIO.fail(PropertyWrongType(key, implicitly[ClassTag[T]].runtimeClass.getSimpleName))
           }
-        case None => self // TODO: should return error
+        case None => ZIO.fail(PropertyNotExist(key, page.id))
       }
   }
 

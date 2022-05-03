@@ -3,7 +3,7 @@ package zio.notion
 import sttp.client3.asynchttpclient.zio.{AsyncHttpClientZioBackend, SttpClient}
 
 import zio._
-import zio.notion.model.Property.Title
+import zio.notion.model.Property.Date
 
 //TODO
 
@@ -35,13 +35,14 @@ object Main extends ZIOAppDefault {
   val sttpLayer: Layer[Throwable, SttpClient] = AsyncHttpClientZioBackend.layer()
   val configuration: NotionConfiguration      = NotionConfiguration(bearer = "secret_tx3gYOBSeFlYJOV0QtQKmAfoYzXQ9XTAuPZRt9XGwYF")
 
-  def app: ZIO[Notion, Throwable, Unit] =
+  def app: ZIO[Notion, NotionError, Unit] =
     for {
-      page <- Notion(_.retrievePage("1c2d0a80-3321-4641-9615-f345185de05a"))
-      _    <- Console.printLine(page.url)
-      patch = page.updateProperty("Name")(Title.rename("Les énumérations en Scala 2.X"))
-      _ <- Notion(_.updatePage(patch))
+      page  <- Notion(_.retrievePage("28e158d738e54e2287c795525f650116"))
+      _     <- Console.printLine(page.url).orDie
+      patch <- page.updateProperty("test")(Date.now)
+      _     <- Notion(_.updatePage(patch))
     } yield ()
 
-  override def run: ZIO[ZIOAppArgs, Any, Any] = app.provide(sttpLayer, ZLayer.succeed(configuration), NotionClient.live, Notion.live)
+  override def run: ZIO[ZIOAppArgs, Any, Any] =
+    app.tapError(e => Console.printLine(e.humanize)).provide(sttpLayer, ZLayer.succeed(configuration), NotionClient.live, Notion.live)
 }

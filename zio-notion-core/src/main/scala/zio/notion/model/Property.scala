@@ -2,6 +2,10 @@ package zio.notion.model
 
 import io.circe.generic.extras._
 
+import zio.{Clock, UIO}
+
+import java.time.LocalDate
+
 @ConfiguredJsonCodec sealed trait Property
 
 // https://github.com/makenotion/notion-sdk-js/blob/main/src/api-endpoints.ts#L8870
@@ -15,6 +19,16 @@ object Property {
   final case class MultiSelect(id: String, multiSelect: List[SelectData]) extends Property
 
   final case class Date(id: String, date: Option[DateData]) extends Property
+
+  object Date {
+    def now: Date => UIO[Date] = _ => Clock.localDateTime.map(dateTime => Date(id = "", date = Some(DateData(start = dateTime.toLocalDate, None, None))))
+
+    def startAt(newDate: LocalDate): Date => Date = date => date.copy(date = date.date.map(_.copy(start = newDate)))
+
+    def endAt(newDate: LocalDate): Date => Date = date => date.copy(date = date.date.map(_.copy(end = Some(newDate))))
+
+    def between(from: LocalDate, to: LocalDate): Date => Date = startAt(from) andThen endAt(to)
+  }
 
   final case class Email(id: String, email: Option[String]) extends Property
 
@@ -36,16 +50,20 @@ object Property {
 
   final case class Title(id: String, title: Seq[RichTextData]) extends Property
 
-  final case class RichText(id: String, richText: Seq[RichTextData]) extends Property
-
-  final case class People(id: String, people: Seq[UserId]) extends Property
-
-  final case class Rollup(id: String, rollup: RollupData) extends Property
-
   object Title {
     def update(f: Title => Title): Title => Title = f
 
     def rename(newTitle: String): Title => Title =
-      update(title => title.copy(title = Seq(RichTextData.Text(RichTextData.Text.TextData(newTitle, None), Annotations.default, newTitle, None))))
+      _.copy(title = Seq(RichTextData.Text(RichTextData.Text.TextData(newTitle, None), Annotations.default, newTitle, None)))
   }
+
+  final case class RichText(id: String, richText: Seq[RichTextData]) extends Property
+
+  final case class People(id: String, people: Seq[UserId]) extends Property
+
+  object People {
+    def clean: People => People = _.copy(people = Seq.empty)
+  }
+
+  final case class Rollup(id: String, rollup: RollupData) extends Property
 }
