@@ -1,12 +1,13 @@
 package zio.notion.model
 
 import io.circe.parser.decode
+
 import zio.Scope
 import zio.notion.model.common.enums.Color
 import zio.notion.model.common.rich_text
 import zio.notion.model.common.rich_text.Annotations
+import zio.test.{assert, TestEnvironment, ZIOSpecDefault, ZSpec}
 import zio.test.Assertion._
-import zio.test.{TestEnvironment, ZIOSpecDefault, ZSpec, assert}
 
 object AnnotationsSpec extends ZIOSpecDefault {
   override def spec: ZSpec[TestEnvironment with Scope, Any] =
