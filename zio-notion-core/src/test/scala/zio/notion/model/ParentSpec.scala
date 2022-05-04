@@ -4,7 +4,8 @@ import io.circe.parser.decode
 
 import zio.Scope
 import zio.notion.Faker._
-import zio.notion.model.Parent._
+import zio.notion.model.common.Parent
+import zio.notion.model.common.Parent._
 import zio.test._
 import zio.test.Assertion._
 

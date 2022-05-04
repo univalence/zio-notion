@@ -4,7 +4,8 @@ import io.circe.parser.decode
 
 import zio.Scope
 import zio.notion.Faker._
-import zio.notion.model.Cover._
+import zio.notion.model.common.{Cover, TemporaryUrl, Url}
+import zio.notion.model.common.Cover._
 import zio.test._
 import zio.test.Assertion._
 
@@ -34,7 +35,7 @@ object CoverSpec extends ZIOSpecDefault {
              |  }
              |}""".stripMargin
 
-        val expected: File = File(file = ExpirableUrl(fakeUrl, fakeDatetime))
+        val expected: File = File(file = TemporaryUrl(fakeUrl, fakeDatetime))
 
         assert(decode[Cover](json))(isRight(equalTo(expected)))
       }

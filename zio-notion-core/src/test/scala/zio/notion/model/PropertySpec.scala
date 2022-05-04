@@ -4,8 +4,10 @@ import io.circe.parser.decode
 
 import zio.Scope
 import zio.notion.Faker._
-import zio.notion.model.Property.Rollup
-import zio.notion.model.RollupFunction.Count
+import zio.notion.model.common.enums.RollupFunction.Count
+import zio.notion.model.page.properties.Property
+import zio.notion.model.page.properties.Property.Rollup
+import zio.notion.model.page.properties.data.RollupData
 import zio.test._
 import zio.test.Assertion._
 

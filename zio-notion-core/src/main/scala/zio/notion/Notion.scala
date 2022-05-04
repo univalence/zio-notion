@@ -5,7 +5,8 @@ import io.circe.parser.decode
 
 import zio._
 import zio.notion.NotionClient.NotionResponse
-import zio.notion.model.{Database, Page}
+import zio.notion.model.database.Database
+import zio.notion.model.page.Page
 
 sealed trait Notion {
   protected def decodeJson[T: Decoder](content: String): IO[NotionError, T] =

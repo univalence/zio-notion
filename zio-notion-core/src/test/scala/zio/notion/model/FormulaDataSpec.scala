@@ -4,7 +4,8 @@ import io.circe.parser.decode
 
 import zio.Scope
 import zio.notion.Faker.fakeDate
-import zio.notion.model.FormulaData.{Date, Number}
+import zio.notion.model.page.properties.data.{DateData, FormulaData}
+import zio.notion.model.page.properties.data.FormulaData.{Date, Number}
 import zio.test._
 import zio.test.Assertion._
 

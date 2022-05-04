@@ -4,6 +4,7 @@ import io.circe.parser.decode
 
 import zio.Scope
 import zio.notion.Faker._
+import zio.notion.model.common.TemporaryUrl
 import zio.test._
 import zio.test.Assertion._
 
@@ -17,9 +18,9 @@ object ExpirableUrlSpec extends ZIOSpecDefault {
              |    "expiry_time": "$fakeDatetime"
              |}""".stripMargin
 
-        val expected: ExpirableUrl = ExpirableUrl(url = fakeUrl, expiryTime = fakeDatetime)
+        val expected: TemporaryUrl = common.TemporaryUrl(url = fakeUrl, expiryTime = fakeDatetime)
 
-        assert(decode[ExpirableUrl](json))(isRight(equalTo(expected)))
+        assert(decode[TemporaryUrl](json))(isRight(equalTo(expected)))
       }
     )
 }

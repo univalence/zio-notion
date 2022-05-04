@@ -3,7 +3,8 @@ import io.circe.parser.decode
 
 import zio.Scope
 import zio.notion.Faker._
-import zio.notion.model.Icon._
+import zio.notion.model.common.{Icon, TemporaryUrl, Url}
+import zio.notion.model.common.Icon._
 import zio.test._
 import zio.test.Assertion._
 
@@ -44,7 +45,7 @@ object IconSpec extends ZIOSpecDefault {
              |  }
              |}""".stripMargin
 
-        val expected: File = File(file = ExpirableUrl(fakeUrl, fakeDatetime))
+        val expected: File = File(file = TemporaryUrl(fakeUrl, fakeDatetime))
 
         assert(decode[Icon](json))(isRight(equalTo(expected)))
       }

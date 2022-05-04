@@ -3,7 +3,9 @@ import io.circe.parser.decode
 
 import zio.Scope
 import zio.notion.Faker._
-import zio.notion.model.Color.Green
+import zio.notion.model.common.enums.Color.Green
+import zio.notion.model.page.properties.data
+import zio.notion.model.page.properties.data.SelectData
 import zio.test._
 import zio.test.Assertion._
 
@@ -18,7 +20,7 @@ object SelectDataSpec extends ZIOSpecDefault {
              |    "color": "green"
              |}""".stripMargin
 
-        val expected: SelectData = SelectData(id = fakeUUID, name = fakeName, color = Green)
+        val expected: SelectData = data.SelectData(id = fakeUUID, name = fakeName, color = Green)
 
         assert(decode[SelectData](json))(isRight(equalTo(expected)))
       }
