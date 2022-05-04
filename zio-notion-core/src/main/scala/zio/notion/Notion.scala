@@ -7,7 +7,6 @@ import zio._
 import zio.notion.NotionClient.NotionResponse
 import zio.notion.model.{Database, Page, User}
 
-
 sealed trait Notion {
   protected def decodeJson[T: Decoder](content: String): IO[NotionError, T] =
     decode[T](content) match {
