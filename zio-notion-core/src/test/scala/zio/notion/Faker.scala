@@ -1,7 +1,7 @@
 package zio.notion
 
-import zio.notion.model.{Page, Parent, UserId}
-import zio.notion.model.Property.Title
+import zio.notion.model._
+import zio.notion.model.Property._
 
 import java.time.{LocalDate, OffsetDateTime, ZoneOffset}
 
@@ -26,7 +26,7 @@ object Faker {
       ZoneOffset.UTC
     )
 
-  val fakeDate: LocalDate =
+  val fakeLocalDate: LocalDate =
     LocalDate.of(
       2022,
       2,
@@ -44,10 +44,13 @@ object Faker {
       icon           = None,
       parent         = Parent.Workspace,
       archived       = false,
-      properties =
-        Map(
-          "Test" -> Title("abc", Seq.empty)
-        ),
-      url = fakeUrl
+      properties     = Map("Test" -> Title("abc", Seq.empty)),
+      url            = fakeUrl
     )
+
+  object FakeProperty {
+    val fakeTitle: Title = Title("abc", Title.defaultData("Test"))
+
+    val fakeDate: Date = Date("abc", None)
+  }
 }

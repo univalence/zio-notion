@@ -3,7 +3,7 @@ package zio.notion
 import sttp.client3.asynchttpclient.zio.{AsyncHttpClientZioBackend, SttpClient}
 
 import zio._
-import zio.notion.model.Property.Date
+import zio.notion.model.Property.Title
 
 //TODO
 
@@ -39,7 +39,7 @@ object Main extends ZIOAppDefault {
     for {
       page  <- Notion(_.retrievePage("28e158d738e54e2287c795525f650116"))
       _     <- Console.printLine(page.url).orDie
-      patch <- page.updateProperty("test")(Date.now)
+      patch <- page.patch.removeIcon.updateProperty(Title.rename("Toti").on("Name"))
       _     <- Notion(_.updatePage(patch))
     } yield ()
 
