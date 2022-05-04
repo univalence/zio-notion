@@ -52,12 +52,11 @@ addCommandAlias("testSpecific", "; clean; test;")
 addCommandAlias("testSpecificWithCoverage", "; clean; coverage; test; coverageReport;")
 
 // -- Lib versions
-val zio        = "2.0.0-RC5"
-val zioPrelude = "1.0.0-RC13"
-val zioConfig  = "3.0.0-RC8"
-val zioHttp    = "2.0.0-RC7"
-val circe      = "0.14.1"
-val sttp       = "3.5.2"
+val zio       = "2.0.0-RC5"
+val zioConfig = "3.0.0-RC8"
+val zioHttp   = "2.0.0-RC7"
+val circe     = "0.14.1"
+val sttp      = "3.5.2"
 
 // -- Main project settings
 lazy val core =
@@ -70,7 +69,6 @@ lazy val core =
         "com.softwaremill.sttp.client3" %% "core"                          % sttp,
         "com.softwaremill.sttp.client3" %% "httpclient-backend-zio"        % sttp,
         "dev.zio"                       %% "zio"                           % zio,
-        "dev.zio"                       %% "zio-prelude"                   % zioPrelude,
         "dev.zio"                       %% "zio-config"                    % zioConfig,
         "dev.zio"                       %% "zio-config"                    % zioConfig,
         "dev.zio"                       %% "zio-config-magnolia"           % zioConfig,
