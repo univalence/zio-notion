@@ -16,6 +16,7 @@ sealed trait Notion {
 
   def retrievePage(pageId: String): IO[NotionError, Page]
   def retrieveDatabase(databaseId: String): IO[NotionError, Database]
+  def retrieveBlock(blockId: String): IO[NotionError, Block]
 }
 
 object Notion extends Accessible[Notion] {
@@ -35,5 +36,7 @@ object Notion extends Accessible[Notion] {
     override def retrievePage(pageId: String): IO[NotionError, Page] = decodeResponse[Page](notionClient.retrievePage(pageId))
 
     override def retrieveDatabase(databaseId: String): IO[NotionError, Database] = decodeResponse[Database](notionClient.retrieveDatabase(databaseId))
+
+    override def retrieveBlock(blockId: String): IO[NotionError, Block] = decodeResponse[Block](notionClient.retrieveBlock(blockId))
   }
 }
