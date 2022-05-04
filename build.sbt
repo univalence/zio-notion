@@ -13,10 +13,29 @@ inThisBuild(
     organizationName     := "Univalence",
     organizationHomepage := Some(url("https://univalence.io/")),
     startYear            := Some(2022),
-    developers           := List(),
-    homepage             := Some(url("https://github.com/univalence/zio-notion")),
-    licenses             := List("Apache-2.0" -> url("https://github.com/univalence/zio-notion/blob/master/LICENSE")),
-    versionScheme        := Some("early-semver"),
+    developers := List(
+      Developer(
+        id    = "dylandoamaral",
+        name  = "Dylan Do Amaral",
+        email = "dylan@univalence.io",
+        url   = url("https://github.com/dylandoamaral")
+      ),
+      Developer(
+        id    = "ahoy-jon",
+        name  = "Jonathan Winandy",
+        email = "jonathan@univalence.io",
+        url   = url("https://github.com/ahoy-jon")
+      ),
+      Developer(
+        id    = "guihardbastien",
+        name  = "Bastien GUIHARD",
+        email = "bastien@univalence.io",
+        url   = url("https://github.com/guihardbastien")
+      )
+    ),
+    homepage      := Some(url("https://github.com/univalence/zio-notion")),
+    licenses      := List("Apache-2.0" -> url("https://github.com/univalence/zio-notion/blob/master/LICENSE")),
+    versionScheme := Some("early-semver"),
     version ~= addVersionPadding
   )
 )

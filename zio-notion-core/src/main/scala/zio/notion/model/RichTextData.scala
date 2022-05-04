@@ -5,7 +5,7 @@ import io.circe.generic.extras._
 @ConfiguredJsonCodec sealed trait RichTextData
 
 object RichTextData {
-  final case class Text(text: Text.TextData, annotations: Annotations, plainText: String, href: Option[String]) extends RichTextData
+  @ConfiguredJsonCodec final case class Text(text: Text.TextData, annotations: Annotations, plainText: String, href: Option[String]) extends RichTextData
 
   object Text {
     @ConfiguredJsonCodec final case class TextData(content: String, link: Option[Url])
