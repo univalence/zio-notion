@@ -11,6 +11,8 @@ object Faker {
 
   val fakeName: String = "Name"
 
+  val fakeEmail: String = "testsuite@univalence.io"
+
   val fakeDatetime: OffsetDateTime =
     OffsetDateTime.of(
       2022,
