@@ -25,3 +25,7 @@ final case class PropertyNotExist(propertyName: String, pageId: String) extends 
 final case class PropertyWrongType(propertyName: String, expectedType: String) extends NotionError {
   override def humanize: String = s"Property $propertyName can't be updated, expected $expectedType type."
 }
+
+final case class PropertyIsEmpty(propertyName: String) extends NotionError {
+  override def humanize: String = s"Property $propertyName can't be updated because is is empty."
+}

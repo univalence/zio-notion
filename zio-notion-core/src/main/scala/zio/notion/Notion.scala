@@ -37,9 +37,10 @@ object Notion extends Accessible[Notion] {
         )
         .flatMap(decodeJson[T])
 
-    override def retrievePage(pageId: String): IO[NotionError, Page]             = decodeResponse[Page](notionClient.retrievePage(pageId))
-    override def retrieveDatabase(databaseId: String): IO[NotionError, Database] = decodeResponse[Database](notionClient.retrieveDatabase(databaseId))
-    override def retrieveUser(userId: String): IO[NotionError, User]             = decodeResponse[User](notionClient.retrieveUser(userId))
+    override def retrievePage(pageId: String): IO[NotionError, Page] = decodeResponse[Page](notionClient.retrievePage(pageId))
+    override def retrieveDatabase(databaseId: String): IO[NotionError, Database] =
+      decodeResponse[Database](notionClient.retrieveDatabase(databaseId))
+    override def retrieveUser(userId: String): IO[NotionError, User] = decodeResponse[User](notionClient.retrieveUser(userId))
 
     override def updatePage(patch: Page.Patch): IO[NotionError, Unit] = notionClient.updatePage(patch).unit
   }

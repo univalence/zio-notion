@@ -1,7 +1,8 @@
 package zio.notion
 
-import zio.notion.model._
-import zio.notion.model.Property._
+import zio.notion.model.common.{Parent, UserId}
+import zio.notion.model.page.Page
+import zio.notion.model.page.property.Property.{Date, Title}
 
 import java.time.{LocalDate, OffsetDateTime, ZoneOffset}
 

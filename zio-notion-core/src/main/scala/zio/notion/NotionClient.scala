@@ -36,7 +36,8 @@ object NotionClient extends Accessible[NotionClient] {
       def handle: IO[NotionError, NotionResponse] = handleRequest(sttpClient.send(request))
     }
 
-    private def handleRequest(request: Task[Response[Either[String, String]]]): IO[NotionError, NotionResponse] = request.mapError(t => ConnectionError(t))
+    private def handleRequest(request: Task[Response[Either[String, String]]]): IO[NotionError, NotionResponse] =
+      request.mapError(t => ConnectionError(t))
 
     private def defaultRequest: RequestT[Empty, Either[String, String], Any] =
       basicRequest.auth

@@ -3,17 +3,10 @@ package zio.notion.model.page.property.data
 import io.circe.parser.decode
 
 import zio.Scope
-<<<<<<< HEAD:zio-notion-core/src/test/scala/zio/notion/model/FormulaDataSpec.scala
 import zio.notion.Faker.fakeLocalDate
-import zio.notion.model.FormulaData.{Date, Number}
+import zio.notion.model.page.property.data.FormulaData.{Date, Number}
 import zio.test._
 import zio.test.Assertion._
-=======
-import zio.notion.Faker.fakeDate
-import zio.notion.model.page.property.data.FormulaData.{Date, Number}
-import zio.test.{assert, TestEnvironment, ZIOSpecDefault, ZSpec}
-import zio.test.Assertion.{equalTo, isRight}
->>>>>>> c26b89cb0c6fada9509faeae4988e7966b8b2efa:zio-notion-core/src/test/scala/zio/notion/model/page/properties/data/FormulaDataSpec.scala
 
 object FormulaDataSpec extends ZIOSpecDefault {
   override def spec: ZSpec[TestEnvironment with Scope, Any] =

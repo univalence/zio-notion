@@ -3,8 +3,7 @@ package zio.notion.model.page.property.data
 import io.circe.parser.decode
 
 import zio.Scope
-import zio.notion.Faker.fakeDate
-import zio.notion.model.page.property.data
+import zio.notion.Faker.fakeLocalDate
 import zio.test.{assert, TestEnvironment, ZIOSpecDefault, ZSpec}
 import zio.test.Assertion.{equalTo, isRight}
 
@@ -19,11 +18,7 @@ object DateDataSpec extends ZIOSpecDefault {
              |    "time_zone": null
              |}""".stripMargin
 
-        <<<<<<< HEAD: zio - notion - core / src / test / scala / zio / notion / model / DateDataSpec.scala
         val expected: DateData = DateData(start = fakeLocalDate, end = None, timeZone = None)
-        =======
-        val expected: DateData = data.DateData(start = fakeDate, end = None, timeZone = None)
-        >>>>>>> c26b89cb0c6fada9509faeae4988e7966b8b2efa: zio - notion - core / src / test / scala / zio / notion / model / page / properties / data / DateDataSpec.scala
 
         assert(decode[DateData](json))(isRight(equalTo(expected)))
       }

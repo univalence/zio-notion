@@ -8,13 +8,15 @@ import zio.notion.model.page.property.data.Id
 @ConfiguredJsonCodec sealed trait RichTextData
 
 object RichTextData {
-  @ConfiguredJsonCodec final case class Text(text: Text.TextData, annotations: Annotations, plainText: String, href: Option[String]) extends RichTextData
+  @ConfiguredJsonCodec final case class Text(text: Text.TextData, annotations: Annotations, plainText: String, href: Option[String])
+      extends RichTextData
 
   object Text {
     @ConfiguredJsonCodec final case class TextData(content: String, link: Option[Url])
   }
 
-  final case class Mention(mention: Mention.MentionData, annotations: Annotations, plainText: String, href: Option[String]) extends RichTextData
+  final case class Mention(mention: Mention.MentionData, annotations: Annotations, plainText: String, href: Option[String])
+      extends RichTextData
 
   object Mention {
     @ConfiguredJsonCodec sealed trait MentionData
@@ -38,7 +40,8 @@ object RichTextData {
     }
   }
 
-  final case class Equation(expression: Equation.Expression, annotations: Annotations, plainText: String, href: Option[String]) extends RichTextData
+  final case class Equation(expression: Equation.Expression, annotations: Annotations, plainText: String, href: Option[String])
+      extends RichTextData
 
   object Equation {
     @ConfiguredJsonCodec final case class Expression(expression: String)
