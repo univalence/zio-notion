@@ -1,13 +1,10 @@
-package zio.notion.model
-
-import io.circe.parser.decode
+package zio.notion.model.page.properties.data
 
 import zio.Scope
 import zio.notion.Faker.fakeDate
-import zio.notion.model.page.properties.data.{DateData, FormulaData}
 import zio.notion.model.page.properties.data.FormulaData.{Date, Number}
-import zio.test._
-import zio.test.Assertion._
+import zio.test.{assert, TestEnvironment, ZIOSpecDefault, ZSpec}
+import zio.test.Assertion.{equalTo, isRight}
 
 object FormulaDataSpec extends ZIOSpecDefault {
   override def spec: ZSpec[TestEnvironment with Scope, Any] =

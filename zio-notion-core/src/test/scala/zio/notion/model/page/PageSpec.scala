@@ -1,10 +1,7 @@
-package zio.notion.model
-
-import io.circe.parser.decode
+package zio.notion.model.page
 
 import zio.Scope
-import zio.notion.model.page.Page
-import zio.test._
+import zio.test.{assert, TestEnvironment, ZIOSpecDefault, ZSpec}
 import zio.test.Assertion.isRight
 
 object PageSpec extends ZIOSpecDefault {

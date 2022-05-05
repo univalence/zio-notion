@@ -1,13 +1,11 @@
-package zio.notion.model
-import io.circe.parser.decode
+package zio.notion.model.page.properties.data
 
 import zio.Scope
-import zio.notion.Faker._
+import zio.notion.Faker.{fakeName, fakeUUID}
 import zio.notion.model.common.enums.Color.Green
 import zio.notion.model.page.properties.data
-import zio.notion.model.page.properties.data.SelectData
-import zio.test._
-import zio.test.Assertion._
+import zio.test.{assert, TestEnvironment, ZIOSpecDefault, ZSpec}
+import zio.test.Assertion.{equalTo, isRight}
 
 object SelectDataSpec extends ZIOSpecDefault {
   override def spec: ZSpec[TestEnvironment with Scope, Any] =

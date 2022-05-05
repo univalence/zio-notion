@@ -1,15 +1,12 @@
-package zio.notion.model
-
-import io.circe.parser.decode
+package zio.notion.model.page.properties
 
 import zio.Scope
-import zio.notion.Faker._
+import zio.notion.Faker.fakeUUID
 import zio.notion.model.common.enums.RollupFunction.Count
-import zio.notion.model.page.properties.Property
 import zio.notion.model.page.properties.Property.Rollup
 import zio.notion.model.page.properties.data.RollupData
-import zio.test._
-import zio.test.Assertion._
+import zio.test.{assert, TestEnvironment, ZIOSpecDefault, ZSpec}
+import zio.test.Assertion.{equalTo, isRight}
 
 object PropertySpec extends ZIOSpecDefault {
   override def spec: ZSpec[TestEnvironment with Scope, Any] =

@@ -1,13 +1,10 @@
-package zio.notion.model
-
-import io.circe.parser.decode
+package zio.notion.model.common
 
 import zio.Scope
-import zio.notion.Faker._
-import zio.notion.model.common.Parent
-import zio.notion.model.common.Parent._
-import zio.test._
-import zio.test.Assertion._
+import zio.notion.Faker.fakeUUID
+import zio.notion.model.common.Parent.{DatabaseId, PageId, Workspace}
+import zio.test.{assert, TestEnvironment, ZIOSpecDefault, ZSpec}
+import zio.test.Assertion.{equalTo, isRight}
 
 object ParentSpec extends ZIOSpecDefault {
   override def spec: ZSpec[TestEnvironment with Scope, Any] =

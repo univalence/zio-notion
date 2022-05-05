@@ -1,12 +1,9 @@
-package zio.notion.model
-
-import io.circe.parser.decode
+package zio.notion.model.common
 
 import zio.Scope
-import zio.notion.Faker._
-import zio.notion.model.common.UserId
-import zio.test._
-import zio.test.Assertion._
+import zio.notion.Faker.fakeUUID
+import zio.test.{assert, TestEnvironment, ZIOSpecDefault, ZSpec}
+import zio.test.Assertion.{equalTo, isRight}
 
 object UserIdSpec extends ZIOSpecDefault {
   override def spec: ZSpec[TestEnvironment with Scope, Any] =

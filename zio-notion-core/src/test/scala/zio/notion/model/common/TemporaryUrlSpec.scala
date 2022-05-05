@@ -1,14 +1,12 @@
-package zio.notion.model
-
-import io.circe.parser.decode
+package zio.notion.model.common
 
 import zio.Scope
-import zio.notion.Faker._
-import zio.notion.model.common.TemporaryUrl
-import zio.test._
-import zio.test.Assertion._
+import zio.notion.Faker.{fakeDatetime, fakeUrl}
+import zio.notion.model.common
+import zio.test.{assert, TestEnvironment, ZIOSpecDefault, ZSpec}
+import zio.test.Assertion.{equalTo, isRight}
 
-object ExpirableUrlSpec extends ZIOSpecDefault {
+object TemporaryUrlSpec extends ZIOSpecDefault {
   override def spec: ZSpec[TestEnvironment with Scope, Any] =
     suite("ExpirableUrl serde suite")(
       test("We should be able to parse an expriable url as json") {
