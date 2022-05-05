@@ -22,10 +22,7 @@ object NotionSpec extends ZIOSpecDefault {
         val effect: ZIO[Notion, NotionError, User] = Notion(_.retrieveUser(fakeUUID))
         effect
           .provide(TestNotionClient.layer, Notion.live)
-          .map { user =>
-            println(user)
-            assertTrue(user.isInstanceOf[User.Person])
-          }
+          .map(user => assertTrue(user.isInstanceOf[User.Person]))
       }
     )
 }

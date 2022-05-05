@@ -25,7 +25,6 @@ object UserSpec extends ZIOSpecDefault {
              |}""".stripMargin
 
         val expected: User = User.Person(fakeUUID, Some(fakeName), Some(fakeUrl), PersonData(Some(fakeEmail)))
-        println(expected)
 
         assert(decode[User](json))(isRight(equalTo(expected)))
       }
