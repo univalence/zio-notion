@@ -2,7 +2,9 @@ package zio.notion
 
 import zio.{Scope, ZIO}
 import zio.notion.Faker._
-import zio.notion.model.{Database, Page, User}
+import zio.notion.model.database.Database
+import zio.notion.model.page.Page
+import zio.notion.model.user.User
 import zio.test._
 
 object NotionSpec extends ZIOSpecDefault {
