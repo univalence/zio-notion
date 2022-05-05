@@ -11,6 +11,7 @@ trait NotionClient {
   def retrievePage(pageId: String): IO[NotionError, NotionResponse]
   def retrieveDatabase(databaseId: String): IO[NotionError, NotionResponse]
   def retrieveBlock(blockId: String): IO[NotionError, NotionResponse]
+  def retrieveUser(userId: String): IO[NotionError, NotionResponse]
 }
 
 object NotionClient extends Accessible[NotionClient] {
@@ -52,6 +53,11 @@ object NotionClient extends Accessible[NotionClient] {
     override def retrieveBlock(blockId: String): IO[NotionError, NotionResponse] =
       defaultRequest
         .get(uri"$endpoint/blocks/$blockId")
+        .handle
+
+    override def retrieveUser(userId: String): IO[NotionError, NotionResponse] =
+      defaultRequest
+        .get(uri"$endpoint/users/$userId")
         .handle
   }
 }

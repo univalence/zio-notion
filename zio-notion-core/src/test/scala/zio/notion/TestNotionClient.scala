@@ -3,6 +3,7 @@ package zio.notion
 import sttp.client3.Response
 
 import zio._
+import zio.notion.Faker._
 import zio.notion.NotionClient.NotionResponse
 
 /** Notion client mock for test purpose */
@@ -312,6 +313,20 @@ final case class TestNotionClient() extends NotionClient {
                                      |    "url": "https://www.notion.so/7caa81b563834270b89cc386a9f0de13",
                                      |    "archived": false
                                      |}""".stripMargin)))
+
+  override def retrieveUser(userId: String): IO[NotionError, NotionResponse] =
+    ZIO.succeed(Response.ok(Right(s"""{
+                                     |    "object": "user",
+                                     |    "id": "$userId",
+                                     |    "name": "$fakeName",
+                                     |    "avatar_url": "$fakeUrl",
+                                     |    "type": "person",
+                                     |    "person": {
+                                     |        "email": "$fakeEmail"
+                                     |    }
+                                     |}""".stripMargin)))
+
+  override def retrieveBlock(blockId: String): IO[NotionError, NotionResponse] = ???
 }
 
 object TestNotionClient {

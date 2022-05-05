@@ -5,7 +5,10 @@ import io.circe.parser.decode
 
 import zio._
 import zio.notion.NotionClient.NotionResponse
-import zio.notion.model.{Database, Page}
+import zio.notion.model.block.Block
+import zio.notion.model.database.Database
+import zio.notion.model.page.Page
+import zio.notion.model.user.User
 
 sealed trait Notion {
   protected def decodeJson[T: Decoder](content: String): IO[NotionError, T] =
@@ -17,6 +20,7 @@ sealed trait Notion {
   def retrievePage(pageId: String): IO[NotionError, Page]
   def retrieveDatabase(databaseId: String): IO[NotionError, Database]
   def retrieveBlock(blockId: String): IO[NotionError, Block]
+  def retrieveUser(userId: String): IO[NotionError, User]
 }
 
 object Notion extends Accessible[Notion] {
@@ -33,10 +37,9 @@ object Notion extends Accessible[Notion] {
         )
         .flatMap(decodeJson[T])
 
-    override def retrievePage(pageId: String): IO[NotionError, Page] = decodeResponse[Page](notionClient.retrievePage(pageId))
-
+    override def retrievePage(pageId: String): IO[NotionError, Page]             = decodeResponse[Page](notionClient.retrievePage(pageId))
     override def retrieveDatabase(databaseId: String): IO[NotionError, Database] = decodeResponse[Database](notionClient.retrieveDatabase(databaseId))
-
-    override def retrieveBlock(blockId: String): IO[NotionError, Block] = decodeResponse[Block](notionClient.retrieveBlock(blockId))
+    override def retrieveBlock(blockId: String): IO[NotionError, Block]          = decodeResponse[Block](notionClient.retrieveBlock(blockId))
+    override def retrieveUser(userId: String): IO[NotionError, User]             = decodeResponse[User](notionClient.retrieveUser(userId))
   }
 }

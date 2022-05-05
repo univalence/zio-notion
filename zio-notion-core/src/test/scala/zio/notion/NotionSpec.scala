@@ -2,7 +2,9 @@ package zio.notion
 
 import zio.{Scope, ZIO}
 import zio.notion.Faker._
-import zio.notion.model.{Database, Page}
+import zio.notion.model.database.Database
+import zio.notion.model.page.Page
+import zio.notion.model.user.User
 import zio.test._
 
 object NotionSpec extends ZIOSpecDefault {
@@ -15,6 +17,12 @@ object NotionSpec extends ZIOSpecDefault {
       test("User can retrieve a database from Notion") {
         val effect: ZIO[Notion, NotionError, Database] = Notion(_.retrieveDatabase(fakeUUID))
         effect.provide(TestNotionClient.layer, Notion.live).map(database => assertTrue(database.id == fakeUUID))
+      },
+      test("User can retrieve an user from Notion") {
+        val effect: ZIO[Notion, NotionError, User] = Notion(_.retrieveUser(fakeUUID))
+        effect
+          .provide(TestNotionClient.layer, Notion.live)
+          .map(user => assertTrue(user.isInstanceOf[User.Person]))
       }
     )
 }
