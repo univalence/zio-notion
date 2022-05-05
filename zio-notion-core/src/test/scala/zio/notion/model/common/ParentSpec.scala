@@ -1,5 +1,7 @@
 package zio.notion.model.common
 
+import io.circe.parser.decode
+
 import zio.Scope
 import zio.notion.Faker.fakeUUID
 import zio.notion.model.common.Parent.{DatabaseId, PageId, Workspace}

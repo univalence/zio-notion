@@ -1,5 +1,7 @@
 package zio.notion.model.page.properties.data
 
+import io.circe.parser.decode
+
 import zio.Scope
 import zio.notion.Faker.fakeDate
 import zio.notion.model.page.properties.data.FormulaData.{Date, Number}

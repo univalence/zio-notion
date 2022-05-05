@@ -1,8 +1,10 @@
 package zio.notion.model.page.properties
 
+import io.circe.parser.decode
+
 import zio.Scope
 import zio.notion.Faker.fakeUUID
-import zio.notion.model.common.enums.RollupFunction.Count
+import zio.notion.model.common.enumeration.RollupFunction.Count
 import zio.notion.model.page.properties.Property.Rollup
 import zio.notion.model.page.properties.data.RollupData
 import zio.test.{assert, TestEnvironment, ZIOSpecDefault, ZSpec}

@@ -1,8 +1,8 @@
-package zio.notion.model.database.property_descriptions
+package zio.notion.model.database.description
 
 import io.circe.generic.extras.ConfiguredJsonCodec
 
-import zio.notion.model.common.enums.BaseColor
+import zio.notion.model.common.enumeration.BaseColor
 
 object SelectDescription {
   @ConfiguredJsonCodec final case class Select(options: List[SelectData])

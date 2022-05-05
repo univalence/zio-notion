@@ -1,5 +1,7 @@
 package zio.notion.model.common
 
+import io.circe.parser.decode
+
 import zio.Scope
 import zio.notion.Faker.{fakeDatetime, fakeEmoji, fakeUrl}
 import zio.notion.model.common.Icon.{Emoji, External, File}

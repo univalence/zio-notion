@@ -1,4 +1,4 @@
-package zio.notion.model.database.property_descriptions
+package zio.notion.model.database.description
 
 import io.circe.generic.extras.ConfiguredJsonCodec
 

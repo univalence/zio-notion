@@ -1,4 +1,4 @@
-package zio.notion.model.common.rich_text
+package zio.notion.model.common.richtext
 
 import io.circe.generic.extras._
 

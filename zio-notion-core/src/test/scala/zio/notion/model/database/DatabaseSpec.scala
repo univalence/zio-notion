@@ -1,5 +1,7 @@
 package zio.notion.model.database
 
+import io.circe.parser.decode
+
 import zio.Scope
 import zio.test.{assert, TestEnvironment, ZIOSpecDefault, ZSpec}
 import zio.test.Assertion.isRight

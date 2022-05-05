@@ -1,9 +1,11 @@
-package zio.notion.model.common.rich_text
+package zio.notion.model.common.richtext
+
+import io.circe.parser.decode
 
 import zio.Scope
-import zio.notion.model.common.enums.Color
-import zio.notion.model.common.rich_text
-import zio.test.{TestEnvironment, ZIOSpecDefault, ZSpec}
+import zio.notion.model.common.enumeration.Color
+import zio.notion.model.common.richtext
+import zio.test.{assert, TestEnvironment, ZIOSpecDefault, ZSpec}
 import zio.test.Assertion.{equalTo, isRight}
 
 object AnnotationsSpec extends ZIOSpecDefault {
@@ -21,7 +23,7 @@ object AnnotationsSpec extends ZIOSpecDefault {
              |}""".stripMargin
 
         val expected: Annotations =
-          rich_text.Annotations(
+          richtext.Annotations(
             bold          = true,
             italic        = false,
             strikethrough = false,

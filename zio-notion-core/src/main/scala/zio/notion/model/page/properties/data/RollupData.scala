@@ -2,7 +2,7 @@ package zio.notion.model.page.properties.data
 
 import io.circe.generic.extras._
 
-import zio.notion.model.common.enums.RollupFunction
+import zio.notion.model.common.enumeration.RollupFunction
 
 @ConfiguredJsonCodec sealed trait RollupData
 

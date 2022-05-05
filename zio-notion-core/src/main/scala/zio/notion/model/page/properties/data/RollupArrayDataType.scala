@@ -3,7 +3,7 @@ package zio.notion.model.page.properties.data
 import io.circe.generic.extras._
 
 import zio.notion.model.common.UserId
-import zio.notion.model.common.rich_text.RichTextData
+import zio.notion.model.common.richtext.RichTextData
 
 @ConfiguredJsonCodec sealed trait RollupArrayDataType
 

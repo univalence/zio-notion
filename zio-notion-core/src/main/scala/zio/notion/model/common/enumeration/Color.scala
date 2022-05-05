@@ -1,4 +1,4 @@
-package zio.notion.model.common.enums
+package zio.notion.model.common.enumeration
 
 import io.circe._
 import io.circe.generic.extras.semiauto.deriveEnumerationCodec

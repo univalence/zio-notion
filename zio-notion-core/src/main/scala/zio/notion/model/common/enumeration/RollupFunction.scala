@@ -1,4 +1,4 @@
-package zio.notion.model.common.enums
+package zio.notion.model.common.enumeration
 
 import io.circe.Codec
 import io.circe.generic.extras.{Configuration => CirceConfiguration}

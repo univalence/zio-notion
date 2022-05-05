@@ -1,8 +1,8 @@
-package zio.notion.model.database.property_descriptions
+package zio.notion.model.database.description
 
 import io.circe.generic.extras.ConfiguredJsonCodec
 
-import zio.notion.model.common.enums.RollupFunction
+import zio.notion.model.common.enumeration.RollupFunction
 
 object RollupDescription {
   @ConfiguredJsonCodec final case class Rollup(

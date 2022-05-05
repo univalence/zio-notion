@@ -3,8 +3,8 @@ package zio.notion.model.database
 import io.circe.generic.extras.ConfiguredJsonCodec
 
 import zio.notion.model.common.{Cover, Icon, Parent, UserId}
-import zio.notion.model.common.rich_text.RichTextData
-import zio.notion.model.database.property_descriptions.PropertyDescription
+import zio.notion.model.common.richtext.RichTextData
+import zio.notion.model.database.description.PropertyDescription
 
 import java.time.OffsetDateTime
 

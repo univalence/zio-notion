@@ -1,10 +1,10 @@
-package zio.notion.model.database.property_descriptions
+package zio.notion.model.database.description
 
 import io.circe.Codec
 import io.circe.generic.extras.ConfiguredJsonCodec
 import io.circe.generic.extras.semiauto.deriveEnumerationCodec
 
-import zio.notion.model.database.property_descriptions.NumberDescription.NumberFormat
+import zio.notion.model.database.description.NumberDescription.NumberFormat
 
 @ConfiguredJsonCodec final case class NumberDescription(format: NumberFormat)
 
