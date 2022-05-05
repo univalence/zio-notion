@@ -1,7 +1,7 @@
 package zio.notion
 
 import zio.ZIO
-import zio.notion.model.Property
+import zio.notion.model.page.property.Property
 
 sealed trait PropertyUpdater[-R, +E, T <: Property]
 
@@ -9,6 +9,8 @@ object PropertyUpdater {
   final case class OneFieldUpdater[R, +E, T <: Property](fieldName: String, f: T => ZIO[R, E, T])                     extends PropertyUpdater[R, E, T]
   final case class AllFieldsUpdater[R, +E, T <: Property](f: T => ZIO[R, E, T])                                       extends PropertyUpdater[R, E, T]
   final case class AllFieldsPredicateUpdater[R, E, T <: Property](predicate: String => Boolean, f: T => ZIO[R, E, T]) extends PropertyUpdater[R, E, T]
+
+  type UTransformation[P <: Property] = Transformation[Any, Notion, P]
 
   trait Transformation[R, E, P <: Property] {
     def transform(property: P): ZIO[R, E, P]

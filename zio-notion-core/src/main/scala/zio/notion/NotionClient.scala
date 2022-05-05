@@ -7,10 +7,13 @@ import sttp.model.Uri
 
 import zio._
 import zio.notion.NotionClient.NotionResponse
-import zio.notion.model.{printer, Page}
+import zio.notion.model.page.Page
+import zio.notion.model.printer
 
 trait NotionClient {
   def retrievePage(pageId: String): IO[NotionError, NotionResponse]
+  def retrieveDatabase(databaseId: String): IO[NotionError, NotionResponse]
+  def retrieveUser(userId: String): IO[NotionError, NotionResponse]
 
   def updatePage(patch: Page.Patch): IO[NotionError, NotionResponse]
 }
@@ -46,10 +49,21 @@ object NotionClient extends Accessible[NotionClient] {
         .get(uri"$endpoint/pages/$pageId")
         .handle
 
+    override def retrieveDatabase(databaseId: String): IO[NotionError, NotionResponse] =
+      defaultRequest
+        .get(uri"$endpoint/databases/$databaseId")
+        .handle
+
+    override def retrieveUser(userId: String): IO[NotionError, NotionResponse] =
+      defaultRequest
+        .get(uri"$endpoint/users/$userId")
+        .handle
+
     override def updatePage(patch: Page.Patch): IO[NotionError, NotionResponse] =
       defaultRequest
         .patch(uri"$endpoint/pages/${patch.page.id}")
         .body(printer.print(patch.asJson))
         .handle
+
   }
 }

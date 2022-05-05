@@ -1,14 +1,28 @@
 package zio.notion
 
-import zio.Scope
+import zio.{Scope, ZIO}
+import zio.notion.Faker._
+import zio.notion.model.database.Database
+import zio.notion.model.page.Page
+import zio.notion.model.user.User
 import zio.test._
 
 object NotionSpec extends ZIOSpecDefault {
   override def spec: ZSpec[TestEnvironment with Scope, Any] =
     suite("Notion high level api suite")(
       test("User can retrieve a page from Notion") {
-        val effect = Notion(_.retrievePage("xxxx"))
-        effect.provide(TestNotionClient.layer, Notion.live).map(page => assertTrue(page.id == "xxxx"))
+        val effect: ZIO[Notion, NotionError, Page] = Notion(_.retrievePage(fakeUUID))
+        effect.provide(TestNotionClient.layer, Notion.live).map(page => assertTrue(page.id == fakeUUID))
+      },
+      test("User can retrieve a database from Notion") {
+        val effect: ZIO[Notion, NotionError, Database] = Notion(_.retrieveDatabase(fakeUUID))
+        effect.provide(TestNotionClient.layer, Notion.live).map(database => assertTrue(database.id == fakeUUID))
+      },
+      test("User can retrieve an user from Notion") {
+        val effect: ZIO[Notion, NotionError, User] = Notion(_.retrieveUser(fakeUUID))
+        effect
+          .provide(TestNotionClient.layer, Notion.live)
+          .map(user => assertTrue(user.isInstanceOf[User.Person]))
       }
     )
 }
