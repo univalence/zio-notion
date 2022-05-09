@@ -71,12 +71,11 @@ addCommandAlias("testSpecific", "; clean; test;")
 addCommandAlias("testSpecificWithCoverage", "; clean; coverage; test; coverageReport;")
 
 // -- Lib versions
-val zio       = "2.0.0-RC6"
-val zioConfig = "3.0.0-RC8"
-val zioHttp   = "2.0.0-RC7"
-val circe     = "0.14.1"
-val sttp      = "3.5.2"
-val magnolia  = "1.1.2"
+val zio          = "2.0.0-RC6"
+val circe        = "0.14.1"
+val sttp         = "3.6.1"
+val magnolia     = "1.1.2"
+val scalaReflect = "2.13.8"
 
 // -- Main project settings
 lazy val core =
@@ -87,18 +86,15 @@ lazy val core =
       libraryDependencies ++= Seq(
         "com.softwaremill.sttp.client3" %% "async-http-client-backend-zio" % sttp,
         "com.softwaremill.sttp.client3" %% "core"                          % sttp,
-        "com.softwaremill.sttp.client3" %% "httpclient-backend-zio"        % sttp,
         "dev.zio"                       %% "zio"                           % zio,
-        "dev.zio"                       %% "zio-config"                    % zioConfig,
-        "dev.zio"                       %% "zio-config"                    % zioConfig,
-        "dev.zio"                       %% "zio-config-magnolia"           % zioConfig,
         "io.circe"                      %% "circe-core"                    % circe,
         "io.circe"                      %% "circe-parser"                  % circe,
         "io.circe"                      %% "circe-generic"                 % circe,
         "io.circe"                      %% "circe-generic-extras"          % circe,
         "dev.zio"                       %% "zio-test"                      % zio % Test,
         "dev.zio"                       %% "zio-test-sbt"                  % zio % Test,
-        "com.softwaremill.magnolia1_2"  %% "magnolia"                      % magnolia
+        "com.softwaremill.magnolia1_2"  %% "magnolia"                      % magnolia,
+        "org.scala-lang"                 % "scala-reflect"                 % scalaReflect
       ),
       testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")),
       scalacOptions ++= Seq("-Ymacro-annotations")
