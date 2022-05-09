@@ -2,3 +2,9 @@ coverage:
   round: up
   range: 50..80
   precision: 2
+comment:
+  layout: "reach, diff, flags, files"
+  behavior: default
+  require_changes: false
+  require_base: no
+  require_head: no
