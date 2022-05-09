@@ -23,7 +23,9 @@ sealed trait Notion {
 
 object Notion {
 
-  def apply[R1 <: Notion, E, A](f: Notion => ZIO[R1, E, A])(implicit tag: Tag[Notion], trace: Trace): ZIO[R1, E, A] = ZIO.serviceWithZIO[Notion](f)
+  def retrievePage(pageId: String): ZIO[Notion, NotionError, Page]             = ZIO.service[Notion].flatMap(_.retrievePage(pageId))
+  def retrieveDatabase(databaseId: String): ZIO[Notion, NotionError, Database] = ZIO.service[Notion].flatMap(_.retrieveDatabase(databaseId))
+  def retrieveUser(userId: String): ZIO[Notion, NotionError, User]             = ZIO.service[Notion].flatMap(_.retrieveUser(userId))
 
   val live: URLayer[NotionClient, Notion] = ZLayer(ZIO.service[NotionClient].map(LiveNotion))
 
