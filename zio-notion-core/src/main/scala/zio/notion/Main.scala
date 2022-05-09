@@ -36,9 +36,9 @@ object Main extends ZIOAppDefault {
 
   def app: ZIO[Notion, NotionError, Unit] =
     for {
-      page <- Notion(_.retrievePage("28e158d738e54e2287c795525f650116"))
+      page <- Notion.retrievePage("1c2d0a80-3321-4641-9615-f345185de05a")
       _    <- Console.printLine(page.url).orDie
-      _    <- Notion(_.updatePage(page.patch.archive))
+      _    <- Notion.updatePage(page.patch.archive)
     } yield ()
 
   override def run: ZIO[ZIOAppArgs, Any, Any] =
