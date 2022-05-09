@@ -14,9 +14,9 @@ trait NotionClient {
 }
 
 object NotionClient {
-
-  def apply[R1 <: NotionClient, E, A](f: NotionClient => ZIO[R1, E, A])(implicit tag: Tag[NotionClient], trace: Trace): ZIO[R1, E, A] =
-    ZIO.serviceWithZIO[NotionClient](f)
+  def retrievePage(pageId: String): ZIO[NotionClient, NotionError, NotionResponse]         = ZIO.service[NotionClient].flatMap(_.retrievePage(pageId))
+  def retrieveDatabase(databaseId: String): ZIO[NotionClient, NotionError, NotionResponse] = ZIO.service[NotionClient].flatMap(_.retrieveDatabase(databaseId))
+  def retrieveUser(userId: String): ZIO[NotionClient, NotionError, NotionResponse]         = ZIO.service[NotionClient].flatMap(_.retrieveUser(userId))
 
   type NotionResponse = Response[Either[String, String]]
 
