@@ -21,7 +21,10 @@ sealed trait Notion {
   def retrieveUser(userId: String): IO[NotionError, User]
 }
 
-object Notion extends Accessible[Notion] {
+object Notion {
+
+  def apply[R1 <: Notion, E, A](f: Notion => ZIO[R1, E, A])(implicit tag: Tag[Notion], trace: Trace): ZIO[R1, E, A] = ZIO.serviceWithZIO[Notion](f) // fixme
+
   val live: URLayer[NotionClient, Notion] = ZLayer(ZIO.service[NotionClient].map(LiveNotion))
 
   final case class LiveNotion(notionClient: NotionClient) extends Notion {

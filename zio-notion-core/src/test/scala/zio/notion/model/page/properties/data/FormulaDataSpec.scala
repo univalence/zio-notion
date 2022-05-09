@@ -5,11 +5,11 @@ import io.circe.parser.decode
 import zio.Scope
 import zio.notion.Faker.fakeDate
 import zio.notion.model.page.properties.data.FormulaData.{Date, Number}
-import zio.test.{assert, TestEnvironment, ZIOSpecDefault, ZSpec}
+import zio.test.{assert, Spec, TestEnvironment, ZIOSpecDefault}
 import zio.test.Assertion.{equalTo, isRight}
 
 object FormulaDataSpec extends ZIOSpecDefault {
-  override def spec: ZSpec[TestEnvironment with Scope, Any] =
+  override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("FormulaData serde suite")(
       test("We should be able to parse a string formula as json") {
         val json: String =
