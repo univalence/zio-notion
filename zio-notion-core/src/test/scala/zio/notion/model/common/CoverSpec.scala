@@ -5,11 +5,11 @@ import io.circe.parser.decode
 import zio.Scope
 import zio.notion.Faker.{fakeDatetime, fakeUrl}
 import zio.notion.model.common.Cover.{External, File}
-import zio.test.{assert, TestEnvironment, ZIOSpecDefault, ZSpec}
+import zio.test.{assert, Spec, TestEnvironment, ZIOSpecDefault}
 import zio.test.Assertion.{equalTo, isRight}
 
 object CoverSpec extends ZIOSpecDefault {
-  override def spec: ZSpec[TestEnvironment with Scope, Any] =
+  override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("Cover serde suite")(
       test("We should be able to parse an external cover as json") {
         val json: String =

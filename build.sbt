@@ -71,7 +71,7 @@ addCommandAlias("testSpecific", "; clean; test;")
 addCommandAlias("testSpecificWithCoverage", "; clean; coverage; test; coverageReport;")
 
 // -- Lib versions
-val zio       = "2.0.0-RC5"
+val zio       = "2.0.0-RC6"
 val zioConfig = "3.0.0-RC8"
 val zioHttp   = "2.0.0-RC7"
 val circe     = "0.14.1"

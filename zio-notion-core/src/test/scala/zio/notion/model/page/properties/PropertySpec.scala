@@ -7,11 +7,11 @@ import zio.notion.Faker.fakeUUID
 import zio.notion.model.common.enumeration.RollupFunction.Count
 import zio.notion.model.page.properties.Property.Rollup
 import zio.notion.model.page.properties.data.RollupData
-import zio.test.{assert, TestEnvironment, ZIOSpecDefault, ZSpec}
+import zio.test.{assert, Spec, TestEnvironment, ZIOSpecDefault}
 import zio.test.Assertion.{equalTo, isRight}
 
 object PropertySpec extends ZIOSpecDefault {
-  override def spec: ZSpec[TestEnvironment with Scope, Any] =
+  override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("RollupData serde suite")(
       test("We should be able to parse a rollup object as json") {
         val json: String =

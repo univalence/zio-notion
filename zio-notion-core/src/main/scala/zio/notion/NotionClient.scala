@@ -13,7 +13,11 @@ trait NotionClient {
   def retrieveUser(userId: String): IO[NotionError, NotionResponse]
 }
 
-object NotionClient extends Accessible[NotionClient] {
+object NotionClient {
+
+  def apply[R1 <: NotionClient, E, A](f: NotionClient => ZIO[R1, E, A])(implicit tag: Tag[NotionClient], trace: Trace): ZIO[R1, E, A] =
+    ZIO.serviceWithZIO[NotionClient](f)
+
   type NotionResponse = Response[Either[String, String]]
 
   val live: URLayer[NotionConfiguration with SttpClient, NotionClient] =
