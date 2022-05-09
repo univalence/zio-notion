@@ -36,7 +36,7 @@ object Main extends ZIOAppDefault {
 
   def app: ZIO[Notion, NotionError, Unit] =
     for {
-      page <- Notion(_.retrievePage("1c2d0a80-3321-4641-9615-f345185de05a"))
+      page <- Notion.retrievePage("1c2d0a80-3321-4641-9615-f345185de05a")
       _    <- Console.printLine(page.url).orDie
     } yield ()
 
