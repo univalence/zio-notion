@@ -23,7 +23,7 @@ sealed trait Notion {
 
 object Notion {
 
-  def apply[R1 <: Notion, E, A](f: Notion => ZIO[R1, E, A])(implicit tag: Tag[Notion], trace: Trace): ZIO[R1, E, A] = ZIO.serviceWithZIO[Notion](f) // fixme
+  def apply[R1 <: Notion, E, A](f: Notion => ZIO[R1, E, A])(implicit tag: Tag[Notion], trace: Trace): ZIO[R1, E, A] = ZIO.serviceWithZIO[Notion](f)
 
   val live: URLayer[NotionClient, Notion] = ZLayer(ZIO.service[NotionClient].map(LiveNotion))
 
