@@ -9,7 +9,7 @@ import zio.test._
 import zio.test.Assertion._
 
 object FormulaDataSpec extends ZIOSpecDefault {
-  override def spec: ZSpec[TestEnvironment with Scope, Any] =
+  override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("FormulaData serde suite")(
       test("We should be able to parse a string formula as json") {
         val json: String =

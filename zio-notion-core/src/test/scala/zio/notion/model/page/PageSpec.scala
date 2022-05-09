@@ -4,19 +4,18 @@ import io.circe.parser.decode
 import io.circe.syntax.EncoderOps
 
 import zio.{Scope, ZIO}
-import zio.notion.{NotionError, _}
-import zio.notion.Faker.{fakeEmoji, fakePage, fakeUrl}
-import zio.notion.model.common.{Cover, Url}
+import zio.notion.Faker._
+import zio.notion.model.common._
 import zio.notion.model.common.Icon.Emoji
-import zio.notion.model.page.patch.PatchedProperty.PatchedCheckbox
+import zio.notion.model.page.patch.PatchedProperty._
 import zio.notion.model.printer
 import zio.test._
 import zio.test.Assertion.isRight
 
 object PageSpec extends ZIOSpecDefault {
-  override def spec: ZSpec[TestEnvironment with Scope, Any] = serdeSpec + patchSpec
+  override def spec: Spec[TestEnvironment with Scope, Any] = serdeSpec + patchSpec
 
-  def serdeSpec: Spec[Any, TestFailure[Nothing], TestSuccess] =
+  def serdeSpec: Spec[TestEnvironment with Scope, Any] =
     suite("Page serde suite")(
       test("We should be able to parse a page json") {
         val json: String =
@@ -169,7 +168,7 @@ object PageSpec extends ZIOSpecDefault {
       }
     )
 
-  def patchSpec: Spec[Any, TestFailure[NotionError], TestSuccess] =
+  def patchSpec: Spec[TestEnvironment with Scope, Any] =
     suite("Patch application suite")(
       test("We should be able to update one property") {
         val patch = fakePage.patch.updateProperty(PatchedCheckbox.check.on("Checkbox"))

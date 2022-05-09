@@ -8,7 +8,7 @@ import zio.notion.model.user.User
 import zio.test._
 
 object NotionSpec extends ZIOSpecDefault {
-  override def spec: ZSpec[TestEnvironment with Scope, Any] =
+  override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("Notion high level api suite")(
       test("User can retrieve a page from Notion") {
         val effect: ZIO[Notion, NotionError, Page] = Notion(_.retrievePage(fakeUUID))

@@ -15,7 +15,7 @@ import zio.test._
 import java.time.LocalDate
 
 object PatchedPropertySpec extends ZIOSpecDefault {
-  override def spec: ZSpec[TestEnvironment with Scope, Any] =
+  override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("Test property patching action")(
       specPatchedNumber,
       specPatchedUrl,
@@ -28,8 +28,8 @@ object PatchedPropertySpec extends ZIOSpecDefault {
       specPatchedTitle
     ) + specEncoding
 
-  def specPatchedNumber: Spec[Any, TestFailure[Nothing], TestSuccess] = {
-    def assertUpdate[E](updater: FieldUpdater[Nothing, PatchedNumber], initial: Double, excepted: Double): Assert =
+  def specPatchedNumber: Spec[TestEnvironment with Scope, Any] = {
+    def assertUpdate[E](updater: FieldUpdater[Nothing, PatchedNumber], initial: Double, excepted: Double): TestResult =
       assertTrue(updater.transform(PatchedNumber(initial)).map(_.number) == Right(excepted))
 
     suite("Test patching numbers")(
@@ -76,7 +76,7 @@ object PatchedPropertySpec extends ZIOSpecDefault {
     )
   }
 
-  def specPatchedUrl: Spec[Any, TestFailure[Nothing], TestSuccess] =
+  def specPatchedUrl: Spec[TestEnvironment with Scope, Any] =
     suite("Test patching urls")(
       test("We can set a new url") {
         val patch: FieldSetter[PatchedUrl] = PatchedUrl.set(fakeUrl).onAll
@@ -85,7 +85,7 @@ object PatchedPropertySpec extends ZIOSpecDefault {
       }
     )
 
-  def specPatchedSelect: Spec[Any, TestFailure[Nothing], TestSuccess] =
+  def specPatchedSelect: Spec[TestEnvironment with Scope, Any] =
     suite("Test patching selects")(
       test("We can set a new select using its name") {
         val patch: FieldSetter[PatchedSelect] = PatchedSelect.setUsingName("name").onAll
@@ -99,12 +99,12 @@ object PatchedPropertySpec extends ZIOSpecDefault {
       }
     )
 
-  def specPatchedMultiSelect: Spec[Any, TestFailure[Nothing], TestSuccess] = {
+  def specPatchedMultiSelect: Spec[TestEnvironment with Scope, Any] = {
     def assertUpdate[E](
         updater: FieldUpdater[Nothing, PatchedMultiSelect],
         initial: List[PatchedSelect],
         expected: List[PatchedSelect]
-    ): Assert = assertTrue(updater.transform(PatchedMultiSelect(initial)).map(_.multiSelect) == Right(expected))
+    ): TestResult = assertTrue(updater.transform(PatchedMultiSelect(initial)).map(_.multiSelect) == Right(expected))
 
     suite("Test patching multi selects")(
       test("We can set a new multi select") {
@@ -141,7 +141,7 @@ object PatchedPropertySpec extends ZIOSpecDefault {
     )
   }
 
-  def specPatchedDate: Spec[Any, TestFailure[Nothing], TestSuccess] =
+  def specPatchedDate: Spec[TestEnvironment with Scope, Any] =
     suite("Test patching dates")(
       test("We can set a start date") {
         val patch: FieldSetter[PatchedDate] = PatchedDate.startAt(fakeLocalDate).onAll
@@ -165,7 +165,7 @@ object PatchedPropertySpec extends ZIOSpecDefault {
       }
     )
 
-  def specPatchedEmail: Spec[Any, TestFailure[Nothing], TestSuccess] =
+  def specPatchedEmail: Spec[TestEnvironment with Scope, Any] =
     suite("Test patching emails")(
       test("We can set a new email") {
         val patch: FieldSetter[PatchedEmail] = PatchedEmail.set(fakeEmail).onAll
@@ -174,7 +174,7 @@ object PatchedPropertySpec extends ZIOSpecDefault {
       }
     )
 
-  def specPatchedPhoneNumber: Spec[Any, TestFailure[Nothing], TestSuccess] =
+  def specPatchedPhoneNumber: Spec[TestEnvironment with Scope, Any] =
     suite("Test patching phone numbers")(
       test("We can set a new phone number") {
         val patch: FieldSetter[PatchedPhoneNumber] = PatchedPhoneNumber.set(fakePhoneNumber).onAll
@@ -183,7 +183,7 @@ object PatchedPropertySpec extends ZIOSpecDefault {
       }
     )
 
-  def specPatchedCheckbox: Spec[Any, TestFailure[Nothing], TestSuccess] =
+  def specPatchedCheckbox: Spec[TestEnvironment with Scope, Any] =
     suite("Test patching checkbox")(
       test("We can check a checkbox") {
         val patch: FieldSetter[PatchedCheckbox] = PatchedCheckbox.check.onAll
@@ -202,7 +202,7 @@ object PatchedPropertySpec extends ZIOSpecDefault {
       }
     )
 
-  def specPatchedFiles: Spec[Any, TestFailure[Nothing], TestSuccess] =
+  def specPatchedFiles: Spec[TestEnvironment with Scope, Any] =
     suite("Test patching files")(
       test("We can set a list of files") {
         val files: List[Link] = List(External("name", Url(fakeUrl)))
@@ -229,7 +229,7 @@ object PatchedPropertySpec extends ZIOSpecDefault {
       }
     )
 
-  def specPatchedTitle: Spec[Any, TestFailure[Nothing], TestSuccess] =
+  def specPatchedTitle: Spec[TestEnvironment with Scope, Any] =
     suite("Test patching title")(
       test("We can set a new title") {
         val patch: FieldSetter[PatchedTitle] = PatchedTitle.set("Title").onAll
@@ -243,7 +243,7 @@ object PatchedPropertySpec extends ZIOSpecDefault {
       }
     )
 
-  def specEncoding: Spec[Any, TestFailure[Nothing], TestSuccess] =
+  def specEncoding: Spec[TestEnvironment with Scope, Any] =
     suite("Test property encoding")(
       test("PatchedNumber encoding") {
         val property: PatchedNumber = PatchedNumber(10)
