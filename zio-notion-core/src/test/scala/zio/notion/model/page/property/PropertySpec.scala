@@ -4,7 +4,6 @@ import io.circe.parser.decode
 
 import zio.Scope
 import zio.notion.Faker._
-import zio.notion.Faker.FakeProperty._
 import zio.notion.model.common.enumeration.RollupFunction.Count
 import zio.notion.model.page.property.Property.{Rollup, _}
 import zio.notion.model.page.property.data.RollupData
@@ -33,26 +32,4 @@ object PropertySpec extends ZIOSpecDefault {
         assert(decode[Property](json))(isRight(equalTo(expected)))
       }
     )
-
-//  def capabilitySpec: Spec[Any, TestFailure[Nothing], TestSuccess] =
-//    suite("Property capability suite")(
-//      test("Title property can be renamed") {
-//        Title
-//          .rename("newTitle")
-//          .transform(fakeTitle)
-//          .map(title => assertTrue(title.title.headOption.map(_.asInstanceOf[RichTextData.Text].plainText).contains("newTitle")))
-//      },
-//      test("Date property can be started now") {
-//        Date.now
-//          .transform(fakeDate)
-//          .map(date => assertTrue(date.date.map(_.start.toString).contains("1970-01-01")))
-//      },
-//      test("Date property can be between two dates") {
-//        Date
-//          .between(fakeLocalDate, fakeLocalDate.plusDays(1))
-//          .transform(fakeDate)
-//          .map(date => assertTrue(date.date.map(_.start.toString).contains("2022-02-22") && date.date.flatMap(_.end.map(_.toString)).contains("2022-02-23")))
-//      }
-//    )
-
 }

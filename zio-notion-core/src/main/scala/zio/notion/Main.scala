@@ -39,8 +39,8 @@ object Main extends ZIOAppDefault {
     for {
       page  <- Notion(_.retrievePage("28e158d738e54e2287c795525f650116"))
       _     <- Console.printLine(page.url).orDie
-      patch <- ZIO.fromEither(page.patch.removeIcon.updateProperty(PatchedNumber.ceil.on("Number")))
-      _     <- Notion(_.updatePage(patch))
+      patch <- ZIO.fromEither(page.patch.updateProperty(PatchedNumber.add(10).on("Number")))
+      _     <- Notion(_.updatePage(patch.removeProperty("Number")))
     } yield ()
 
   override def run: ZIO[ZIOAppArgs, Any, Any] =

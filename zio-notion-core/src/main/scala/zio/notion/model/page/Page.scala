@@ -34,7 +34,7 @@ final case class Page(
 object Page {
   final case class Patch(
       page:       Page,
-      properties: Map[String, PatchedProperty],
+      properties: Map[String, Option[PatchedProperty]],
       archived:   Option[Boolean],
       icon:       Removable[Icon],
       cover:      Removable[Cover]
@@ -69,16 +69,16 @@ object Page {
         case PropertyUpdater.FieldSetter(matcher, value) =>
           matcher match {
             case FieldMatcher.All =>
-              val properties: Iterable[(String, O)] =
+              val properties: Iterable[(String, Option[O])] =
                 page.properties.collect {
-                  case (key, property) if manifest.runtimeClass.isInstance(property) => key -> value
+                  case (key, property) if manifest.runtimeClass.isInstance(property) => key -> Some(value)
                 }
 
               Right(properties.foldLeft(self)((acc, curr) => acc.copy(properties = acc.properties + curr)))
             case FieldMatcher.Predicate(f) =>
-              val properties: Iterable[(String, O)] =
+              val properties: Iterable[(String, Option[O])] =
                 page.properties.collect {
-                  case (key, property) if f(key) && manifest.runtimeClass.isInstance(property) => key -> value
+                  case (key, property) if f(key) && manifest.runtimeClass.isInstance(property) => key -> Some(value)
                 }
 
               Right(properties.foldLeft(self)((acc, curr) => acc.copy(properties = acc.properties + curr)))
@@ -86,7 +86,7 @@ object Page {
               page.properties.get(key) match {
                 case Some(property) if manifest.runtimeClass.isInstance(property) =>
                   // We update it
-                  Right(copy(properties = properties + (key -> value)))
+                  Right(copy(properties = properties + (key -> Some(value))))
                 case Some(_) =>
                   // We can't update the property because it doesn't have the good type
                   Left(PropertyWrongType(key, tag.runtimeClass.getSimpleName))
@@ -98,11 +98,11 @@ object Page {
         case PropertyUpdater.FieldUpdater(matcher, transform) =>
           matcher match {
             case FieldMatcher.All =>
-              val maybeProperties: Iterable[Either[E, (String, O)]] =
+              val maybeProperties: Iterable[Either[E, (String, Option[O])]] =
                 page.properties.collect {
                   case (key, property: I) if manifest.runtimeClass.isInstance(property) =>
                     patchable.patch(property) match {
-                      case Some(input) => transform(input).map(key -> _)
+                      case Some(input) => transform(input).map(key -> Some(_))
                       case None        => Left(PropertyIsEmpty(key))
                     }
                 }
@@ -111,11 +111,11 @@ object Page {
                 acc.flatMap(patch => curr.map(property => patch.copy(properties = patch.properties + property)))
               )
             case FieldMatcher.Predicate(f) =>
-              val maybeProperties: Iterable[Either[E, (String, O)]] =
+              val maybeProperties: Iterable[Either[E, (String, Option[O])]] =
                 page.properties.collect {
                   case (key, property: I) if f(key) && manifest.runtimeClass.isInstance(property) =>
                     patchable.patch(property) match {
-                      case Some(input) => transform(input).map(key -> _)
+                      case Some(input) => transform(input).map(key -> Some(_))
                       case None        => Left(PropertyIsEmpty(key))
                     }
                 }
@@ -127,7 +127,7 @@ object Page {
               page.properties.get(key) match {
                 case Some(property: I) if manifest.runtimeClass.isInstance(property) =>
                   patchable.patch(property) match {
-                    case Some(input) => transform(input).map(value => copy(properties = properties + (key -> value)))
+                    case Some(input) => transform(input).map(value => copy(properties = properties + (key -> Some(value))))
                     case None        => Left(PropertyIsEmpty(key))
                   }
                 case Some(_) =>
@@ -140,6 +140,8 @@ object Page {
           }
       }
     }
+
+    def removeProperty(key: String): Patch = copy(properties = properties + (key -> None))
 
     def archive: Patch = copy(archived = Some(true))
 
@@ -176,7 +178,8 @@ object Page {
           }
 
         val properties =
-          if (patch.properties.isEmpty) List.empty else List(("properties", Encoder[Map[String, PatchedProperty]].apply(patch.properties)))
+          if (patch.properties.isEmpty) List.empty
+          else List(("properties", Encoder[Map[String, Option[PatchedProperty]]].apply(patch.properties)))
         val archived = patch.archived.fold(List.empty[(String, Json)])(bool => List(("archived", Encoder[Boolean].apply(bool))))
         val icon     = removalEncoding("icon", patch.icon)
         val cover    = removalEncoding("cover", patch.cover)

@@ -18,7 +18,7 @@ object PropertyUpdater {
 
   type UTransformation[P <: PatchedProperty] = Transformation[Nothing, P]
 
-  sealed trait Patch[E, P <: PatchedProperty]
+  trait Patch[E, P <: PatchedProperty]
 
   trait Transformation[E, P <: PatchedProperty] extends Patch[E, P] {
     def transform(property: P): Either[E, P]
@@ -32,11 +32,21 @@ object PropertyUpdater {
     def onAllMatching(predicate: String => Boolean): FieldUpdater[E, P] = FieldUpdater(FieldMatcher.Predicate(predicate), transform)
   }
 
+  object Transformation {
+    def apply[E, P <: PatchedProperty](f: P => Either[E, P]): Transformation[E, P] = (property: P) => f(property)
+
+    def succeed[P <: PatchedProperty](f: P => P): UTransformation[P] = Transformation(p => Right(f(p)))
+  }
+
   trait Setter[P <: PatchedProperty] extends Patch[Nothing, P] {
     protected def build(): P
     final def value: P = build()
 
     final def on(fieldName: String): FieldSetter[P] = FieldSetter(FieldMatcher.One(fieldName), value)
+
+    def onAll: FieldSetter[P] = FieldSetter(FieldMatcher.All, value)
+
+    def onAllMatching(predicate: String => Boolean): FieldSetter[P] = FieldSetter(FieldMatcher.Predicate(predicate), value)
   }
 
   object Setter {
