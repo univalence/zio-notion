@@ -12,7 +12,7 @@ import java.time.LocalDate
 sealed trait PatchedProperty
 
 // TODO: Add set + update + remove for all
-// TODO: Add people, formula and rollup patches
+// TODO: Add people, formula, rich text and rollup patches
 object PatchedProperty {
   final case class PatchedNumber(number: Double) extends PatchedProperty
 

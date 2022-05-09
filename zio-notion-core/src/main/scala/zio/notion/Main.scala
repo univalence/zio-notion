@@ -3,7 +3,7 @@ package zio.notion
 import sttp.client3.asynchttpclient.zio.{AsyncHttpClientZioBackend, SttpClient}
 
 import zio._
-import zio.notion.model.page.patch.PatchedProperty.PatchedNumber
+import zio.notion.model.page.patch.PatchedProperty.PatchedDate
 
 //TODO
 
@@ -39,8 +39,8 @@ object Main extends ZIOAppDefault {
     for {
       page  <- Notion(_.retrievePage("28e158d738e54e2287c795525f650116"))
       _     <- Console.printLine(page.url).orDie
-      patch <- ZIO.fromEither(page.patch.updateProperty(PatchedNumber.add(10).on("Number")))
-      _     <- Notion(_.updatePage(patch.removeProperty("Number")))
+      patch <- ZIO.fromEither(page.patch.updateProperty(PatchedDate.endAt(_.plusDays(2)).on("Date")))
+      _     <- Notion(_.updatePage(patch))
     } yield ()
 
   override def run: ZIO[ZIOAppArgs, Any, Any] =

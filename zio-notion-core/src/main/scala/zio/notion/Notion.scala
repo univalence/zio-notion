@@ -20,7 +20,7 @@ sealed trait Notion {
   def retrieveDatabase(databaseId: String): IO[NotionError, Database]
   def retrieveUser(userId: String): IO[NotionError, User]
 
-  def updatePage(patch: Page.Patch): IO[NotionError, Unit]
+  def updatePage(patch: Page.Patch): IO[NotionError, Page]
 }
 
 object Notion extends Accessible[Notion] {
@@ -42,6 +42,6 @@ object Notion extends Accessible[Notion] {
       decodeResponse[Database](notionClient.retrieveDatabase(databaseId))
     override def retrieveUser(userId: String): IO[NotionError, User] = decodeResponse[User](notionClient.retrieveUser(userId))
 
-    override def updatePage(patch: Page.Patch): IO[NotionError, Unit] = notionClient.updatePage(patch).unit
+    override def updatePage(patch: Page.Patch): IO[NotionError, Page] = decodeResponse[Page](notionClient.updatePage(patch))
   }
 }
