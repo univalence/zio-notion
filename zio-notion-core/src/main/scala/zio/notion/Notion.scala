@@ -5,7 +5,7 @@ import io.circe.parser.decode
 
 import zio._
 import zio.notion.NotionClient.NotionResponse
-import zio.notion.model.database.Database
+import zio.notion.model.database.{Database, DatabaseQueryResponse}
 import zio.notion.model.page.Page
 import zio.notion.model.user.User
 
@@ -19,6 +19,7 @@ sealed trait Notion {
   def retrievePage(pageId: String): IO[NotionError, Page]
   def retrieveDatabase(databaseId: String): IO[NotionError, Database]
   def retrieveUser(userId: String): IO[NotionError, User]
+  def queryDatabase(databaseId: String): IO[NotionError, DatabaseQueryResponse]
 }
 
 object Notion {
@@ -43,5 +44,7 @@ object Notion {
     override def retrievePage(pageId: String): IO[NotionError, Page]             = decodeResponse[Page](notionClient.retrievePage(pageId))
     override def retrieveDatabase(databaseId: String): IO[NotionError, Database] = decodeResponse[Database](notionClient.retrieveDatabase(databaseId))
     override def retrieveUser(userId: String): IO[NotionError, User]             = decodeResponse[User](notionClient.retrieveUser(userId))
+    override def queryDatabase(databaseId: String): IO[NotionError, DatabaseQueryResponse] =
+      decodeResponse[DatabaseQueryResponse](notionClient.retrieveUser(databaseId))
   }
 }

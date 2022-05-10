@@ -325,6 +325,8 @@ final case class TestNotionClient() extends NotionClient {
                                      |        "email": "$fakeEmail"
                                      |    }
                                      |}""".stripMargin)))
+
+  override def queryDatabase(databaseId: String): IO[NotionError, NotionResponse] = ???
 }
 
 object TestNotionClient {
