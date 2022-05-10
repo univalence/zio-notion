@@ -38,7 +38,9 @@ object Main extends ZIOAppDefault {
     for {
       page <- Notion.retrievePage("1c2d0a80-3321-4641-9615-f345185de05a")
       _    <- Console.printLine(page.url).orDie
+      _    <- Notion.updatePage(page.patch.archive)
     } yield ()
 
-  override def run: ZIO[ZIOAppArgs, Any, Any] = app.provide(sttpLayer, ZLayer.succeed(configuration), NotionClient.live, Notion.live)
+  override def run: ZIO[ZIOAppArgs, Any, Any] =
+    app.tapError(e => Console.printLine(e.humanize)).provide(sttpLayer, ZLayer.succeed(configuration), NotionClient.live, Notion.live)
 }

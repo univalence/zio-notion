@@ -71,9 +71,11 @@ addCommandAlias("testSpecific", "; clean; test;")
 addCommandAlias("testSpecificWithCoverage", "; clean; coverage; test; coverageReport;")
 
 // -- Lib versions
-val zio   = "2.0.0-RC6"
-val circe = "0.14.1"
-val sttp  = "3.6.1"
+val zio          = "2.0.0-RC6"
+val circe        = "0.14.1"
+val sttp         = "3.6.1"
+val magnolia     = "1.1.2"
+val scalaReflect = "2.13.8"
 
 // -- Main project settings
 lazy val core =
@@ -90,7 +92,9 @@ lazy val core =
         "io.circe"                      %% "circe-generic"                 % circe,
         "io.circe"                      %% "circe-generic-extras"          % circe,
         "dev.zio"                       %% "zio-test"                      % zio % Test,
-        "dev.zio"                       %% "zio-test-sbt"                  % zio % Test
+        "dev.zio"                       %% "zio-test-sbt"                  % zio % Test,
+        "com.softwaremill.magnolia1_2"  %% "magnolia"                      % magnolia,
+        "org.scala-lang"                 % "scala-reflect"                 % scalaReflect
       ),
       testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")),
       scalacOptions ++= Seq("-Ymacro-annotations")
