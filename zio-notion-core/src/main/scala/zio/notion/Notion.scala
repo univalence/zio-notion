@@ -5,6 +5,7 @@ import io.circe.parser.decode
 
 import zio._
 import zio.notion.NotionClient.NotionResponse
+import zio.notion.NotionError.JsonError
 import zio.notion.model.database.Database
 import zio.notion.model.page.Page
 import zio.notion.model.user.User
@@ -33,15 +34,7 @@ object Notion {
   val live: URLayer[NotionClient, Notion] = ZLayer(ZIO.service[NotionClient].map(LiveNotion))
 
   final case class LiveNotion(notionClient: NotionClient) extends Notion {
-    private def decodeResponse[T: Decoder](request: IO[NotionError, NotionResponse]): IO[NotionError, T] =
-      request
-        .flatMap(response =>
-          response.code match {
-            case code if code.isSuccess => ZIO.succeed(response.body.merge)
-            case code                   => ZIO.fail(HttpError(code.code, response.body.merge))
-          }
-        )
-        .flatMap(decodeJson[T])
+    private def decodeResponse[T: Decoder](request: IO[NotionError, NotionResponse]): IO[NotionError, T] = request.flatMap(decodeJson[T])
 
     override def retrievePage(pageId: String): IO[NotionError, Page] = decodeResponse[Page](notionClient.retrievePage(pageId))
     override def retrieveDatabase(databaseId: String): IO[NotionError, Database] =

@@ -3,7 +3,8 @@ package zio.notion.model.page
 import io.circe.{Encoder, Json}
 import io.circe.generic.extras.ConfiguredJsonCodec
 
-import zio.notion.{NotionError, Patchable, PropertyIsEmpty, PropertyNotExist, PropertyUpdater, PropertyWrongType, Removable}
+import zio.notion.{NotionError, Patchable, PropertyUpdater, Removable}
+import zio.notion.NotionError._
 import zio.notion.PropertyUpdater.FieldMatcher
 import zio.notion.Removable.{Ignore, Keep, Remove}
 import zio.notion.model.common.{Cover, Icon, Parent, UserId}
@@ -87,9 +88,9 @@ object Page {
                 case Some(property) if manifest.runtimeClass.isInstance(property) =>
                   // We update it
                   Right(copy(properties = properties + (key -> Some(value))))
-                case Some(_) =>
+                case Some(property) =>
                   // We can't update the property because it doesn't have the good type
-                  Left(PropertyWrongType(key, tag.runtimeClass.getSimpleName))
+                  Left(PropertyWrongType(key, manifest.runtimeClass.getSimpleName, property.getClass.getSimpleName))
                 case None =>
                   // We can't update the property because it doesn't exist
                   Left(PropertyNotExist(key, page.id))
@@ -130,9 +131,9 @@ object Page {
                     case Some(input) => transform(input).map(value => copy(properties = properties + (key -> Some(value))))
                     case None        => Left(PropertyIsEmpty(key))
                   }
-                case Some(_) =>
+                case Some(property) =>
                   // We can't update the property because it doesn't have the good type
-                  Left(PropertyWrongType(key, tag.runtimeClass.getSimpleName))
+                  Left(PropertyWrongType(key, manifest.runtimeClass.getSimpleName, property.getClass.getSimpleName))
                 case None =>
                   // We can't update the property because it doesn't exist
                   Left(PropertyNotExist(key, page.id))

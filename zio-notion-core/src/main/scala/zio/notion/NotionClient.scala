@@ -1,5 +1,8 @@
 package zio.notion
 
+import io.circe.Decoder
+import io.circe.generic.semiauto.deriveDecoder
+import io.circe.parser.decode
 import io.circe.syntax.EncoderOps
 import sttp.client3._
 import sttp.client3.asynchttpclient.zio.SttpClient
@@ -7,6 +10,7 @@ import sttp.model.Uri
 
 import zio._
 import zio.notion.NotionClient.NotionResponse
+import zio.notion.NotionError._
 import zio.notion.model.page.Page
 import zio.notion.model.printer
 
@@ -28,7 +32,17 @@ object NotionClient {
 
   def updatePage(patch: Page.Patch): ZIO[NotionClient, NotionError, NotionResponse] = ZIO.service[NotionClient].flatMap(_.updatePage(patch))
 
-  type NotionResponse = Response[Either[String, String]]
+  type NotionResponse = String
+
+  final case class NotionClientError(
+      status:  Int,
+      code:    String,
+      message: String
+  )
+
+  object NotionClientError {
+    implicit val decoder: Decoder[NotionClientError] = deriveDecoder[NotionClientError]
+  }
 
   val live: URLayer[NotionConfiguration with SttpClient, NotionClient] =
     ZLayer {
@@ -42,11 +56,24 @@ object NotionClient {
     val endpoint: Uri = uri"https://api.notion.com/v1"
 
     implicit private class RequestOps(request: Request[Either[String, String], Any]) {
-      def handle: IO[NotionError, NotionResponse] = handleRequest(sttpClient.send(request))
-    }
+      def handle: IO[NotionError, NotionResponse] =
+        sttpClient
+          .send(request)
+          .mapError(t => ConnectionError(t))
+          .flatMap(response =>
+            response.code match {
+              case code if code.isSuccess => ZIO.succeed(response.body.merge)
+              case _ =>
+                val error =
+                  decode[NotionClientError](response.body.merge) match {
+                    case Left(error)  => JsonError(error)
+                    case Right(error) => NotionError.HttpError(request.toCurl, error.status, error.code, error.message)
+                  }
 
-    private def handleRequest(request: Task[Response[Either[String, String]]]): IO[NotionError, NotionResponse] =
-      request.mapError(t => ConnectionError(t))
+                ZIO.fail(error)
+            }
+          )
+    }
 
     private def defaultRequest: RequestT[Empty, Either[String, String], Any] =
       basicRequest.auth
@@ -74,6 +101,5 @@ object NotionClient {
         .patch(uri"$endpoint/pages/${patch.page.id}")
         .body(printer.print(patch.asJson))
         .handle
-
   }
 }
