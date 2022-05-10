@@ -4,6 +4,8 @@ import sttp.client3.asynchttpclient.zio.{AsyncHttpClientZioBackend, SttpClient}
 
 import zio._
 
+import java.util.UUID
+
 //TODO
 
 // Créer le "NotionConnector" (name, JValue) => IO[HttpError, JValue]
@@ -36,7 +38,7 @@ object Main extends ZIOAppDefault {
 
   def app: ZIO[Notion, NotionError, Unit] =
     for {
-      page <- Notion.retrievePage("1c2d0a80-3321-4641-9615-f345185de05a")
+      page <- Notion.retrievePage(UUID.fromString("1c2d0a80-3321-4641-9615-f345185de05a"))
       _    <- Console.printLine(page.url).orDie
       _    <- Notion.updatePage(page.patch.archive)
     } yield ()

@@ -2,6 +2,8 @@ package zio.notion
 
 import io.circe.{Error => CirceError}
 
+import java.util.UUID
+
 sealed trait NotionError extends Throwable {
   def humanize: String
 }
@@ -18,7 +20,7 @@ final case class JsonError(error: CirceError) extends NotionError {
   override def humanize: String = error.getMessage
 }
 
-final case class PropertyNotExist(propertyName: String, pageId: String) extends NotionError {
+final case class PropertyNotExist(propertyName: String, pageId: UUID) extends NotionError {
   override def humanize: String = s"Property $propertyName doesn't exists for $pageId."
 }
 

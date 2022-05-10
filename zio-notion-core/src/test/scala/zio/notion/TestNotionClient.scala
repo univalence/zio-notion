@@ -7,9 +7,11 @@ import zio.notion.Faker._
 import zio.notion.NotionClient.NotionResponse
 import zio.notion.model.page.Page
 
+import java.util.UUID
+
 /** Notion client mock for test purpose */
 final case class TestNotionClient() extends NotionClient {
-  def pagePayload(pageId: String): String =
+  def pagePayload(pageId: UUID): String =
     s"""{
        |    "object": "page",
        |    "id": "$pageId",
@@ -145,9 +147,9 @@ final case class TestNotionClient() extends NotionClient {
        |    "url": "https://www.notion.so/Les-num-rations-en-Scala-2-X-1c2d0a80332146419615f345185de05a"
        |}""".stripMargin
 
-  override def retrievePage(pageId: String): IO[NotionError, NotionResponse] = ZIO.succeed(Response.ok(Right(pagePayload(pageId))))
+  override def retrievePage(pageId: UUID): IO[NotionError, NotionResponse] = ZIO.succeed(Response.ok(Right(pagePayload(pageId))))
 
-  override def retrieveDatabase(databaseId: String): IO[NotionError, NotionResponse] =
+  override def retrieveDatabase(databaseId: UUID): IO[NotionError, NotionResponse] =
     ZIO.succeed(Response.ok(Right(s"""{
                                      |    "object": "database",
                                      |    "id": "$databaseId",
@@ -311,7 +313,7 @@ final case class TestNotionClient() extends NotionClient {
                                      |    "archived": false
                                      |}""".stripMargin)))
 
-  override def retrieveUser(userId: String): IO[NotionError, NotionResponse] =
+  override def retrieveUser(userId: UUID): IO[NotionError, NotionResponse] =
     ZIO.succeed(Response.ok(Right(s"""{
                                      |    "object": "user",
                                      |    "id": "$userId",

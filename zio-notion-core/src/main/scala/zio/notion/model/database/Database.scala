@@ -7,6 +7,7 @@ import zio.notion.model.common.richtext.RichTextData
 import zio.notion.model.database.description.PropertyDescription
 
 import java.time.OffsetDateTime
+import java.util.UUID
 
 @ConfiguredJsonCodec
 final case class Database(
@@ -14,7 +15,7 @@ final case class Database(
     lastEditedTime: OffsetDateTime,
     createdBy:      UserId,
     lastEditedBy:   UserId,
-    id:             String,
+    id:             UUID,
     title:          List[RichTextData.Text],
     cover:          Option[Cover],
     icon:           Option[Icon],

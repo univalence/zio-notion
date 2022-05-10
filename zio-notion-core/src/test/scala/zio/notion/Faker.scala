@@ -6,11 +6,12 @@ import zio.notion.model.page.Page
 import zio.notion.model.page.property.Property.{Checkbox, Date, Title}
 
 import java.time.{LocalDate, OffsetDateTime, ZoneOffset}
+import java.util.UUID
 
 object Faker {
   val fakeEmoji: String = "🎉"
 
-  val fakeUUID: String = "3868f708-ae46-461f-bfcf-72d34c9536f9"
+  val fakeUUID: UUID = UUID.fromString("3868f708-ae46-461f-bfcf-72d34c9536f9")
 
   val fakeUrl: String = "https://notion.zio"
 

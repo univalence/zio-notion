@@ -10,21 +10,21 @@ import zio.notion.NotionClient.NotionResponse
 import zio.notion.model.page.Page
 import zio.notion.model.printer
 
+import java.util.UUID
+
 trait NotionClient {
-  def retrievePage(pageId: String): IO[NotionError, NotionResponse]
-  def retrieveDatabase(databaseId: String): IO[NotionError, NotionResponse]
-  def retrieveUser(userId: String): IO[NotionError, NotionResponse]
+  def retrievePage(pageId: UUID): IO[NotionError, NotionResponse]
+  def retrieveDatabase(databaseId: UUID): IO[NotionError, NotionResponse]
+  def retrieveUser(userId: UUID): IO[NotionError, NotionResponse]
 
   def updatePage(patch: Page.Patch): IO[NotionError, NotionResponse]
 }
 
 object NotionClient {
-  def retrievePage(pageId: String): ZIO[NotionClient, NotionError, NotionResponse] =
-    ZIO.service[NotionClient].flatMap(_.retrievePage(pageId))
-  def retrieveDatabase(databaseId: String): ZIO[NotionClient, NotionError, NotionResponse] =
+  def retrievePage(pageId: UUID): ZIO[NotionClient, NotionError, NotionResponse] = ZIO.service[NotionClient].flatMap(_.retrievePage(pageId))
+  def retrieveDatabase(databaseId: UUID): ZIO[NotionClient, NotionError, NotionResponse] =
     ZIO.service[NotionClient].flatMap(_.retrieveDatabase(databaseId))
-  def retrieveUser(userId: String): ZIO[NotionClient, NotionError, NotionResponse] =
-    ZIO.service[NotionClient].flatMap(_.retrieveUser(userId))
+  def retrieveUser(userId: UUID): ZIO[NotionClient, NotionError, NotionResponse] = ZIO.service[NotionClient].flatMap(_.retrieveUser(userId))
 
   def updatePage(patch: Page.Patch): ZIO[NotionClient, NotionError, NotionResponse] = ZIO.service[NotionClient].flatMap(_.updatePage(patch))
 
@@ -54,17 +54,17 @@ object NotionClient {
         .header("Notion-Version", "2022-02-22")
         .header("Content-Type", "application/json")
 
-    override def retrievePage(pageId: String): IO[NotionError, NotionResponse] =
+    override def retrievePage(pageId: UUID): IO[NotionError, NotionResponse] =
       defaultRequest
         .get(uri"$endpoint/pages/$pageId")
         .handle
 
-    override def retrieveDatabase(databaseId: String): IO[NotionError, NotionResponse] =
+    override def retrieveDatabase(databaseId: UUID): IO[NotionError, NotionResponse] =
       defaultRequest
         .get(uri"$endpoint/databases/$databaseId")
         .handle
 
-    override def retrieveUser(userId: String): IO[NotionError, NotionResponse] =
+    override def retrieveUser(userId: UUID): IO[NotionError, NotionResponse] =
       defaultRequest
         .get(uri"$endpoint/users/$userId")
         .handle

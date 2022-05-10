@@ -9,6 +9,8 @@ import zio.notion.model.database.Database
 import zio.notion.model.page.Page
 import zio.notion.model.user.User
 
+import java.util.UUID
+
 sealed trait Notion {
   protected def decodeJson[T: Decoder](content: String): IO[NotionError, T] =
     decode[T](content) match {
@@ -16,17 +18,17 @@ sealed trait Notion {
       case Left(error) => ZIO.fail(JsonError(error))
     }
 
-  def retrievePage(pageId: String): IO[NotionError, Page]
-  def retrieveDatabase(databaseId: String): IO[NotionError, Database]
-  def retrieveUser(userId: String): IO[NotionError, User]
+  def retrievePage(pageId: UUID): IO[NotionError, Page]
+  def retrieveDatabase(databaseId: UUID): IO[NotionError, Database]
+  def retrieveUser(userId: UUID): IO[NotionError, User]
 
   def updatePage(patch: Page.Patch): IO[NotionError, Page]
 }
 
 object Notion {
-  def retrievePage(pageId: String): ZIO[Notion, NotionError, Page]             = ZIO.service[Notion].flatMap(_.retrievePage(pageId))
-  def retrieveDatabase(databaseId: String): ZIO[Notion, NotionError, Database] = ZIO.service[Notion].flatMap(_.retrieveDatabase(databaseId))
-  def retrieveUser(userId: String): ZIO[Notion, NotionError, User]             = ZIO.service[Notion].flatMap(_.retrieveUser(userId))
+  def retrievePage(pageId: UUID): ZIO[Notion, NotionError, Page]             = ZIO.service[Notion].flatMap(_.retrievePage(pageId))
+  def retrieveDatabase(databaseId: UUID): ZIO[Notion, NotionError, Database] = ZIO.service[Notion].flatMap(_.retrieveDatabase(databaseId))
+  def retrieveUser(userId: UUID): ZIO[Notion, NotionError, User]             = ZIO.service[Notion].flatMap(_.retrieveUser(userId))
 
   def updatePage(patch: Page.Patch): ZIO[Notion, NotionError, Page] = ZIO.service[Notion].flatMap(_.updatePage(patch))
 
@@ -43,10 +45,10 @@ object Notion {
         )
         .flatMap(decodeJson[T])
 
-    override def retrievePage(pageId: String): IO[NotionError, Page] = decodeResponse[Page](notionClient.retrievePage(pageId))
-    override def retrieveDatabase(databaseId: String): IO[NotionError, Database] =
+    override def retrievePage(pageId: UUID): IO[NotionError, Page] = decodeResponse[Page](notionClient.retrievePage(pageId))
+    override def retrieveDatabase(databaseId: UUID): IO[NotionError, Database] =
       decodeResponse[Database](notionClient.retrieveDatabase(databaseId))
-    override def retrieveUser(userId: String): IO[NotionError, User] = decodeResponse[User](notionClient.retrieveUser(userId))
+    override def retrieveUser(userId: UUID): IO[NotionError, User] = decodeResponse[User](notionClient.retrieveUser(userId))
 
     override def updatePage(patch: Page.Patch): IO[NotionError, Page] = decodeResponse[Page](notionClient.updatePage(patch))
   }

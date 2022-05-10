@@ -13,6 +13,7 @@ import zio.notion.model.page.property.Property
 import scala.reflect.ClassTag
 
 import java.time.OffsetDateTime
+import java.util.UUID
 
 @ConfiguredJsonCodec
 final case class Page(
@@ -20,7 +21,7 @@ final case class Page(
     lastEditedTime: OffsetDateTime,
     createdBy:      UserId,
     lastEditedBy:   UserId,
-    id:             String,
+    id:             UUID,
     cover:          Option[Cover],
     icon:           Option[Icon],
     parent:         Parent,

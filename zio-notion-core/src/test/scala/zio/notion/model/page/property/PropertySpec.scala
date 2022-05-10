@@ -3,7 +3,6 @@ package zio.notion.model.page.property
 import io.circe.parser.decode
 
 import zio.Scope
-import zio.notion.Faker._
 import zio.notion.model.common.enumeration.RollupFunction.Count
 import zio.notion.model.page.property.Property.{Rollup, _}
 import zio.notion.model.page.property.data.RollupData
@@ -17,7 +16,7 @@ object PropertySpec extends ZIOSpecDefault {
         val json: String =
           s"""{
              |    "type": "rollup",
-             |    "id": "$fakeUUID",
+             |    "id": "abc",
              |    "rollup": { 
              |      "type": "number",
              |      "number": 42,
@@ -25,7 +24,7 @@ object PropertySpec extends ZIOSpecDefault {
              |    }
              |}""".stripMargin
 
-        val expected = Rollup(id = fakeUUID, rollup = RollupData.Number(Some(42d), Count))
+        val expected = Rollup(id = "abc", rollup = RollupData.Number(Some(42d), Count))
 
         assert(decode[Property](json))(isRight(equalTo(expected)))
       }
