@@ -4,6 +4,7 @@ import io.circe.{Encoder, Json}
 
 import zio.Clock
 import zio.notion.PropertyUpdater.{Setter, Transformation, UTransformation}
+import zio.notion.model.common.UserId
 import zio.notion.model.common.enumeration.Color
 import zio.notion.model.common.richtext.{Annotations, RichTextData}
 import zio.notion.model.magnolia.PatchEncoderDerivation
@@ -159,7 +160,7 @@ object PatchedProperty {
     def set(files: Seq[Link]): Setter[PatchedFiles] = Setter(PatchedFiles(files))
 
     def update(f: Seq[Link] => Seq[Link]): UTransformation[PatchedFiles] =
-      Transformation.succeed(files => files.copy(files = f(files.files)))
+      Transformation.succeed(property => property.copy(files = f(property.files)))
 
     def add(files: Seq[Link]): UTransformation[PatchedFiles] = update(_ ++ files)
 
@@ -231,6 +232,21 @@ object PatchedProperty {
     def color(color: Color): UTransformation[PatchedRichText] = annotate(_.copy(color = color))
 
     implicit val encoder: Encoder[PatchedRichText] = PatchEncoderDerivation.gen[PatchedRichText]
+  }
+
+  final case class PatchedPeople(people: Seq[UserId]) extends PatchedProperty
+
+  object PatchedPeople {
+    def set(people: Seq[UserId]): Setter[PatchedPeople] = Setter(PatchedPeople(people))
+
+    def update(f: Seq[UserId] => Seq[UserId]): UTransformation[PatchedPeople] =
+      Transformation.succeed(property => property.copy(people = f(property.people)))
+
+    def add(people: Seq[UserId]): UTransformation[PatchedPeople] = update(_ ++ people)
+
+    def add(people: UserId): UTransformation[PatchedPeople] = add(List(people))
+
+    implicit val encoder: Encoder[PatchedPeople] = PatchEncoderDerivation.gen[PatchedPeople]
   }
 
   implicit val encoder: Encoder[PatchedProperty] = PatchEncoderDerivation.gen[PatchedProperty]

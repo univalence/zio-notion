@@ -5,7 +5,7 @@ import io.circe.syntax.EncoderOps
 import zio.{Scope, UIO}
 import zio.notion.Faker._
 import zio.notion.PropertyUpdater._
-import zio.notion.model.common.{richtext, Url}
+import zio.notion.model.common.{richtext, Url, UserId}
 import zio.notion.model.common.enumeration.Color
 import zio.notion.model.common.richtext.RichTextData
 import zio.notion.model.page.patch.PatchedProperty._
@@ -28,7 +28,8 @@ object PatchedPropertySpec extends ZIOSpecDefault {
       specPatchedCheckbox,
       specPatchedFiles,
       specPatchedTitle,
-      specPatchedRichText
+      specPatchedRichText,
+      specPatchedPeople
     ) + specEncoding
 
   def specPatchedNumber: Spec[TestEnvironment with Scope, Any] = {
@@ -284,6 +285,22 @@ object PatchedPropertySpec extends ZIOSpecDefault {
     )
   }
 
+  def specPatchedPeople: Spec[TestEnvironment with Scope, Any] =
+    suite("Test patching people")(
+      test("We can set a list of people") {
+        val people: List[UserId] = List(UserId(fakeUUID))
+
+        val patch: FieldSetter[PatchedPeople] = PatchedPeople.set(people).onAll
+
+        assertTrue(patch.value.people == people)
+      },
+      test("We can set a new person") {
+        val patch: FieldUpdater[Nothing, PatchedPeople] = PatchedPeople.add(UserId(fakeUUID)).onAll
+
+        assertTrue(patch.transform(PatchedPeople(Seq.empty)).map(_.people) == Right(Seq(UserId(fakeUUID))))
+      }
+    )
+
   def specEncoding: Spec[TestEnvironment with Scope, Any] =
     suite("Test property encoding")(
       test("PatchedNumber encoding") {
@@ -446,6 +463,20 @@ object PatchedPropertySpec extends ZIOSpecDefault {
              |      "plain_text" : "This is a content",
              |      "href" : null,
              |      "type" : "text"
+             |    }
+             |  ]
+             |}""".stripMargin
+
+        assertTrue(printer.print(property.asJson) == expected)
+      },
+      test("PatchedPeople encoding") {
+        val property: PatchedPeople = PatchedPeople(List(UserId(fakeUUID)))
+
+        val expected: String =
+          s"""{
+             |  "people" : [
+             |    {
+             |      "id" : "$fakeUUID"
              |    }
              |  ]
              |}""".stripMargin
