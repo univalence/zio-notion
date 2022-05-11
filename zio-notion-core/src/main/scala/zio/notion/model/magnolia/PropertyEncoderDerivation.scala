@@ -7,13 +7,16 @@ import magnolia1._
 /**
  * A macro definition to deserialize:
  * https://developers.notion.com/reference/property-value-object#multi-select-property-values
+ * https://developers.notion.com/reference/post-database-query
  */
-object PatchEncoderDerivation {
+object PropertyEncoderDerivation {
   type Typeclass[T] = Encoder[T]
 
   def join[T](ctx: CaseClass[Encoder, T]): Encoder[T] =
     (value: T) =>
       ctx.parameters.length match {
+        case 0 =>
+          Json.obj((snakeCaseTransformation(ctx.typeName.short), Json.obj()))
         case 1 =>
           val parameter = ctx.parameters.head
           Json.obj((snakeCaseTransformation(parameter.label), parameter.typeclass.apply(parameter.dereference(value))))

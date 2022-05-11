@@ -4,7 +4,7 @@ import io.circe.{Encoder, Json}
 
 import zio.Clock
 import zio.notion.PropertyUpdater.{Setter, Transformation, UTransformation}
-import zio.notion.model.magnolia.PatchEncoderDerivation
+import zio.notion.model.magnolia.PropertyEncoderDerivation
 import zio.notion.model.page.property.Link
 
 import java.time.LocalDate
@@ -40,7 +40,7 @@ object PatchedProperty {
 
     def ceil: UTransformation[PatchedNumber] = update(Math.ceil)
 
-    implicit val encoder: Encoder[PatchedNumber] = PatchEncoderDerivation.gen[PatchedNumber]
+    implicit val encoder: Encoder[PatchedNumber] = PropertyEncoderDerivation.gen[PatchedNumber]
   }
 
   final case class PatchedUrl(url: String) extends PatchedProperty
@@ -48,7 +48,7 @@ object PatchedProperty {
   object PatchedUrl {
     def set(url: String): Setter[PatchedUrl] = Setter(PatchedUrl(url))
 
-    implicit val encoder: Encoder[PatchedUrl] = PatchEncoderDerivation.gen[PatchedUrl]
+    implicit val encoder: Encoder[PatchedUrl] = PropertyEncoderDerivation.gen[PatchedUrl]
   }
 
   final case class PatchedSelect(id: Option[String], name: Option[String]) extends PatchedProperty
@@ -60,7 +60,7 @@ object PatchedProperty {
 
     def setUsingName(name: String): Setter[PatchedSelect] = set(None, Some(name))
 
-    implicit val encoder: Encoder[PatchedSelect] = PatchEncoderDerivation.gen[PatchedSelect]
+    implicit val encoder: Encoder[PatchedSelect] = PropertyEncoderDerivation.gen[PatchedSelect]
   }
 
   final case class PatchedMultiSelect(multiSelect: List[PatchedSelect]) extends PatchedProperty
@@ -109,7 +109,7 @@ object PatchedProperty {
 
     def today: zio.UIO[Setter[PatchedDate]] = Clock.localDateTime.map(_.toLocalDate).map(startAt)
 
-    implicit val encoder: Encoder[PatchedDate] = PatchEncoderDerivation.gen[PatchedDate]
+    implicit val encoder: Encoder[PatchedDate] = PropertyEncoderDerivation.gen[PatchedDate]
   }
 
   final case class PatchedEmail(email: String) extends PatchedProperty
@@ -120,7 +120,7 @@ object PatchedProperty {
     def update(f: String => String): UTransformation[PatchedEmail] =
       Transformation.succeed(property => property.copy(email = f(property.email)))
 
-    implicit val encoder: Encoder[PatchedEmail] = PatchEncoderDerivation.gen[PatchedEmail]
+    implicit val encoder: Encoder[PatchedEmail] = PropertyEncoderDerivation.gen[PatchedEmail]
   }
 
   final case class PatchedPhoneNumber(phoneNumber: String) extends PatchedProperty
@@ -131,7 +131,7 @@ object PatchedProperty {
     def update(f: String => String): UTransformation[PatchedPhoneNumber] =
       Transformation.succeed(property => property.copy(phoneNumber = f(property.phoneNumber)))
 
-    implicit val encoder: Encoder[PatchedPhoneNumber] = PatchEncoderDerivation.gen[PatchedPhoneNumber]
+    implicit val encoder: Encoder[PatchedPhoneNumber] = PropertyEncoderDerivation.gen[PatchedPhoneNumber]
   }
 
   final case class PatchedCheckbox(checkbox: Boolean) extends PatchedProperty
@@ -148,7 +148,7 @@ object PatchedProperty {
 
     def reverse: UTransformation[PatchedCheckbox] = update(!_)
 
-    implicit val encoder: Encoder[PatchedCheckbox] = PatchEncoderDerivation.gen[PatchedCheckbox]
+    implicit val encoder: Encoder[PatchedCheckbox] = PropertyEncoderDerivation.gen[PatchedCheckbox]
   }
 
   final case class PatchedFiles(files: Seq[Link]) extends PatchedProperty
@@ -165,7 +165,7 @@ object PatchedProperty {
 
     def filter(predicate: Link => Boolean): UTransformation[PatchedFiles] = update(_.filter(predicate))
 
-    implicit val encoder: Encoder[PatchedFiles] = PatchEncoderDerivation.gen[PatchedFiles]
+    implicit val encoder: Encoder[PatchedFiles] = PropertyEncoderDerivation.gen[PatchedFiles]
   }
 
   final case class PatchedTitle(title: String) extends PatchedProperty
@@ -193,5 +193,5 @@ object PatchedProperty {
         )
   }
 
-  implicit val encoder: Encoder[PatchedProperty] = PatchEncoderDerivation.gen[PatchedProperty]
+  implicit val encoder: Encoder[PatchedProperty] = PropertyEncoderDerivation.gen[PatchedProperty]
 }

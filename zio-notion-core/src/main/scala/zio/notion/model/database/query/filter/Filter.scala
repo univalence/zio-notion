@@ -3,34 +3,19 @@ package zio.notion.model.database.query.filter
 import io.circe.{Encoder, Json}
 import io.circe.syntax.EncoderOps
 
-//{
-//  "and": [
-//    {
-//      "property": "Done",
-//      "checkbox": {
-//        "equals": true
-//      }
-//    },
-//    {
-//      "or": [
-//        {
-//          "property": "Tags",
-//          "contains": "A"
-//        },
-//        {
-//          "property": "Tags",
-//          "contains": "B"
-//        }
-//      ]
-//    }
-//  ]
-//}
+import zio.notion.model.database.query.filter.Filter.SubFilter
 
-//https://developers.notion.com/reference/post-database-query
-
-sealed trait Filter
+sealed trait Filter {
+  self =>
+  def or(subFilter: SubFilter): Filter = ???
+}
 
 object Filter {
+
+  def where(subFilter: SubFilter): SubFilter      = ???
+  def where(subFilter: PropertyFilter): SubFilter = ???
+  def where(filter: Filter): SubFilter            = ???
+
   final case class Or(or: List[SubFilter])            extends Filter
   final case class And(and: List[SubFilter])          extends Filter
   final case class PropFilter(filter: PropertyFilter) extends Filter
@@ -41,7 +26,11 @@ object Filter {
     case PropFilter(filter) => filter.asJson
   }
 
-  sealed trait SubFilter
+  sealed trait SubFilter {
+    self =>
+    def or(other: SubFilter): Filter.Or      = Filter.Or(List(self, other))
+    def or(other: PropertyFilter): Filter.Or = Filter.Or(List(self, SubFilter.PropFilter(other)))
+  }
 
   object SubFilter {
     final case class Or(or: List[PropertyFilter])       extends SubFilter
