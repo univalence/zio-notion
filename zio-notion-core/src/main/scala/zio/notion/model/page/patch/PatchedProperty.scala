@@ -4,6 +4,8 @@ import io.circe.{Encoder, Json}
 
 import zio.Clock
 import zio.notion.PropertyUpdater.{Setter, Transformation, UTransformation}
+import zio.notion.model.common.enumeration.Color
+import zio.notion.model.common.richtext.{Annotations, RichTextData}
 import zio.notion.model.magnolia.PatchEncoderDerivation
 import zio.notion.model.page.property.Link
 
@@ -191,6 +193,44 @@ object PatchedProperty {
               )
             )
         )
+  }
+
+  final case class PatchedRichText(richText: Seq[RichTextData]) extends PatchedProperty
+
+  object PatchedRichText {
+    def set(richText: List[RichTextData]): Setter[PatchedRichText] = Setter(PatchedRichText(richText))
+
+    def write(text: String, annotations: Annotations = Annotations.default): Setter[PatchedRichText] =
+      set(
+        List(
+          RichTextData.Text(
+            RichTextData.Text.TextData(text, None),
+            annotations,
+            text,
+            None
+          )
+        )
+      )
+
+    def update(f: Seq[RichTextData] => Seq[RichTextData]): UTransformation[PatchedRichText] =
+      Transformation.succeed(property => property.copy(richText = f(property.richText)))
+
+    def annotate(f: Annotations => Annotations): UTransformation[PatchedRichText] =
+      update(_.map {
+        case d: RichTextData.Text     => d.copy(annotations = f(d.annotations))
+        case d: RichTextData.Mention  => d.copy(annotations = f(d.annotations))
+        case d: RichTextData.Equation => d.copy(annotations = f(d.annotations))
+      })
+
+    def reset: UTransformation[PatchedRichText]               = annotate(_ => Annotations.default)
+    def bold: UTransformation[PatchedRichText]                = annotate(_.copy(bold = true))
+    def italic: UTransformation[PatchedRichText]              = annotate(_.copy(italic = true))
+    def strikethrough: UTransformation[PatchedRichText]       = annotate(_.copy(strikethrough = true))
+    def underline: UTransformation[PatchedRichText]           = annotate(_.copy(underline = true))
+    def code: UTransformation[PatchedRichText]                = annotate(_.copy(code = true))
+    def color(color: Color): UTransformation[PatchedRichText] = annotate(_.copy(color = color))
+
+    implicit val encoder: Encoder[PatchedRichText] = PatchEncoderDerivation.gen[PatchedRichText]
   }
 
   implicit val encoder: Encoder[PatchedProperty] = PatchEncoderDerivation.gen[PatchedProperty]
