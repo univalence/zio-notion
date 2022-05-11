@@ -20,13 +20,16 @@ sealed trait Notion {
   def retrieveDatabase(databaseId: String): IO[NotionError, Database]
   def retrieveUser(userId: String): IO[NotionError, User]
   def queryDatabase(databaseId: String): IO[NotionError, DatabaseQueryResponse]
+
+  def updatePage(patch: Page.Patch): IO[NotionError, Page]
 }
 
 object Notion {
-
   def retrievePage(pageId: String): ZIO[Notion, NotionError, Page]             = ZIO.service[Notion].flatMap(_.retrievePage(pageId))
   def retrieveDatabase(databaseId: String): ZIO[Notion, NotionError, Database] = ZIO.service[Notion].flatMap(_.retrieveDatabase(databaseId))
   def retrieveUser(userId: String): ZIO[Notion, NotionError, User]             = ZIO.service[Notion].flatMap(_.retrieveUser(userId))
+  // todo accessor method query db
+  def updatePage(patch: Page.Patch): ZIO[Notion, NotionError, Page] = ZIO.service[Notion].flatMap(_.updatePage(patch))
 
   val live: URLayer[NotionClient, Notion] = ZLayer(ZIO.service[NotionClient].map(LiveNotion))
 
@@ -41,10 +44,13 @@ object Notion {
         )
         .flatMap(decodeJson[T])
 
-    override def retrievePage(pageId: String): IO[NotionError, Page]             = decodeResponse[Page](notionClient.retrievePage(pageId))
-    override def retrieveDatabase(databaseId: String): IO[NotionError, Database] = decodeResponse[Database](notionClient.retrieveDatabase(databaseId))
-    override def retrieveUser(userId: String): IO[NotionError, User]             = decodeResponse[User](notionClient.retrieveUser(userId))
+    override def retrievePage(pageId: String): IO[NotionError, Page] = decodeResponse[Page](notionClient.retrievePage(pageId))
+    override def retrieveDatabase(databaseId: String): IO[NotionError, Database] =
+      decodeResponse[Database](notionClient.retrieveDatabase(databaseId))
+    override def retrieveUser(userId: String): IO[NotionError, User] = decodeResponse[User](notionClient.retrieveUser(userId))
     override def queryDatabase(databaseId: String): IO[NotionError, DatabaseQueryResponse] =
       decodeResponse[DatabaseQueryResponse](notionClient.retrieveUser(databaseId))
+    override def updatePage(patch: Page.Patch): IO[NotionError, Page] = decodeResponse[Page](notionClient.updatePage(patch))
+
   }
 }

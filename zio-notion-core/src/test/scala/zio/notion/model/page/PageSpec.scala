@@ -1,13 +1,21 @@
 package zio.notion.model.page
 
 import io.circe.parser.decode
+import io.circe.syntax.EncoderOps
 
-import zio.Scope
-import zio.test.{assert, Spec, TestEnvironment, ZIOSpecDefault}
+import zio.{Scope, ZIO}
+import zio.notion.Faker._
+import zio.notion.model.common._
+import zio.notion.model.common.Icon.Emoji
+import zio.notion.model.page.patch.PatchedProperty._
+import zio.notion.model.printer
+import zio.test._
 import zio.test.Assertion.isRight
 
 object PageSpec extends ZIOSpecDefault {
-  override def spec: Spec[TestEnvironment with Scope, Any] =
+  override def spec: Spec[TestEnvironment with Scope, Any] = serdeSpec + patchSpec
+
+  def serdeSpec: Spec[TestEnvironment with Scope, Any] =
     suite("Page serde suite")(
       test("We should be able to parse a page json") {
         val json: String =
@@ -147,6 +155,115 @@ object PageSpec extends ZIOSpecDefault {
             |}""".stripMargin
 
         assert(decode[Page](json))(isRight)
+      },
+      test("We should be able to encode an empty page patch") {
+        val patch = Page.Patch(fakePage)
+
+        val expected =
+          """{
+            |  
+            |}""".stripMargin
+
+        assertTrue(printer.print(patch.asJson) == expected)
+      }
+    )
+
+  def patchSpec: Spec[TestEnvironment with Scope, Any] =
+    suite("Patch application suite")(
+      test("We should be able to update one property") {
+        val patch = fakePage.patch.updateProperty(PatchedCheckbox.check.on("Checkbox"))
+
+        val expected =
+          """{
+            |  "properties" : {
+            |    "Checkbox" : {
+            |      "checkbox" : true
+            |    }
+            |  }
+            |}""".stripMargin
+
+        ZIO.fromEither(patch).map(p => assertTrue(printer.print(p.asJson) == expected))
+      },
+      test("We should be able to remove one property") {
+        val patch = fakePage.patch.removeProperty("Checkbox")
+
+        val expected =
+          """{
+            |  "properties" : {
+            |    "Checkbox" : null
+            |  }
+            |}""".stripMargin
+
+        assertTrue(printer.print(patch.asJson) == expected)
+      },
+      test("We should be able to remove an icon") {
+        val patch = fakePage.patch.removeIcon
+
+        val expected =
+          """{
+            |  "icon" : null
+            |}""".stripMargin
+
+        assertTrue(printer.print(patch.asJson) == expected)
+      },
+      test("We should be able to update an icon") {
+        val patch = fakePage.patch.updateIcon(Emoji(fakeEmoji))
+
+        val expected =
+          s"""{
+             |  "icon" : {
+             |    "emoji" : "$fakeEmoji",
+             |    "type" : "emoji"
+             |  }
+             |}""".stripMargin
+
+        assertTrue(printer.print(patch.asJson) == expected)
+      },
+      test("We should be able to remove a cover") {
+        val patch = fakePage.patch.removeCover
+
+        val expected =
+          """{
+            |  "cover" : null
+            |}""".stripMargin
+
+        assertTrue(printer.print(patch.asJson) == expected)
+      },
+      test("We should be able to update a cover") {
+        val patch = fakePage.patch.updateCover(Cover.External(Url(fakeUrl)))
+
+        val expected =
+          s"""{
+             |  "cover" : {
+             |    "external" : {
+             |      "url" : "$fakeUrl"
+             |    },
+             |    "type" : "external"
+             |  }
+             |}""".stripMargin
+
+        assertTrue(printer.print(patch.asJson) == expected)
+      },
+      test("We should be able to archive a page") {
+        val patch = fakePage.patch.unarchive
+
+        val expected =
+          """{
+            |  "archived" : false
+            |}""".stripMargin
+
+        assertTrue(printer.print(patch.asJson) == expected)
+      },
+      test("We should be able to chain patches") {
+        val patch = fakePage.patch.unarchive.removeIcon
+
+        val expected =
+          """{
+            |  "archived" : false,
+            |  "icon" : null
+            |}""".stripMargin
+
+        assertTrue(printer.print(patch.asJson) == expected)
       }
     )
 }

@@ -1,12 +1,12 @@
-package zio.notion.model.page.properties.data
+package zio.notion.model.page.property.data
 
 import io.circe.parser.decode
 
 import zio.Scope
 import zio.notion.Faker.{fakeName, fakeUUID}
 import zio.notion.model.common.enumeration.Color.Green
-import zio.notion.model.page.properties.data
-import zio.test.{assert, Spec, TestEnvironment, ZIOSpecDefault}
+import zio.notion.model.page.property.data
+import zio.test._
 import zio.test.Assertion.{equalTo, isRight}
 
 object SelectDataSpec extends ZIOSpecDefault {

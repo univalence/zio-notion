@@ -1,4 +1,4 @@
-package zio.notion.model.page.properties
+package zio.notion.model.page.property
 
 import io.circe.generic.extras._
 
