@@ -1,6 +1,8 @@
 package zio.notion.model.database.query.filter
 
-sealed trait PropertyFilter
+import io.circe.generic.extras.ConfiguredJsonCodec
+
+@ConfiguredJsonCodec sealed trait PropertyFilter
 sealed trait ExistencePropertyFilter       extends PropertyFilter
 sealed trait TextPropertyFilter            extends PropertyFilter
 sealed trait NumberPropertyFilter          extends PropertyFilter
@@ -15,7 +17,6 @@ sealed trait RollupSubFilterPropertyFilter extends PropertyFilter
 sealed trait RollupPropertyFilter          extends PropertyFilter
 
 object PropertyFilter {
-
   final case class Title(title: TextPropertyFilter, property: String)                   extends PropertyFilter
   final case class RichText(richText: TextPropertyFilter, property: String)             extends PropertyFilter
   final case class Number(number: NumberPropertyFilter, property: String)               extends PropertyFilter
