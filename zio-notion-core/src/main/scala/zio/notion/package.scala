@@ -42,4 +42,6 @@ package object notion {
       )
 
   implicit val patchableRichText: Patchable[RichText, PatchedRichText] = (input: RichText) => Some(PatchedRichText(input.richText))
+
+  implicit val patchablePeople: Patchable[People, PatchedPeople] = (input: People) => Some(PatchedPeople(input.people))
 }
