@@ -41,4 +41,5 @@ package object notion {
         )
       )
 
+  implicit val patchableRichText: Patchable[RichText, PatchedRichText] = (input: RichText) => Some(PatchedRichText(input.richText))
 }
