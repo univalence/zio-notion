@@ -32,7 +32,7 @@ import zio._
 object Main extends ZIOAppDefault {
 
   val sttpLayer: Layer[Throwable, SttpClient] = AsyncHttpClientZioBackend.layer()
-  val configuration: NotionConfiguration      = NotionConfiguration(bearer = "secret_tx3gYOBSeFlYJOV0QtQKmAfoYzXQ9XTAuPZRt9XGwYF")
+  val configuration: NotionConfiguration      = NotionConfiguration(bearer = "secret_dnjrnOCfZBOiKsITF8AFDNL5QwYYHF5t7Rysbl0Mfzd")
 
   def app: ZIO[Notion, NotionError, Unit] =
     for {
