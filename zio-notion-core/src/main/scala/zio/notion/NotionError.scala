@@ -23,8 +23,8 @@ object NotionError {
     override def humanize: String = error.getMessage
   }
 
-  final case class PropertyNotExist(propertyName: String, pageId: String) extends NotionError {
-    override def humanize: String = s"Property $propertyName doesn't exists for $pageId."
+  final case class PropertyNotExist(propertyName: String, id: String) extends NotionError {
+    override def humanize: String = s"Property $propertyName doesn't exists for $id."
   }
 
   final case class PropertyWrongType(propertyName: String, expectedType: String, foundType: String) extends NotionError {

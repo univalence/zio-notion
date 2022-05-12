@@ -201,16 +201,7 @@ object PatchedProperty {
     def set(richText: List[RichTextData]): Setter[PatchedRichText] = Setter(PatchedRichText(richText))
 
     def write(text: String, annotations: Annotations = Annotations.default): Setter[PatchedRichText] =
-      set(
-        List(
-          RichTextData.Text(
-            RichTextData.Text.TextData(text, None),
-            annotations,
-            text,
-            None
-          )
-        )
-      )
+      set(List(RichTextData.default(text, annotations)))
 
     def update(f: Seq[RichTextData] => Seq[RichTextData]): UTransformation[PatchedRichText] =
       Transformation.succeed(property => property.copy(richText = f(property.richText)))

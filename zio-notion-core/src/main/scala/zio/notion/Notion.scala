@@ -22,6 +22,7 @@ sealed trait Notion {
   def retrieveUser(userId: String): IO[NotionError, User]
 
   def updatePage(patch: Page.Patch): IO[NotionError, Page]
+  def updateDatabase(patch: Database.Patch): IO[NotionError, Database]
 }
 
 object Notion {
@@ -29,7 +30,8 @@ object Notion {
   def retrieveDatabase(databaseId: String): ZIO[Notion, NotionError, Database] = ZIO.service[Notion].flatMap(_.retrieveDatabase(databaseId))
   def retrieveUser(userId: String): ZIO[Notion, NotionError, User]             = ZIO.service[Notion].flatMap(_.retrieveUser(userId))
 
-  def updatePage(patch: Page.Patch): ZIO[Notion, NotionError, Page] = ZIO.service[Notion].flatMap(_.updatePage(patch))
+  def updatePage(patch: Page.Patch): ZIO[Notion, NotionError, Page]             = ZIO.service[Notion].flatMap(_.updatePage(patch))
+  def updateDatabase(patch: Database.Patch): ZIO[Notion, NotionError, Database] = ZIO.service[Notion].flatMap(_.updateDatabase(patch))
 
   val live: URLayer[NotionClient, Notion] = ZLayer(ZIO.service[NotionClient].map(LiveNotion))
 
@@ -42,5 +44,7 @@ object Notion {
     override def retrieveUser(userId: String): IO[NotionError, User] = decodeResponse[User](notionClient.retrieveUser(userId))
 
     override def updatePage(patch: Page.Patch): IO[NotionError, Page] = decodeResponse[Page](notionClient.updatePage(patch))
+    override def updateDatabase(patch: Database.Patch): IO[NotionError, Database] =
+      decodeResponse[Database](notionClient.updateDatabase(patch))
   }
 }

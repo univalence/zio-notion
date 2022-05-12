@@ -3,6 +3,7 @@ package zio.notion
 import zio._
 import zio.notion.Faker._
 import zio.notion.NotionClient.NotionResponse
+import zio.notion.model.database.Database
 import zio.notion.model.page.Page
 
 /** Notion client mock for test purpose */
@@ -321,7 +322,9 @@ final case class TestNotionClient() extends NotionClient {
                    |    }
                    |}""".stripMargin)
 
-  override def updatePage(patch: Page.Patch): IO[NotionError, NotionResponse] = ZIO.succeed(pagePayload(patch.page.id))
+  override def updatePage(patch: Page.Patch): IO[NotionError, NotionResponse] = retrievePage(patch.page.id)
+
+  override def updateDatabase(patch: Database.Patch): IO[NotionError, NotionResponse] = retrieveDatabase(patch.database.id)
 }
 
 object TestNotionClient {
