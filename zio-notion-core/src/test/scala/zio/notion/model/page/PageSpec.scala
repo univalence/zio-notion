@@ -3,7 +3,7 @@ package zio.notion.model.page
 import io.circe.parser.decode
 import io.circe.syntax.EncoderOps
 
-import zio.{Scope, ZIO}
+import zio.Scope
 import zio.notion.Faker._
 import zio.notion.model.common._
 import zio.notion.model.common.Icon.Emoji
@@ -169,9 +169,9 @@ object PageSpec extends ZIOSpecDefault {
     )
 
   def patchSpec: Spec[TestEnvironment with Scope, Any] =
-    suite("Patch application suite")(
+    suite("Page update suite")(
       test("We should be able to update one property") {
-        val patch = fakePage.patch.updateProperty(PatchedCheckbox.check.on("Checkbox"))
+        val maybePatch = fakePage.patch.updateProperty(PatchedCheckbox.check.on("Checkbox"))
 
         val expected =
           """{
@@ -182,7 +182,7 @@ object PageSpec extends ZIOSpecDefault {
             |  }
             |}""".stripMargin
 
-        ZIO.fromEither(patch).map(p => assertTrue(printer.print(p.asJson) == expected))
+        assertTrue(maybePatch.map(patch => printer.print(patch.asJson)) == Right(expected))
       },
       test("We should be able to remove one property") {
         val patch = fakePage.patch.removeProperty("Checkbox")
