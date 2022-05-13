@@ -67,78 +67,71 @@ object Page {
     )(implicit patchable: Patchable[I, O], tag: ClassTag[O], manifest: Manifest[I]): Either[E, Patch] = {
       val default: Either[E, Patch] = Right(self)
 
+      def updateProperties(
+          update: (String, Option[O]) => Either[E, (String, Option[O])],
+          predicate: String => Boolean
+      ): Either[E, Patch] = {
+        val maybeProperties: Iterable[Either[E, (String, Option[O])]] =
+          page.properties.collect {
+            case (key, property: I) if predicate(key) && manifest.runtimeClass.isInstance(property) =>
+              update(key, properties.getOrElse(key, patchable.patch(property)).map(_.asInstanceOf[O]))
+          }
+
+        maybeProperties.foldLeft(default)((acc, curr) =>
+          acc.flatMap(patch => curr.map(property => patch.copy(properties = patch.properties + property)))
+        )
+      }
+
+      def setProperties(value: O, predicate: String => Boolean): Either[E, Patch] =
+        updateProperties((key, _) => Right(key -> Some(value)), predicate)
+
+      def transformProperties(transform: O => Either[E, O], predicate: String => Boolean): Either[E, Patch] =
+        updateProperties(
+          (key, maybeInput) =>
+            maybeInput match {
+              case Some(input) => transform(input).map(key -> Some(_))
+              case None        => Left(PropertyIsEmpty(key))
+            },
+          predicate
+        )
+
+      def updateOneProperty(key: String, update: Option[O] => Either[E, O]): Either[E, Patch] =
+        page.properties.get(key) match {
+          case Some(property: I) if manifest.runtimeClass.isInstance(property) =>
+            update(
+              properties
+                .getOrElse(key, patchable.patch(property))
+                .map(_.asInstanceOf[O])
+            )
+              .map(value => copy(properties = properties + (key -> Some(value))))
+          case Some(property) =>
+            // We can't update the property because it doesn't have the good type
+            Left(PropertyWrongType(key, manifest.runtimeClass.getSimpleName, property.getClass.getSimpleName))
+          case None =>
+            // We can't update the property because it doesn't exist
+            Left(PropertyNotExist(key, page.id))
+        }
+
       updater match {
         case PropertyUpdater.FieldSetter(matcher, value) =>
           matcher match {
-            case FieldMatcher.All =>
-              val properties: Iterable[(String, Option[O])] =
-                page.properties.collect {
-                  case (key, property) if manifest.runtimeClass.isInstance(property) => key -> Some(value)
-                }
-
-              Right(properties.foldLeft(self)((acc, curr) => acc.copy(properties = acc.properties + curr)))
-            case FieldMatcher.Predicate(f) =>
-              val properties: Iterable[(String, Option[O])] =
-                page.properties.collect {
-                  case (key, property) if f(key) && manifest.runtimeClass.isInstance(property) => key -> Some(value)
-                }
-
-              Right(properties.foldLeft(self)((acc, curr) => acc.copy(properties = acc.properties + curr)))
-            case FieldMatcher.One(key) =>
-              page.properties.get(key) match {
-                case Some(property) if manifest.runtimeClass.isInstance(property) =>
-                  // We update it
-                  Right(copy(properties = properties + (key -> Some(value))))
-                case Some(property) =>
-                  // We can't update the property because it doesn't have the good type
-                  Left(PropertyWrongType(key, manifest.runtimeClass.getSimpleName, property.getClass.getSimpleName))
-                case None =>
-                  // We can't update the property because it doesn't exist
-                  Left(PropertyNotExist(key, page.id))
-              }
+            case FieldMatcher.All          => setProperties(value, _ => true)
+            case FieldMatcher.Predicate(f) => setProperties(value, f)
+            case FieldMatcher.One(key)     => updateOneProperty(key, _ => Right(value))
           }
         case PropertyUpdater.FieldUpdater(matcher, transform) =>
           matcher match {
-            case FieldMatcher.All =>
-              val maybeProperties: Iterable[Either[E, (String, Option[O])]] =
-                page.properties.collect {
-                  case (key, property: I) if manifest.runtimeClass.isInstance(property) =>
-                    properties.getOrElse(key, patchable.patch(property)) match {
-                      case Some(input) => transform(input.asInstanceOf[O]).map(key -> Some(_))
-                      case None        => Left(PropertyIsEmpty(key))
-                    }
-                }
-
-              maybeProperties.foldLeft(default)((acc, curr) =>
-                acc.flatMap(patch => curr.map(property => patch.copy(properties = patch.properties + property)))
-              )
-            case FieldMatcher.Predicate(f) =>
-              val maybeProperties: Iterable[Either[E, (String, Option[O])]] =
-                page.properties.collect {
-                  case (key, property: I) if f(key) && manifest.runtimeClass.isInstance(property) =>
-                    properties.getOrElse(key, patchable.patch(property)) match {
-                      case Some(input) => transform(input.asInstanceOf[O]).map(key -> Some(_))
-                      case None        => Left(PropertyIsEmpty(key))
-                    }
-                }
-
-              maybeProperties.foldLeft(default)((acc, curr) =>
-                acc.flatMap(patch => curr.map(property => patch.copy(properties = patch.properties + property)))
-              )
+            case FieldMatcher.All          => transformProperties(transform, _ => true)
+            case FieldMatcher.Predicate(f) => transformProperties(transform, f)
             case FieldMatcher.One(key) =>
-              page.properties.get(key) match {
-                case Some(property: I) if manifest.runtimeClass.isInstance(property) =>
-                  properties.getOrElse(key, patchable.patch(property)) match {
-                    case Some(input) => transform(input.asInstanceOf[O]).map(value => copy(properties = properties + (key -> Some(value))))
-                    case None        => Left(PropertyIsEmpty(key))
-                  }
-                case Some(property) =>
-                  // We can't update the property because it doesn't have the good type
-                  Left(PropertyWrongType(key, manifest.runtimeClass.getSimpleName, property.getClass.getSimpleName))
-                case None =>
-                  // We can't update the property because it doesn't exist
-                  Left(PropertyNotExist(key, page.id))
-              }
+              updateOneProperty(
+                key,
+                {
+                  case Some(input) => transform(input)
+                  // We can't update the property has no value
+                  case None => Left(PropertyIsEmpty(key))
+                }
+              )
           }
       }
     }
