@@ -1,8 +1,7 @@
 package zio.notion.model.database
 
-import io.circe.{Encoder, Json}
+import io.circe.Encoder
 import io.circe.generic.extras.ConfiguredJsonCodec
-import io.circe.syntax.EncoderOps
 
 import zio.notion.NotionError
 import zio.notion.NotionError.PropertyNotExist
@@ -12,6 +11,7 @@ import zio.notion.model.common.richtext.{Annotations, RichTextData}
 import zio.notion.model.database.description.PropertyDescription
 import zio.notion.model.database.patch.PatchedPropertyDescription
 import zio.notion.model.database.patch.PatchedPropertyDescription.PatchedPropertyDescriptionMatcher
+import zio.notion.model.magnolia.PatchEncoderDerivation
 
 import java.time.OffsetDateTime
 
@@ -89,14 +89,6 @@ object Database {
   object Patch {
     def apply(database: Database): Patch = Patch(database, None, Map.empty)
 
-    implicit val encoder: Encoder[Patch] =
-      (patch: Patch) => {
-        val title: Seq[(String, Json)] = patch.title.fold(List.empty[(String, Json)])(t => List("title" -> t.asJson))
-        val properties: Seq[(String, Json)] =
-          if (patch.properties.isEmpty) List.empty
-          else List(("properties", patch.properties.asJson))
-
-        Json.obj(title ++ properties: _*)
-      }
+    implicit val encoder: Encoder[Patch] = PatchEncoderDerivation.gen[Patch]
   }
 }

@@ -62,13 +62,7 @@ object PatchedPropertyDescription {
     final case class SelectOption(name: String, color: Option[BaseColor])
 
     object SelectOption {
-      implicit val encoder: Encoder[SelectOption] =
-        (option: SelectOption) => {
-          val name: Seq[(String, Json)] = List("name" -> Json.fromString(option.name))
-          val color                     = option.color.fold(List.empty[(String, Json)])(c => List("color" -> c.asJson))
-
-          Json.obj(name ++ color: _*)
-        }
+      implicit val encoder: Encoder[SelectOption] = NoDiscriminantNoNullEncoderDerivation.gen[SelectOption]
     }
 
     implicit val encoder: Encoder[PropertyType] = NoDiscriminantNoNullEncoderDerivation.gen[PropertyType]
@@ -78,9 +72,10 @@ object PatchedPropertyDescription {
     (patch: PatchedPropertyDescription) => {
       val name: Seq[(String, Json)] = patch.name.fold(List.empty[(String, Json)])(n => List("name" -> Json.fromString(n)))
       val propertyType =
-        patch.propertyType.fold(List.empty[(String, Json)])(p =>
-          List(snakeCaseTransformation(p.getClass.getSimpleName.split('$').head) -> p.asJson)
-        )
+        patch.propertyType.fold(List.empty[(String, Json)]) { p =>
+          val name = snakeCaseTransformation(p.getClass.getSimpleName.split('$').head)
+          List(name -> p.asJson)
+        }
 
       Json.obj(name ++ propertyType: _*)
     }

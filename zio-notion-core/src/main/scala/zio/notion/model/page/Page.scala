@@ -1,6 +1,6 @@
 package zio.notion.model.page
 
-import io.circe.{Encoder, Json}
+import io.circe.Encoder
 import io.circe.generic.extras.ConfiguredJsonCodec
 
 import zio.notion.{NotionError, Patchable, PropertyUpdater, Removable}
@@ -8,6 +8,7 @@ import zio.notion.NotionError._
 import zio.notion.PropertyUpdater.FieldMatcher
 import zio.notion.Removable.{Ignore, Keep, Remove}
 import zio.notion.model.common.{Cover, Icon, Parent, UserId}
+import zio.notion.model.magnolia.PatchEncoderDerivation
 import zio.notion.model.page.patch.PatchedProperty
 import zio.notion.model.page.property.Property
 
@@ -160,32 +161,6 @@ object Page {
   object Patch {
     def apply(page: Page): Patch = Patch(page, Map.empty, None, Ignore, Ignore)
 
-    /**
-     * The issue here is that the generated Json contains both optional
-     * and removable values. It means that a key/value pair should:
-     *   - appear if it is a patch
-     *   - be null if it is a remove
-     *   - disappear if it is an ignore
-     *
-     * By default we can ask Circe to either remove all nulls or to keep
-     * them but here we need both.
-     */
-    implicit val encoder: Encoder[Patch] =
-      (patch: Patch) => {
-        def removalEncoding[T: Encoder](key: String, value: Removable[T]): List[(String, Json)] =
-          value match {
-            case Ignore => List.empty
-            case v      => List((key, Encoder[Removable[T]].apply(v)))
-          }
-
-        val properties =
-          if (patch.properties.isEmpty) List.empty
-          else List(("properties", Encoder[Map[String, Option[PatchedProperty]]].apply(patch.properties)))
-        val archived = patch.archived.fold(List.empty[(String, Json)])(bool => List(("archived", Encoder[Boolean].apply(bool))))
-        val icon     = removalEncoding("icon", patch.icon)
-        val cover    = removalEncoding("cover", patch.cover)
-
-        Json.obj(properties ++ archived ++ icon ++ cover: _*)
-      }
+    implicit val encoder: Encoder[Patch] = PatchEncoderDerivation.gen[Patch]
   }
 }
