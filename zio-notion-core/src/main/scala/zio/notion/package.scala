@@ -1,6 +1,5 @@
 package zio
 
-import zio.notion.model.common.richtext.RichTextData
 import zio.notion.model.page.patch.PatchedProperty._
 import zio.notion.model.page.property.Property._
 
