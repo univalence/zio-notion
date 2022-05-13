@@ -20,8 +20,10 @@ object PropertyUpdater {
 
   trait Patch[E, P <: PatchedProperty]
 
-  trait Transformation[E, P <: PatchedProperty] extends Patch[E, P] {
+  trait Transformation[E, P <: PatchedProperty] extends Patch[E, P] { self =>
     def transform(property: P): Either[E, P]
+
+    def map(f: P => P): Transformation[E, P] = Transformation(p => transform(p).map(f))
 
     def andThen(next: Transformation[E, P]): Transformation[E, P] = date => transform(date).flatMap(curr => next.transform(curr))
 
@@ -41,6 +43,8 @@ object PropertyUpdater {
   trait Setter[P <: PatchedProperty] extends Patch[Nothing, P] {
     protected def build(): P
     final def value: P = build()
+
+    def map(f: P => P): Setter[P] = Setter(f(value))
 
     final def on(fieldName: String): FieldSetter[P] = FieldSetter(FieldMatcher.One(fieldName), value)
 
