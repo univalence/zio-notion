@@ -36,7 +36,7 @@ final case class Database(
 object Database {
   final case class Patch(
       database:   Database,
-      title:      Option[List[RichTextData.Text]],
+      title:      Option[Seq[RichTextData]],
       properties: Map[String, Option[PatchedPropertyDescription]]
   ) { self =>
     def updateProperty(
@@ -79,11 +79,11 @@ object Database {
         case None    => Left(PropertyNotExist(key, database.id))
       }
 
-    def updateTitle(f: List[RichTextData.Text] => List[RichTextData.Text]): Patch = copy(title = Some(f(title.getOrElse(database.title))))
+    def updateTitle(f: Seq[RichTextData] => Seq[RichTextData]): Patch = copy(title = Some(f(title.getOrElse(database.title))))
 
-    def rename(text: List[RichTextData.Text]): Patch = updateTitle(_ => text)
+    def rename(text: Seq[RichTextData.Text]): Patch = updateTitle(_ => text)
 
-    def rename(text: String): Patch = rename(List(RichTextData.default(text, Annotations.default)))
+    def rename(text: String): Patch = rename(Seq(RichTextData.default(text, Annotations.default)))
   }
 
   object Patch {

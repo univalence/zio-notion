@@ -1,6 +1,5 @@
 package zio
 
-import zio.notion.model.common.richtext.RichTextData
 import zio.notion.model.page.patch.PatchedProperty._
 import zio.notion.model.page.property.Property._
 
@@ -27,19 +26,7 @@ package object notion {
 
   implicit val patchableFiles: Patchable[Files, PatchedFiles] = (input: Files) => Some(PatchedFiles(input.files))
 
-  implicit val patchableTitle: Patchable[Title, PatchedTitle] =
-    (input: Title) =>
-      Some(
-        PatchedTitle(
-          input.title
-            .map {
-              case RichTextData.Text(_, _, plainText, _)     => plainText
-              case RichTextData.Mention(_, _, plainText, _)  => plainText
-              case RichTextData.Equation(_, _, plainText, _) => plainText
-            }
-            .reduce(_ + " " + _)
-        )
-      )
+  implicit val patchableTitle: Patchable[Title, PatchedTitle] = (input: Title) => Some(PatchedTitle(input.title))
 
   implicit val patchableRichText: Patchable[RichText, PatchedRichText] = (input: RichText) => Some(PatchedRichText(input.richText))
 

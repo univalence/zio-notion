@@ -280,7 +280,8 @@ object DatabaseSpec extends ZIOSpecDefault {
             |        "color" : "default"
             |      },
             |      "plain_text" : "My database",
-            |      "href" : null
+            |      "href" : null,
+            |      "type" : "text"
             |    }
             |  ]
             |}""".stripMargin
