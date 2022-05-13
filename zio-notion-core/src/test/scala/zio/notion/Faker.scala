@@ -1,7 +1,5 @@
 package zio.notion
 
-import io.circe.JsonObject
-
 import zio.notion.Faker.FakeProperty.{fakeCheckbox, fakeTitle}
 import zio.notion.model.common.{Parent, UserId}
 import zio.notion.model.common.richtext.{Annotations, RichTextData}
@@ -71,7 +69,7 @@ object Faker {
       icon           = None,
       parent         = Parent.Workspace,
       archived       = false,
-      properties     = Map("Test" -> PropertyDescription.CreatedTime("id", "Test", JsonObject())),
+      properties     = Map("Test" -> PropertyDescription.CreatedTime("id", "Test")),
       url            = fakeUrl
     )
 
