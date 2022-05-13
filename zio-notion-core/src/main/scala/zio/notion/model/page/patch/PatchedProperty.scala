@@ -7,7 +7,7 @@ import zio.notion.PropertyUpdater.{Setter, Transformation, UTransformation}
 import zio.notion.model.common.UserId
 import zio.notion.model.common.enumeration.Color
 import zio.notion.model.common.richtext.{Annotations, RichTextData}
-import zio.notion.model.magnolia.PatchEncoderDerivation
+import zio.notion.model.magnolia.{NoDiscriminantNoNullEncoderDerivation, PatchedPropertyEncoderDerivation}
 import zio.notion.model.page.property.Link
 
 import java.time.LocalDate
@@ -42,7 +42,7 @@ object PatchedProperty {
 
     def ceil: UTransformation[PatchedNumber] = update(Math.ceil)
 
-    implicit val encoder: Encoder[PatchedNumber] = PatchEncoderDerivation.gen[PatchedNumber]
+    implicit val encoder: Encoder[PatchedNumber] = PatchedPropertyEncoderDerivation.gen[PatchedNumber]
   }
 
   final case class PatchedUrl(url: String) extends PatchedProperty
@@ -50,7 +50,7 @@ object PatchedProperty {
   object PatchedUrl {
     def set(url: String): Setter[PatchedUrl] = Setter(PatchedUrl(url))
 
-    implicit val encoder: Encoder[PatchedUrl] = PatchEncoderDerivation.gen[PatchedUrl]
+    implicit val encoder: Encoder[PatchedUrl] = PatchedPropertyEncoderDerivation.gen[PatchedUrl]
   }
 
   final case class PatchedSelect(id: Option[String], name: Option[String]) extends PatchedProperty
@@ -62,7 +62,7 @@ object PatchedProperty {
 
     def setUsingName(name: String): Setter[PatchedSelect] = set(None, Some(name))
 
-    implicit val encoder: Encoder[PatchedSelect] = PatchEncoderDerivation.gen[PatchedSelect]
+    implicit val encoder: Encoder[PatchedSelect] = PatchedPropertyEncoderDerivation.gen[PatchedSelect]
   }
 
   final case class PatchedMultiSelect(multiSelect: List[PatchedSelect]) extends PatchedProperty
@@ -82,16 +82,10 @@ object PatchedProperty {
     def addUsingName(name: String): UTransformation[PatchedMultiSelect] = update(_ :+ PatchedSelect(None, Some(name)))
 
     implicit val encoder: Encoder[PatchedMultiSelect] =
-      (property: PatchedMultiSelect) =>
-        Json.obj(
-          "multi_select" -> Json.arr(
-            property.multiSelect.map { select =>
-              val name = select.name.fold(List.empty[(String, Json)])(v => List("name" -> Json.fromString(v)))
-              val id   = select.id.fold(List.empty[(String, Json)])(v => List("id" -> Json.fromString(v)))
-              Json.obj(name ++ id: _*)
-            }: _*
-          )
-        )
+      (property: PatchedMultiSelect) => {
+        val encodedMultiSelect = property.multiSelect.map(NoDiscriminantNoNullEncoderDerivation.gen[PatchedSelect].apply)
+        Json.obj("multi_select" -> Json.arr(encodedMultiSelect: _*))
+      }
   }
 
   final case class PatchedDate(start: LocalDate, end: Option[LocalDate], timeZone: Option[String]) extends PatchedProperty
@@ -111,7 +105,7 @@ object PatchedProperty {
 
     def today: zio.UIO[Setter[PatchedDate]] = Clock.localDateTime.map(_.toLocalDate).map(startAt)
 
-    implicit val encoder: Encoder[PatchedDate] = PatchEncoderDerivation.gen[PatchedDate]
+    implicit val encoder: Encoder[PatchedDate] = PatchedPropertyEncoderDerivation.gen[PatchedDate]
   }
 
   final case class PatchedEmail(email: String) extends PatchedProperty
@@ -122,7 +116,7 @@ object PatchedProperty {
     def update(f: String => String): UTransformation[PatchedEmail] =
       Transformation.succeed(property => property.copy(email = f(property.email)))
 
-    implicit val encoder: Encoder[PatchedEmail] = PatchEncoderDerivation.gen[PatchedEmail]
+    implicit val encoder: Encoder[PatchedEmail] = PatchedPropertyEncoderDerivation.gen[PatchedEmail]
   }
 
   final case class PatchedPhoneNumber(phoneNumber: String) extends PatchedProperty
@@ -133,7 +127,7 @@ object PatchedProperty {
     def update(f: String => String): UTransformation[PatchedPhoneNumber] =
       Transformation.succeed(property => property.copy(phoneNumber = f(property.phoneNumber)))
 
-    implicit val encoder: Encoder[PatchedPhoneNumber] = PatchEncoderDerivation.gen[PatchedPhoneNumber]
+    implicit val encoder: Encoder[PatchedPhoneNumber] = PatchedPropertyEncoderDerivation.gen[PatchedPhoneNumber]
   }
 
   final case class PatchedCheckbox(checkbox: Boolean) extends PatchedProperty
@@ -150,7 +144,7 @@ object PatchedProperty {
 
     def reverse: UTransformation[PatchedCheckbox] = update(!_)
 
-    implicit val encoder: Encoder[PatchedCheckbox] = PatchEncoderDerivation.gen[PatchedCheckbox]
+    implicit val encoder: Encoder[PatchedCheckbox] = PatchedPropertyEncoderDerivation.gen[PatchedCheckbox]
   }
 
   final case class PatchedFiles(files: Seq[Link]) extends PatchedProperty
@@ -167,7 +161,7 @@ object PatchedProperty {
 
     def filter(predicate: Link => Boolean): UTransformation[PatchedFiles] = update(_.filter(predicate))
 
-    implicit val encoder: Encoder[PatchedFiles] = PatchEncoderDerivation.gen[PatchedFiles]
+    implicit val encoder: Encoder[PatchedFiles] = PatchedPropertyEncoderDerivation.gen[PatchedFiles]
   }
 
   final case class PatchedTitle(title: String) extends PatchedProperty
@@ -221,7 +215,7 @@ object PatchedProperty {
     def code: UTransformation[PatchedRichText]                = annotate(_.copy(code = true))
     def color(color: Color): UTransformation[PatchedRichText] = annotate(_.copy(color = color))
 
-    implicit val encoder: Encoder[PatchedRichText] = PatchEncoderDerivation.gen[PatchedRichText]
+    implicit val encoder: Encoder[PatchedRichText] = PatchedPropertyEncoderDerivation.gen[PatchedRichText]
   }
 
   final case class PatchedPeople(people: Seq[UserId]) extends PatchedProperty
@@ -236,8 +230,8 @@ object PatchedProperty {
 
     def add(people: UserId): UTransformation[PatchedPeople] = add(List(people))
 
-    implicit val encoder: Encoder[PatchedPeople] = PatchEncoderDerivation.gen[PatchedPeople]
+    implicit val encoder: Encoder[PatchedPeople] = PatchedPropertyEncoderDerivation.gen[PatchedPeople]
   }
 
-  implicit val encoder: Encoder[PatchedProperty] = PatchEncoderDerivation.gen[PatchedProperty]
+  implicit val encoder: Encoder[PatchedProperty] = PatchedPropertyEncoderDerivation.gen[PatchedProperty]
 }

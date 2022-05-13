@@ -7,7 +7,7 @@ import magnolia1._
 /**
  * A macro encoder that ignores both null values and discriminant.
  *
- * Example:
+ * __Example:__
  * {{{
  * sealed trait Foo
  * case class Bar(foo: Int, bar: Option[Int]) extends Foo
@@ -18,9 +18,7 @@ import magnolia1._
  * val bar = Bar(1, None)
  * }}}
  */
-object NoDiscriminantNoNullEncoderDerivation {
-  type Typeclass[T] = Encoder[T]
-
+object NoDiscriminantNoNullEncoderDerivation extends EncoderDerivation {
   def join[T](ctx: CaseClass[Encoder, T]): Encoder[T] =
     (value: T) => {
       val values =
@@ -30,12 +28,4 @@ object NoDiscriminantNoNullEncoderDerivation {
 
       Json.obj(values: _*)
     }
-
-  def split[T](ctx: SealedTrait[Encoder, T]): Encoder[T] =
-    (value: T) =>
-      ctx.split(value) { sub =>
-        sub.typeclass.apply(sub.cast(value))
-      }
-
-  implicit def gen[T]: Encoder[T] = macro Magnolia.gen[T]
 }
