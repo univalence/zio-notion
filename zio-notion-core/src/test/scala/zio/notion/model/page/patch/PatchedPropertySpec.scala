@@ -238,12 +238,14 @@ object PatchedPropertySpec extends ZIOSpecDefault {
       test("We can set a new title") {
         val patch: FieldSetter[PatchedTitle] = PatchedTitle.set("Title").onAll
 
-        assertTrue(patch.value.title == "Title")
+        assertTrue(patch.value.title.head.asInstanceOf[RichTextData.Text].plainText == "Title")
       },
       test("We can capitalize a title") {
         val patch: FieldUpdater[Nothing, PatchedTitle] = PatchedTitle.capitalize.onAll
 
-        assertTrue(patch.transform(PatchedTitle("title")).map(_.title) == Right("Title"))
+        val source = PatchedTitle(List(RichTextData.default("title", richtext.Annotations.default)))
+
+        assertTrue(patch.transform(source).map(_.title.head.asInstanceOf[RichTextData.Text].plainText) == Right("Title"))
       }
     )
 
@@ -415,16 +417,27 @@ object PatchedPropertySpec extends ZIOSpecDefault {
         assertTrue(printer.print(property.asJson) == expected)
       },
       test("PatchedTitle encoding") {
-        val property: PatchedTitle = PatchedTitle("Title")
+        val property: PatchedTitle = PatchedTitle(List(RichTextData.default("Title", richtext.Annotations.default)))
 
         val expected: String =
           s"""{
              |  "title" : [
              |    {
-             |      "type" : "text",
              |      "text" : {
-             |        "content" : "Title"
-             |      }
+             |        "content" : "Title",
+             |        "link" : null
+             |      },
+             |      "annotations" : {
+             |        "bold" : false,
+             |        "italic" : false,
+             |        "strikethrough" : false,
+             |        "underline" : false,
+             |        "code" : false,
+             |        "color" : "default"
+             |      },
+             |      "plain_text" : "Title",
+             |      "href" : null,
+             |      "type" : "text"
              |    }
              |  ]
              |}""".stripMargin

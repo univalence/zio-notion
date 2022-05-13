@@ -164,29 +164,23 @@ object PatchedProperty {
     implicit val encoder: Encoder[PatchedFiles] = PatchedPropertyEncoderDerivation.gen[PatchedFiles]
   }
 
-  final case class PatchedTitle(title: String) extends PatchedProperty
+  final case class PatchedTitle(title: Seq[RichTextData]) extends PatchedProperty
 
   object PatchedTitle {
-    def set(title: String): Setter[PatchedTitle] = Setter(PatchedTitle(title))
+    def set(title: Seq[RichTextData.Text]): Setter[PatchedTitle] = Setter(PatchedTitle(title))
 
-    def update(f: String => String): UTransformation[PatchedTitle] =
+    def set(title: String): Setter[PatchedTitle] = set(Seq(RichTextData.default(title, Annotations.default)))
+
+    def update(f: Seq[RichTextData] => Seq[RichTextData]): UTransformation[PatchedTitle] =
       Transformation.succeed(property => property.copy(title = f(property.title)))
 
-    def capitalize: UTransformation[PatchedTitle] = update(_.capitalize)
+    def capitalize: UTransformation[PatchedTitle] =
+      update(_.map {
+        case d: RichTextData.Text => d.copy(text = d.text.copy(content = d.text.content.capitalize), plainText = d.plainText.capitalize)
+        case d                    => d
+      })
 
-    implicit val encoder: Encoder[PatchedTitle] =
-      (property: PatchedTitle) =>
-        Json.obj(
-          "title" ->
-            Json.arr(
-              Json.obj(
-                "type" -> Json.fromString("text"),
-                "text" -> Json.obj(
-                  "content" -> Json.fromString(property.title)
-                )
-              )
-            )
-        )
+    implicit val encoder: Encoder[PatchedTitle] = PatchedPropertyEncoderDerivation.gen[PatchedTitle]
   }
 
   final case class PatchedRichText(richText: Seq[RichTextData]) extends PatchedProperty
