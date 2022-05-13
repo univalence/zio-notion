@@ -68,8 +68,8 @@ object Page {
       val default: Either[E, Patch] = Right(self)
 
       def updateProperties(
-          update: (String, Option[O]) => Either[E, (String, Option[O])],
-          predicate: String => Boolean
+          predicate: String => Boolean,
+          update: (String, Option[O]) => Either[E, (String, Option[O])]
       ): Either[E, Patch] = {
         val maybeProperties: Iterable[Either[E, (String, Option[O])]] =
           page.properties.collect {
@@ -82,17 +82,17 @@ object Page {
         )
       }
 
-      def setProperties(value: O, predicate: String => Boolean): Either[E, Patch] =
-        updateProperties((key, _) => Right(key -> Some(value)), predicate)
+      def setProperties(predicate: String => Boolean, value: O): Either[E, Patch] =
+        updateProperties(predicate, (key, _) => Right(key -> Some(value)))
 
-      def transformProperties(transform: O => Either[E, O], predicate: String => Boolean): Either[E, Patch] =
+      def transformProperties(predicate: String => Boolean, transform: O => Either[E, O]): Either[E, Patch] =
         updateProperties(
+          predicate,
           (key, maybeInput) =>
             maybeInput match {
               case Some(input) => transform(input).map(key -> Some(_))
               case None        => Left(PropertyIsEmpty(key))
-            },
-          predicate
+            }
         )
 
       def updateOneProperty(key: String, update: Option[O] => Either[E, O]): Either[E, Patch] =
@@ -115,14 +115,14 @@ object Page {
       updater match {
         case PropertyUpdater.FieldSetter(matcher, value) =>
           matcher match {
-            case FieldMatcher.All          => setProperties(value, _ => true)
-            case FieldMatcher.Predicate(f) => setProperties(value, f)
+            case FieldMatcher.All          => setProperties(_ => true, value)
+            case FieldMatcher.Predicate(f) => setProperties(f, value)
             case FieldMatcher.One(key)     => updateOneProperty(key, _ => Right(value))
           }
         case PropertyUpdater.FieldUpdater(matcher, transform) =>
           matcher match {
-            case FieldMatcher.All          => transformProperties(transform, _ => true)
-            case FieldMatcher.Predicate(f) => transformProperties(transform, f)
+            case FieldMatcher.All          => transformProperties(_ => true, transform)
+            case FieldMatcher.Predicate(f) => transformProperties(f, transform)
             case FieldMatcher.One(key) =>
               updateOneProperty(
                 key,
