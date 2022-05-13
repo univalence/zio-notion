@@ -103,8 +103,8 @@ object Page {
               val maybeProperties: Iterable[Either[E, (String, Option[O])]] =
                 page.properties.collect {
                   case (key, property: I) if manifest.runtimeClass.isInstance(property) =>
-                    patchable.patch(property) match {
-                      case Some(input) => transform(input).map(key -> Some(_))
+                    properties.getOrElse(key, patchable.patch(property)) match {
+                      case Some(input) => transform(input.asInstanceOf[O]).map(key -> Some(_))
                       case None        => Left(PropertyIsEmpty(key))
                     }
                 }
@@ -116,8 +116,8 @@ object Page {
               val maybeProperties: Iterable[Either[E, (String, Option[O])]] =
                 page.properties.collect {
                   case (key, property: I) if f(key) && manifest.runtimeClass.isInstance(property) =>
-                    patchable.patch(property) match {
-                      case Some(input) => transform(input).map(key -> Some(_))
+                    properties.getOrElse(key, patchable.patch(property)) match {
+                      case Some(input) => transform(input.asInstanceOf[O]).map(key -> Some(_))
                       case None        => Left(PropertyIsEmpty(key))
                     }
                 }
@@ -128,8 +128,8 @@ object Page {
             case FieldMatcher.One(key) =>
               page.properties.get(key) match {
                 case Some(property: I) if manifest.runtimeClass.isInstance(property) =>
-                  patchable.patch(property) match {
-                    case Some(input) => transform(input).map(value => copy(properties = properties + (key -> Some(value))))
+                  properties.getOrElse(key, patchable.patch(property)) match {
+                    case Some(input) => transform(input.asInstanceOf[O]).map(value => copy(properties = properties + (key -> Some(value))))
                     case None        => Left(PropertyIsEmpty(key))
                   }
                 case Some(property) =>

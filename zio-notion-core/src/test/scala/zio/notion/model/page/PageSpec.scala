@@ -264,6 +264,24 @@ object PageSpec extends ZIOSpecDefault {
             |}""".stripMargin
 
         assertTrue(printer.print(patch.asJson) == expected)
+      },
+      test("Updating a property twice should apply the second update on the first one") {
+        val maybePatch =
+          for {
+            p1 <- fakePage.patch.updateProperty(PatchedCheckbox.check.on("Checkbox"))
+            p2 <- p1.updateProperty(PatchedCheckbox.reverse.onAll)
+          } yield p2
+
+        val expected =
+          """{
+            |  "properties" : {
+            |    "Checkbox" : {
+            |      "checkbox" : false
+            |    }
+            |  }
+            |}""".stripMargin
+
+        assertTrue(maybePatch.map(patch => printer.print(patch.asJson)) == Right(expected))
       }
     )
 }
