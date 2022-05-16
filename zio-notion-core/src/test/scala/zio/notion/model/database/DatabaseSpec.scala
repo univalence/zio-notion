@@ -7,7 +7,7 @@ import zio.Scope
 import zio.notion.Faker.{fakeDatabase, fakeUUID}
 import zio.notion.NotionError.PropertyNotExist
 import zio.notion.model.database.patch.PatchedPropertyDescription
-import zio.notion.model.database.patch.PatchedPropertyDescription.PropertyType
+import zio.notion.model.database.patch.implicits._
 import zio.notion.model.printer
 import zio.test.{assert, assertTrue, Spec, TestEnvironment, ZIOSpecDefault}
 import zio.test.Assertion.isRight
@@ -189,7 +189,13 @@ object DatabaseSpec extends ZIOSpecDefault {
   def patchSpec: Spec[TestEnvironment with Scope, Any] =
     suite("Database update suite")(
       test("We should be able to update one property") {
-        val patch = fakeDatabase.patch.updateProperty(PatchedPropertyDescription.rename("Date").cast(PropertyType.Date).on("Test"))
+        val patch =
+          fakeDatabase.patch.updateProperty(
+            PatchedPropertyDescription
+              .rename("Date")
+              .as(date)
+              .on("Test")
+          )
 
         val expected =
           """{
@@ -206,7 +212,12 @@ object DatabaseSpec extends ZIOSpecDefault {
         assertTrue(printer.print(patch.asJson) == expected)
       },
       test("We should be able to create a new property description") {
-        val patch = fakeDatabase.patch.updateProperty(PatchedPropertyDescription.cast(PropertyType.Date).on("New field"))
+        val patch =
+          fakeDatabase.patch.updateProperty(
+            PatchedPropertyDescription
+              .as(date)
+              .on("New field")
+          )
 
         val expected =
           """{
@@ -226,7 +237,7 @@ object DatabaseSpec extends ZIOSpecDefault {
           fakeDatabase.patch.updateProperty(
             PatchedPropertyDescription
               .rename("Date")
-              .cast(PropertyType.Date)
+              .as(date)
               .on("New field")
           )
 

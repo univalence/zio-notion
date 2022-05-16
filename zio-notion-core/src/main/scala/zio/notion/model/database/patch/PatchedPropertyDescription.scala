@@ -13,7 +13,7 @@ import zio.notion.model.magnolia.NoDiscriminantNoNullEncoderDerivation
 final case class PatchedPropertyDescription(name: Option[String], propertyType: Option[PropertyType]) { self =>
   def rename(name: String): PatchedPropertyDescription = copy(name = Some(name))
 
-  def cast(propertyType: PropertyType): PatchedPropertyDescription = copy(propertyType = Some(propertyType))
+  def as(propertyType: PropertyType): PatchedPropertyDescription = copy(propertyType = Some(propertyType))
 
   def on(fieldName: String): PatchedPropertyDescriptionMatcher = PatchedPropertyDescriptionMatcher(FieldMatcher.One(fieldName), self)
 
@@ -26,27 +26,27 @@ final case class PatchedPropertyDescription(name: Option[String], propertyType: 
 object PatchedPropertyDescription {
   def rename(name: String): PatchedPropertyDescription = PatchedPropertyDescription(name = Some(name), None)
 
-  def cast(propertyType: PropertyType): PatchedPropertyDescription = PatchedPropertyDescription(None, propertyType = Some(propertyType))
+  def as(propertyType: PropertyType): PatchedPropertyDescription = PatchedPropertyDescription(None, propertyType = Some(propertyType))
 
   final case class PatchedPropertyDescriptionMatcher(matcher: FieldMatcher, description: PatchedPropertyDescription)
 
   sealed trait PropertyType
 
   object PropertyType {
-    final case object Title                                   extends PropertyType
-    final case object RichText                                extends PropertyType
-    final case class Number(format: NumberFormat)             extends PropertyType
-    final case class Select(options: List[SelectOption])      extends PropertyType
-    final case class MultiSelect(options: List[SelectOption]) extends PropertyType
-    final case object Date                                    extends PropertyType
-    final case object People                                  extends PropertyType
-    final case object Files                                   extends PropertyType
-    final case object Checkbox                                extends PropertyType
-    final case object Url                                     extends PropertyType
-    final case object Email                                   extends PropertyType
-    final case object PhoneNumber                             extends PropertyType
-    final case class Formula(expression: String)              extends PropertyType
-    final case class Relation(databaseId: String)             extends PropertyType
+    final case object Title                                  extends PropertyType
+    final case object RichText                               extends PropertyType
+    final case class Number(format: NumberFormat)            extends PropertyType
+    final case class Select(options: Seq[SelectOption])      extends PropertyType
+    final case class MultiSelect(options: Seq[SelectOption]) extends PropertyType
+    final case object Date                                   extends PropertyType
+    final case object People                                 extends PropertyType
+    final case object Files                                  extends PropertyType
+    final case object Checkbox                               extends PropertyType
+    final case object Url                                    extends PropertyType
+    final case object Email                                  extends PropertyType
+    final case object PhoneNumber                            extends PropertyType
+    final case class Formula(expression: String)             extends PropertyType
+    final case class Relation(databaseId: String)            extends PropertyType
     final case class Rollup(
         rollupPropertyName:   Option[String],
         relationPropertyName: Option[String],
