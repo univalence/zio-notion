@@ -3,9 +3,7 @@ package zio.notion.model.database.patch
 import io.circe.syntax.EncoderOps
 
 import zio.Scope
-import zio.notion.model.common.enumeration.Color
-import zio.notion.model.database.patch.PatchedPropertyDescription.PropertyType
-import zio.notion.model.database.patch.PatchedPropertyDescription.PropertyType.SelectOption
+import zio.notion.model.database.patch.implicits._
 import zio.notion.model.printer
 import zio.test._
 
@@ -16,7 +14,7 @@ object PatchedPropertyDescriptionSpec extends ZIOSpecDefault {
         val description: PatchedPropertyDescription =
           PatchedPropertyDescription
             .rename("Test")
-            .cast(PropertyType.MultiSelect(List(SelectOption("test", Some(Color.Blue)), SelectOption("test2", None))))
+            .as(multiSelect("test".blue, "test2"))
 
         val expected: String =
           """{

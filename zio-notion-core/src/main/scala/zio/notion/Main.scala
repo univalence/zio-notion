@@ -46,7 +46,7 @@ object Main extends ZIOAppDefault {
       patch =
         database.patch.updateProperty(
           PatchedPropertyDescription
-            .cast(PropertyType.Select(List(SelectOption("test", Some(Color.Blue)), SelectOption("test2", None))))
+            .as(PropertyType.Select(List(SelectOption("test", Some(Color.Blue)), SelectOption("test2", None))))
             .onAll
         )
       _ <- Console.printLine(database.url).orDie
