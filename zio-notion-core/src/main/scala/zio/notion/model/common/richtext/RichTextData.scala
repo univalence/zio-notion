@@ -47,4 +47,7 @@ object RichTextData {
     @ConfiguredJsonCodec final case class Expression(expression: String)
   }
 
+  def default(text: String, annotations: Annotations): Text =
+    RichTextData.Text(RichTextData.Text.TextData(text, None), annotations, text, None)
+
 }

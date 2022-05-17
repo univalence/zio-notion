@@ -1,14 +1,22 @@
 package zio.notion.model.database
 
 import io.circe.parser.decode
+import io.circe.syntax.EncoderOps
 
 import zio.Scope
-import zio.test.{assert, Spec, TestEnvironment, ZIOSpecDefault}
+import zio.notion.Faker.{fakeDatabase, fakeUUID}
+import zio.notion.NotionError.PropertyNotExist
+import zio.notion.model.database.patch.PatchedPropertyDescription
+import zio.notion.model.database.patch.implicits._
+import zio.notion.model.printer
+import zio.test.{assert, assertTrue, Spec, TestEnvironment, ZIOSpecDefault}
 import zio.test.Assertion.isRight
 
 object DatabaseSpec extends ZIOSpecDefault {
-  override def spec: Spec[TestEnvironment with Scope, Any] =
-    suite("DB serde suite")(
+  override def spec: Spec[TestEnvironment with Scope, Any] = serdeSpec + patchSpec
+
+  def serdeSpec: Spec[TestEnvironment with Scope, Any] =
+    suite("Database serde suite")(
       test("We should be able to parse a database json") {
         val json: String =
           """{
@@ -177,4 +185,120 @@ object DatabaseSpec extends ZIOSpecDefault {
         assert(decode[Database](json))(isRight)
       }
     )
+
+  def patchSpec: Spec[TestEnvironment with Scope, Any] =
+    suite("Database update suite")(
+      test("We should be able to update one property") {
+        val patch =
+          fakeDatabase.patch.updateProperty(
+            PatchedPropertyDescription
+              .rename("Date")
+              .as(date)
+              .on("Test")
+          )
+
+        val expected =
+          """{
+            |  "properties" : {
+            |    "Test" : {
+            |      "name" : "Date",
+            |      "date" : {
+            |        
+            |      }
+            |    }
+            |  }
+            |}""".stripMargin
+
+        assertTrue(printer.print(patch.asJson) == expected)
+      },
+      test("We should be able to create a new property description") {
+        val patch =
+          fakeDatabase.patch.updateProperty(
+            PatchedPropertyDescription
+              .as(date)
+              .on("New field")
+          )
+
+        val expected =
+          """{
+            |  "properties" : {
+            |    "New field" : {
+            |      "date" : {
+            |        
+            |      }
+            |    }
+            |  }
+            |}""".stripMargin
+
+        assertTrue(printer.print(patch.asJson) == expected)
+      },
+      test("We should be able to rename a newly created property description (if we rename on create, we have to use the rename value)") {
+        val patch =
+          fakeDatabase.patch.updateProperty(
+            PatchedPropertyDescription
+              .rename("Date")
+              .as(date)
+              .on("New field")
+          )
+
+        val expected =
+          """{
+            |  "properties" : {
+            |    "Date" : {
+            |      "date" : {
+            |        
+            |      }
+            |    }
+            |  }
+            |}""".stripMargin
+
+        assertTrue(printer.print(patch.asJson) == expected)
+      },
+      test("We should be able to remove one existing property") {
+        val maybePatch = fakeDatabase.patch.removeProperty("Test")
+
+        val expected =
+          """{
+            |  "properties" : {
+            |    "Test" : null
+            |  }
+            |}""".stripMargin
+
+        assertTrue(maybePatch.map(patch => printer.print(patch.asJson)) == Right(expected))
+      },
+      test("We should return an error when we remove one non existing property") {
+        val maybePatch = fakeDatabase.patch.removeProperty("Void")
+
+        assertTrue(maybePatch.map(patch => printer.print(patch.asJson)) == Left(PropertyNotExist("Void", fakeUUID)))
+      },
+      test("We should be able to update the title") {
+        val patch = fakeDatabase.patch.rename("My database")
+
+        val expected =
+          """{
+            |  "title" : [
+            |    {
+            |      "text" : {
+            |        "content" : "My database",
+            |        "link" : null
+            |      },
+            |      "annotations" : {
+            |        "bold" : false,
+            |        "italic" : false,
+            |        "strikethrough" : false,
+            |        "underline" : false,
+            |        "code" : false,
+            |        "color" : "default"
+            |      },
+            |      "plain_text" : "My database",
+            |      "href" : null,
+            |      "type" : "text"
+            |    }
+            |  ]
+            |}""".stripMargin
+
+        assertTrue(printer.print(patch.asJson) == expected)
+      }
+    )
+
 }

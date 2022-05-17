@@ -5,7 +5,9 @@ import io.circe.syntax.EncoderOps
 import zio.{Scope, UIO}
 import zio.notion.Faker._
 import zio.notion.PropertyUpdater._
-import zio.notion.model.common.Url
+import zio.notion.model.common.{richtext, Url, UserId}
+import zio.notion.model.common.enumeration.Color
+import zio.notion.model.common.richtext.RichTextData
 import zio.notion.model.page.patch.PatchedProperty._
 import zio.notion.model.page.property.Link
 import zio.notion.model.page.property.Link.External
@@ -25,7 +27,9 @@ object PatchedPropertySpec extends ZIOSpecDefault {
       specPatchedEmail,
       specPatchedCheckbox,
       specPatchedFiles,
-      specPatchedTitle
+      specPatchedTitle,
+      specPatchedRichText,
+      specPatchedPeople
     ) + specEncoding
 
   def specPatchedNumber: Spec[TestEnvironment with Scope, Any] = {
@@ -234,12 +238,68 @@ object PatchedPropertySpec extends ZIOSpecDefault {
       test("We can set a new title") {
         val patch: FieldSetter[PatchedTitle] = PatchedTitle.set("Title").onAll
 
-        assertTrue(patch.value.title == "Title")
+        assertTrue(patch.value.title.head.asInstanceOf[RichTextData.Text].plainText == "Title")
       },
       test("We can capitalize a title") {
         val patch: FieldUpdater[Nothing, PatchedTitle] = PatchedTitle.capitalize.onAll
 
-        assertTrue(patch.transform(PatchedTitle("title")).map(_.title) == Right("Title"))
+        val source = PatchedTitle(List(RichTextData.default("title", richtext.Annotations.default)))
+
+        assertTrue(patch.transform(source).map(_.title.head.asInstanceOf[RichTextData.Text].plainText) == Right("Title"))
+      }
+    )
+
+  def specPatchedRichText: Spec[TestEnvironment with Scope, Any] = {
+    def testAnnotation(name: String, transformation: UTransformation[PatchedRichText], expected: richtext.Annotations => Boolean) =
+      test(s"We can use $name on a every rich text") {
+        val default: PatchedRichText =
+          PatchedRichText(
+            List(
+              RichTextData.Text(
+                RichTextData.Text.TextData("This is a content", None),
+                richtext.Annotations.default,
+                "This is a content",
+                None
+              )
+            )
+          )
+
+        val patch: FieldUpdater[Nothing, PatchedRichText] = transformation.onAll
+
+        assertTrue(
+          patch.transform(default).map(_.richText.map(_.asInstanceOf[RichTextData.Text].annotations).forall(expected)) == Right(true)
+        )
+      }
+
+    suite("Test patching rich text")(
+      test("We can write a new rich text") {
+        val patch: FieldSetter[PatchedRichText] = PatchedRichText.write("A new content").onAll
+
+        assertTrue(patch.value.richText.headOption.map(_.asInstanceOf[RichTextData.Text].plainText).contains("A new content"))
+      },
+      testAnnotation("reset", PatchedRichText.reset, _ == richtext.Annotations.default),
+      testAnnotation("bold", PatchedRichText.bold, _.bold),
+      testAnnotation("italic", PatchedRichText.italic, _.italic),
+      testAnnotation("strikethrough", PatchedRichText.strikethrough, _.strikethrough),
+      testAnnotation("underline", PatchedRichText.underline, _.underline),
+      testAnnotation("code", PatchedRichText.code, _.code),
+      testAnnotation("color", PatchedRichText.color(Color.BlueBackground), _.color == Color.BlueBackground)
+    )
+  }
+
+  def specPatchedPeople: Spec[TestEnvironment with Scope, Any] =
+    suite("Test patching people")(
+      test("We can set a list of people") {
+        val people: List[UserId] = List(UserId(fakeUUID))
+
+        val patch: FieldSetter[PatchedPeople] = PatchedPeople.set(people).onAll
+
+        assertTrue(patch.value.people == people)
+      },
+      test("We can set a new person") {
+        val patch: FieldUpdater[Nothing, PatchedPeople] = PatchedPeople.add(UserId(fakeUUID)).onAll
+
+        assertTrue(patch.transform(PatchedPeople(Seq.empty)).map(_.people) == Right(Seq(UserId(fakeUUID))))
       }
     )
 
@@ -357,16 +417,79 @@ object PatchedPropertySpec extends ZIOSpecDefault {
         assertTrue(printer.print(property.asJson) == expected)
       },
       test("PatchedTitle encoding") {
-        val property: PatchedTitle = PatchedTitle("Title")
+        val property: PatchedTitle = PatchedTitle(List(RichTextData.default("Title", richtext.Annotations.default)))
 
         val expected: String =
           s"""{
              |  "title" : [
              |    {
-             |      "type" : "text",
              |      "text" : {
-             |        "content" : "Title"
-             |      }
+             |        "content" : "Title",
+             |        "link" : null
+             |      },
+             |      "annotations" : {
+             |        "bold" : false,
+             |        "italic" : false,
+             |        "strikethrough" : false,
+             |        "underline" : false,
+             |        "code" : false,
+             |        "color" : "default"
+             |      },
+             |      "plain_text" : "Title",
+             |      "href" : null,
+             |      "type" : "text"
+             |    }
+             |  ]
+             |}""".stripMargin
+
+        assertTrue(printer.print(property.asJson) == expected)
+      },
+      test("PatchedRichText encoding") {
+        val property: PatchedRichText =
+          PatchedRichText(
+            List(
+              RichTextData.Text(
+                RichTextData.Text.TextData("This is a content", None),
+                richtext.Annotations.default,
+                "This is a content",
+                None
+              )
+            )
+          )
+
+        val expected: String =
+          s"""{
+             |  "rich_text" : [
+             |    {
+             |      "text" : {
+             |        "content" : "This is a content",
+             |        "link" : null
+             |      },
+             |      "annotations" : {
+             |        "bold" : false,
+             |        "italic" : false,
+             |        "strikethrough" : false,
+             |        "underline" : false,
+             |        "code" : false,
+             |        "color" : "default"
+             |      },
+             |      "plain_text" : "This is a content",
+             |      "href" : null,
+             |      "type" : "text"
+             |    }
+             |  ]
+             |}""".stripMargin
+
+        assertTrue(printer.print(property.asJson) == expected)
+      },
+      test("PatchedPeople encoding") {
+        val property: PatchedPeople = PatchedPeople(List(UserId(fakeUUID)))
+
+        val expected: String =
+          s"""{
+             |  "people" : [
+             |    {
+             |      "id" : "$fakeUUID"
              |    }
              |  ]
              |}""".stripMargin

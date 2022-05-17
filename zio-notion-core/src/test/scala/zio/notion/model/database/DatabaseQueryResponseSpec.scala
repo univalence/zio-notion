@@ -177,7 +177,7 @@ object DatabaseQueryResponseSpec extends ZIOSpecDefault {
             |    "page": {}
             |}""".stripMargin
 
-        assert(decode[DatabaseQueryResponse](json))(isRight)
+        assert(decode[DatabaseQuery](json))(isRight)
       }
     )
 }

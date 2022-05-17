@@ -3,7 +3,7 @@ package zio.notion.model.page.property
 import io.circe.generic.extras._
 
 import zio.notion.model.common.UserId
-import zio.notion.model.common.richtext.{Annotations, RichTextData}
+import zio.notion.model.common.richtext.RichTextData
 import zio.notion.model.page.property.data.{DateData, FormulaData, RollupData, SelectData}
 
 @ConfiguredJsonCodec sealed trait Property
@@ -39,11 +39,6 @@ object Property {
   final case class Formula(id: String, formula: FormulaData) extends Property
 
   final case class Title(id: String, title: Seq[RichTextData]) extends Property
-
-  object Title {
-    def defaultData(title: String): Seq[RichTextData] =
-      Seq(RichTextData.Text(RichTextData.Text.TextData(title, None), Annotations.default, title, None))
-  }
 
   final case class RichText(id: String, richText: Seq[RichTextData]) extends Property
 

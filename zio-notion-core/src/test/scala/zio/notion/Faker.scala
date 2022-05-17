@@ -2,6 +2,9 @@ package zio.notion
 
 import zio.notion.Faker.FakeProperty.{fakeCheckbox, fakeTitle}
 import zio.notion.model.common.{Parent, UserId}
+import zio.notion.model.common.richtext.{Annotations, RichTextData}
+import zio.notion.model.database.Database
+import zio.notion.model.database.description.PropertyDescription
 import zio.notion.model.page.Page
 import zio.notion.model.page.property.Property.{Checkbox, Date, Title}
 
@@ -54,8 +57,24 @@ object Faker {
       url            = fakeUrl
     )
 
+  val fakeDatabase: Database =
+    Database(
+      createdTime    = fakeDatetime,
+      lastEditedTime = fakeDatetime,
+      createdBy      = UserId(fakeUUID),
+      lastEditedBy   = UserId(fakeUUID),
+      id             = fakeUUID,
+      title          = List(RichTextData.default("test", Annotations.default)),
+      cover          = None,
+      icon           = None,
+      parent         = Parent.Workspace,
+      archived       = false,
+      properties     = Map("Test" -> PropertyDescription.CreatedTime("id", "Test")),
+      url            = fakeUrl
+    )
+
   object FakeProperty {
-    val fakeTitle: Title = Title("abc", Title.defaultData("Test"))
+    val fakeTitle: Title = Title("abc", List(RichTextData.default("test", Annotations.default)))
 
     val fakeDate: Date = Date("abc", None)
 

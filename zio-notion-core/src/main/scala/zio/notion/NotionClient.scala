@@ -1,5 +1,8 @@
 package zio.notion
 
+import io.circe.Decoder
+import io.circe.generic.semiauto.deriveDecoder
+import io.circe.parser.decode
 import io.circe.syntax.EncoderOps
 import sttp.client3._
 import sttp.client3.asynchttpclient.zio.SttpClient
@@ -7,6 +10,8 @@ import sttp.model.Uri
 
 import zio._
 import zio.notion.NotionClient.NotionResponse
+import zio.notion.NotionError._
+import zio.notion.model.database.Database
 import zio.notion.model.page.Page
 import zio.notion.model.printer
 
@@ -18,7 +23,7 @@ trait NotionClient {
   def queryDatabase(databaseId: String): IO[NotionError, NotionResponse]
 
   def updatePage(patch: Page.Patch): IO[NotionError, NotionResponse]
-
+  def updateDatabase(patch: Database.Patch): IO[NotionError, NotionResponse]
 }
 
 object NotionClient {
@@ -28,10 +33,25 @@ object NotionClient {
     ZIO.service[NotionClient].flatMap(_.retrieveDatabase(databaseId))
   def retrieveUser(userId: String): ZIO[NotionClient, NotionError, NotionResponse] =
     ZIO.service[NotionClient].flatMap(_.retrieveUser(userId))
-//todo accessor method query db
-  def updatePage(patch: Page.Patch): ZIO[NotionClient, NotionError, NotionResponse] = ZIO.service[NotionClient].flatMap(_.updatePage(patch))
 
-  type NotionResponse = Response[Either[String, String]]
+  def queryDatabase(databaseId: String): ZIO[NotionClient, NotionError, NotionResponse] =
+    ZIO.service[NotionClient].flatMap(_.queryDatabase(databaseId))
+
+  def updatePage(patch: Page.Patch): ZIO[NotionClient, NotionError, NotionResponse] = ZIO.service[NotionClient].flatMap(_.updatePage(patch))
+  def updateDatabase(patch: Database.Patch): ZIO[NotionClient, NotionError, NotionResponse] =
+    ZIO.service[NotionClient].flatMap(_.updateDatabase(patch))
+
+  type NotionResponse = String
+
+  final case class NotionClientError(
+      status:  Int,
+      code:    String,
+      message: String
+  )
+
+  object NotionClientError {
+    implicit val decoder: Decoder[NotionClientError] = deriveDecoder[NotionClientError]
+  }
 
   val live: URLayer[NotionConfiguration with SttpClient, NotionClient] =
     ZLayer {
@@ -45,11 +65,24 @@ object NotionClient {
     val endpoint: Uri = uri"https://api.notion.com/v1"
 
     implicit private class RequestOps(request: Request[Either[String, String], Any]) {
-      def handle: IO[NotionError, NotionResponse] = handleRequest(sttpClient.send(request))
-    }
+      def handle: IO[NotionError, NotionResponse] =
+        sttpClient
+          .send(request)
+          .mapError(t => ConnectionError(t))
+          .flatMap(response =>
+            response.code match {
+              case code if code.isSuccess => ZIO.succeed(response.body.merge)
+              case _ =>
+                val error =
+                  decode[NotionClientError](response.body.merge) match {
+                    case Left(error)  => JsonError(error)
+                    case Right(error) => NotionError.HttpError(request.toCurl, error.status, error.code, error.message)
+                  }
 
-    private def handleRequest(request: Task[Response[Either[String, String]]]): IO[NotionError, NotionResponse] =
-      request.mapError(t => ConnectionError(t))
+                ZIO.fail(error)
+            }
+          )
+    }
 
     private def defaultRequest: RequestT[Empty, Either[String, String], Any] =
       basicRequest.auth
@@ -76,11 +109,17 @@ object NotionClient {
       defaultRequest
         .post(uri"$endpoint/databases/$databaseId/query")
         .handle
+
     override def updatePage(patch: Page.Patch): IO[NotionError, NotionResponse] =
       defaultRequest
         .patch(uri"$endpoint/pages/${patch.page.id}")
         .body(printer.print(patch.asJson))
         .handle
 
+    override def updateDatabase(patch: Database.Patch): IO[NotionError, NotionResponse] =
+      defaultRequest
+        .patch(uri"$endpoint/databases/${patch.database.id}")
+        .body(printer.print(patch.asJson))
+        .handle
   }
 }
