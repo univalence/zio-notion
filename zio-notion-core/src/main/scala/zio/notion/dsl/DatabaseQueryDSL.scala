@@ -11,7 +11,7 @@ import zio.notion.model.database.query.Sorts.Sorting.TimestampType.{CreatedTime,
 
 import java.time.LocalDate
 
-object query {
+object DatabaseQueryDSL {
 
   // Sort helpers
 

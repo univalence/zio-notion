@@ -3,7 +3,7 @@ package zio.notion
 import sttp.client3.asynchttpclient.zio.{AsyncHttpClientZioBackend, SttpClient}
 
 import zio._
-import zio.notion.dsl.query._
+import zio.notion.dsl.DatabaseQueryDSL._
 import zio.notion.model.database.query.{Filter, Sorts}
 
 //TODO
