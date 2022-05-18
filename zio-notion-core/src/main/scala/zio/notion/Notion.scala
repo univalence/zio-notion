@@ -7,6 +7,7 @@ import zio._
 import zio.notion.NotionClient.NotionResponse
 import zio.notion.NotionError.JsonError
 import zio.notion.model.database.{Database, DatabaseQuery}
+import zio.notion.model.database.query.{Filter, Query, Sorts}
 import zio.notion.model.page.Page
 import zio.notion.model.user.User
 
@@ -21,7 +22,7 @@ sealed trait Notion {
   def retrieveDatabase(databaseId: String): IO[NotionError, Database]
   def retrieveUser(userId: String): IO[NotionError, User]
 
-  def queryDatabase(databaseId: String): IO[NotionError, DatabaseQuery]
+  def queryDatabase(databaseId: String, query: Query): IO[NotionError, DatabaseQuery]
 
   def updatePage(patch: Page.Patch): IO[NotionError, Page]
   def updateDatabase(patch: Database.Patch): IO[NotionError, Database]
@@ -32,7 +33,15 @@ object Notion {
   def retrieveDatabase(databaseId: String): ZIO[Notion, NotionError, Database] = ZIO.service[Notion].flatMap(_.retrieveDatabase(databaseId))
   def retrieveUser(userId: String): ZIO[Notion, NotionError, User]             = ZIO.service[Notion].flatMap(_.retrieveUser(userId))
 
-  def queryDatabase(databaseId: String): ZIO[Notion, NotionError, DatabaseQuery] = ZIO.service[Notion].flatMap(_.queryDatabase(databaseId))
+  def queryDatabase(databaseId: String, query: Query): ZIO[Notion, NotionError, DatabaseQuery] =
+    ZIO.service[Notion].flatMap(_.queryDatabase(databaseId, query))
+  def queryDatabase(databaseId: String): ZIO[Notion, NotionError, DatabaseQuery] = queryDatabase(databaseId, Query(None, None))
+  def queryDatabase(databaseId: String, filter: Filter, sorts: Sorts): ZIO[Notion, NotionError, DatabaseQuery] =
+    queryDatabase(databaseId, Query(Some(filter), Some(sorts)))
+  def queryDatabase(databaseId: String, sorts: Sorts): ZIO[Notion, NotionError, DatabaseQuery] =
+    queryDatabase(databaseId, Query(None, Some(sorts)))
+  def queryDatabase(databaseId: String, filter: Filter): ZIO[Notion, NotionError, DatabaseQuery] =
+    queryDatabase(databaseId, Query(Some(filter), None))
 
   def updatePage(patch: Page.Patch): ZIO[Notion, NotionError, Page]             = ZIO.service[Notion].flatMap(_.updatePage(patch))
   def updateDatabase(patch: Database.Patch): ZIO[Notion, NotionError, Database] = ZIO.service[Notion].flatMap(_.updateDatabase(patch))
@@ -47,8 +56,8 @@ object Notion {
       decodeResponse[Database](notionClient.retrieveDatabase(databaseId))
     override def retrieveUser(userId: String): IO[NotionError, User] = decodeResponse[User](notionClient.retrieveUser(userId))
 
-    override def queryDatabase(databaseId: String): IO[NotionError, DatabaseQuery] =
-      decodeResponse[DatabaseQuery](notionClient.retrieveUser(databaseId))
+    override def queryDatabase(databaseId: String, query: Query): IO[NotionError, DatabaseQuery] =
+      decodeResponse[DatabaseQuery](notionClient.queryDatabase(databaseId, query))
 
     override def updatePage(patch: Page.Patch): IO[NotionError, Page] = decodeResponse[Page](notionClient.updatePage(patch))
     override def updateDatabase(patch: Database.Patch): IO[NotionError, Database] =

@@ -1,49 +1,19 @@
-package zio.notion.model.database.query.filter
+package zio.notion.model.database.query
 
 import io.circe.Encoder
 import io.circe.generic.extras.ConfiguredJsonCodec
 
-import zio.notion.model.database.query.filter.Filter.SubFilter
-import zio.notion.model.database.query.filter.PropertyFilter.TextPropertyFilter.{EndsWith, StartsWith}
-import zio.notion.model.magnolia.PropertyEncoderDerivation
+import zio.notion.model.magnolia.PatchedPropertyEncoderDerivation
 
-@ConfiguredJsonCodec(encodeOnly = true) sealed trait PropertyFilter {
-  self =>
-  def and(other: PropertyFilter): SubFilter = ???
-  def or(other: PropertyFilter): SubFilter  = ???
-}
+@ConfiguredJsonCodec(encodeOnly = true) sealed trait PropertyFilter
 
 object PropertyFilter {
-  final case class Title(title: TextPropertyFilter, property: String) extends PropertyFilter {
-    self =>
-    def startsWith(str: String): Title = self.copy(title = StartsWith(str))
-    def endsWith(str: String): Title   = self.copy(title = EndsWith(str))
-    def equals(str: String): Title     = ???
-
-  }
-  object Title {
-    def title(property: String): Title = Title(title = null, property = property)
-  }
-
-  final case class RichText(richText: TextPropertyFilter, property: String) extends PropertyFilter
-  final case class Number(number: NumberPropertyFilter, property: String)   extends PropertyFilter
-
-  final case class Checkbox(checkbox: CheckboxPropertyFilter, property: String) extends PropertyFilter {
-    self =>
-    def isNotTrue: Checkbox = ???
-  }
-  object Checkbox {
-    def checkbox(property: String): Checkbox = Checkbox(checkbox = null, property = property)
-  }
-
-  final case class Select(select: SelectPropertyFilter, property: String) extends PropertyFilter
-  final case class MultiSelect(multiSelect: TextPropertyFilter, property: String) extends PropertyFilter {
-    self =>
-    def doesNotContain(string: String): MultiSelect = ???
-  }
-  object MultiSelect {
-    def multiSelect(string: String): MultiSelect = MultiSelect(multiSelect = null, property = string)
-  }
+  final case class Title(property: String, title: TextPropertyFilter)                   extends PropertyFilter
+  final case class RichText(property: String, richText: TextPropertyFilter)             extends PropertyFilter
+  final case class Number(property: String, number: NumberPropertyFilter)               extends PropertyFilter
+  final case class Checkbox(property: String, checkbox: CheckboxPropertyFilter)         extends PropertyFilter
+  final case class Select(property: String, select: SelectPropertyFilter)               extends PropertyFilter
+  final case class MultiSelect(multiSelect: TextPropertyFilter, property: String)       extends PropertyFilter
   final case class Date(date: DatePropertyFilter, property: String)                     extends PropertyFilter
   final case class People(people: PeoplePropertyFilter, property: String)               extends PropertyFilter
   final case class Files(files: ExistencePropertyFilter, property: String)              extends PropertyFilter
@@ -61,7 +31,7 @@ object PropertyFilter {
   sealed trait ExistencePropertyFilter
 
   object ExistencePropertyFilter {
-    implicit val encoder: Encoder[ExistencePropertyFilter] = PropertyEncoderDerivation.gen[ExistencePropertyFilter]
+    implicit val encoder: Encoder[ExistencePropertyFilter] = PatchedPropertyEncoderDerivation.gen[ExistencePropertyFilter]
   }
 
   sealed trait TextPropertyFilter
@@ -70,20 +40,20 @@ object PropertyFilter {
     final case class StartsWith(startsWith: String) extends TextPropertyFilter
     final case class EndsWith(endsWith: String)     extends TextPropertyFilter
 
-    implicit val encoder: Encoder[TextPropertyFilter] = PropertyEncoderDerivation.gen[TextPropertyFilter]
+    implicit val encoder: Encoder[TextPropertyFilter] = PatchedPropertyEncoderDerivation.gen[TextPropertyFilter]
   }
 
   sealed trait NumberPropertyFilter
 
   object NumberPropertyFilter {
-    final case class NumberEquals(equals: Double)                       extends NumberPropertyFilter
-    final case class NumberDoesNotEqual(doesNotEqual: Double)           extends NumberPropertyFilter
+    final case class Equals(equals: Double)                             extends NumberPropertyFilter
+    final case class DoesNotEqual(doesNotEqual: Double)                 extends NumberPropertyFilter
     final case class GreaterThan(greaterThan: Double)                   extends NumberPropertyFilter
     final case class LessThan(lessThan: Double)                         extends NumberPropertyFilter
     final case class GreaterThanOrEqualTo(greaterThanOrEqualTo: Double) extends NumberPropertyFilter
     final case class LessThanOrEqualTo(lessThanOrEqualTo: Double)       extends NumberPropertyFilter
 
-    implicit val encoder: Encoder[NumberPropertyFilter] = PropertyEncoderDerivation.gen[NumberPropertyFilter]
+    implicit val encoder: Encoder[NumberPropertyFilter] = PatchedPropertyEncoderDerivation.gen[NumberPropertyFilter]
   }
 
   sealed trait CheckboxPropertyFilter
@@ -92,19 +62,19 @@ object PropertyFilter {
     final case class Equals(equals: Boolean)             extends CheckboxPropertyFilter
     final case class DoesNotEqual(doesNotEqual: Boolean) extends CheckboxPropertyFilter
 
-    implicit val encoder: Encoder[CheckboxPropertyFilter] = PropertyEncoderDerivation.gen[CheckboxPropertyFilter]
+    implicit val encoder: Encoder[CheckboxPropertyFilter] = PatchedPropertyEncoderDerivation.gen[CheckboxPropertyFilter]
   }
 
   sealed trait SelectPropertyFilter
 
   object SelectPropertyFilter {
-    implicit val encoder: Encoder[SelectPropertyFilter] = PropertyEncoderDerivation.gen[SelectPropertyFilter]
+    implicit val encoder: Encoder[SelectPropertyFilter] = PatchedPropertyEncoderDerivation.gen[SelectPropertyFilter]
   }
 
   sealed trait MultiSelectPropertyFilter
 
   object MultiSelectPropertyFilter {
-    implicit val encoder: Encoder[MultiSelectPropertyFilter] = PropertyEncoderDerivation.gen[MultiSelectPropertyFilter]
+    implicit val encoder: Encoder[MultiSelectPropertyFilter] = PatchedPropertyEncoderDerivation.gen[MultiSelectPropertyFilter]
   }
 
   sealed trait DatePropertyFilter
@@ -120,19 +90,19 @@ object PropertyFilter {
     final case object NextMonth                     extends DatePropertyFilter
     final case object NextYear                      extends DatePropertyFilter
 
-    implicit val encoder: Encoder[DatePropertyFilter] = PropertyEncoderDerivation.gen[DatePropertyFilter]
+    implicit val encoder: Encoder[DatePropertyFilter] = PatchedPropertyEncoderDerivation.gen[DatePropertyFilter]
   }
 
   sealed trait PeoplePropertyFilter
 
   object PeoplePropertyFilter {
-    implicit val encoder: Encoder[PeoplePropertyFilter] = PropertyEncoderDerivation.gen[PeoplePropertyFilter]
+    implicit val encoder: Encoder[PeoplePropertyFilter] = PatchedPropertyEncoderDerivation.gen[PeoplePropertyFilter]
   }
 
   sealed trait RelationPropertyFilter
 
   object RelationPropertyFilter {
-    implicit val encoder: Encoder[RelationPropertyFilter] = PropertyEncoderDerivation.gen[RelationPropertyFilter]
+    implicit val encoder: Encoder[RelationPropertyFilter] = PatchedPropertyEncoderDerivation.gen[RelationPropertyFilter]
   }
 
   sealed trait FormulaPropertyFilter
@@ -144,7 +114,7 @@ object PropertyFilter {
     final case class numberFormula(number: NumberPropertyFilter)       extends FormulaPropertyFilter
     final case class DateFormula(date: DatePropertyFilter)             extends FormulaPropertyFilter
 
-    implicit val encoder: Encoder[FormulaPropertyFilter] = PropertyEncoderDerivation.gen[FormulaPropertyFilter]
+    implicit val encoder: Encoder[FormulaPropertyFilter] = PatchedPropertyEncoderDerivation.gen[FormulaPropertyFilter]
   }
 
   sealed trait RollupSubFilterPropertyFilter
@@ -160,7 +130,7 @@ object PropertyFilter {
     final case class PeopleRollupSubfilter(people: PeoplePropertyFilter)                extends RollupSubFilterPropertyFilter
     final case class FilesRollupSubfilter(files: ExistencePropertyFilter)               extends RollupSubFilterPropertyFilter
 
-    implicit val encoder: Encoder[RollupSubFilterPropertyFilter] = PropertyEncoderDerivation.gen[RollupSubFilterPropertyFilter]
+    implicit val encoder: Encoder[RollupSubFilterPropertyFilter] = PatchedPropertyEncoderDerivation.gen[RollupSubFilterPropertyFilter]
   }
 
   sealed trait RollupPropertyFilter
@@ -172,11 +142,12 @@ object PropertyFilter {
     final case class date(date: DatePropertyFilter)              extends RollupPropertyFilter
     final case class NumberRollup(number: NumberPropertyFilter)  extends RollupPropertyFilter
 
-    implicit val encoder: Encoder[RollupPropertyFilter] = PropertyEncoderDerivation.gen[RollupPropertyFilter]
+    implicit val encoder: Encoder[RollupPropertyFilter] = PatchedPropertyEncoderDerivation.gen[RollupPropertyFilter]
   }
 
   final case class Equals(equals: String)             extends TextPropertyFilter with SelectPropertyFilter with DatePropertyFilter
   final case class DoesNotEqual(doesNotEqual: String) extends TextPropertyFilter with SelectPropertyFilter
+
   final case class Contains(contains: String)
       extends TextPropertyFilter
       with MultiSelectPropertyFilter
@@ -197,6 +168,7 @@ object PropertyFilter {
       with DatePropertyFilter
       with PeoplePropertyFilter
       with RelationPropertyFilter
+
   final case class IsNotEmpty(isNotEmpty: Boolean)
       extends ExistencePropertyFilter
       with TextPropertyFilter
