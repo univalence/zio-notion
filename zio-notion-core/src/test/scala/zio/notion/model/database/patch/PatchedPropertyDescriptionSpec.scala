@@ -3,7 +3,7 @@ package zio.notion.model.database.patch
 import io.circe.syntax.EncoderOps
 
 import zio.Scope
-import zio.notion.model.database.patch.implicits._
+import zio.notion.dsl.DatabasePatchDSL._
 import zio.notion.model.printer
 import zio.test._
 

@@ -1,11 +1,11 @@
-package zio.notion.model.database.patch
+package zio.notion.dsl
 
 import zio.notion.model.common.enumeration.Color
 import zio.notion.model.database.description.NumberDescription.NumberFormat
 import zio.notion.model.database.patch.PatchedPropertyDescription.PropertyType
 import zio.notion.model.database.patch.PatchedPropertyDescription.PropertyType.SelectOption
 
-object implicits {
+object DatabasePatchDSL {
   implicit def selectOptionConversion(string: String): SelectOption = SelectOption(string, None)
 
   implicit class stringOps(string: String) {
