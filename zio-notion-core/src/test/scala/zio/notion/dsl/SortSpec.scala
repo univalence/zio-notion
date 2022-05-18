@@ -7,10 +7,8 @@ import zio.notion.model.database.query.Sorts.Sorting.{Property, Timestamp}
 import zio.notion.model.database.query.Sorts.Sorting.TimestampType.{CreatedTime, LastEditedTime}
 import zio.test._
 
-object QuerySpec extends ZIOSpecDefault {
-  override def spec: Spec[TestEnvironment with Scope, Any] = sortSpec
-
-  def sortSpec: Spec[TestEnvironment with Scope, Any] =
+object SortSpec extends ZIOSpecDefault {
+  override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("Sort dsl helper functions suite")(
       test("We can use a String as a Sort") {
         val sort: Sorts     = "checkbox"

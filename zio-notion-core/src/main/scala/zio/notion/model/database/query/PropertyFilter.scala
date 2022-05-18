@@ -13,20 +13,20 @@ object PropertyFilter {
   final case class Number(property: String, number: NumberPropertyFilter)               extends PropertyFilter
   final case class Checkbox(property: String, checkbox: CheckboxPropertyFilter)         extends PropertyFilter
   final case class Select(property: String, select: SelectPropertyFilter)               extends PropertyFilter
-  final case class MultiSelect(multiSelect: TextPropertyFilter, property: String)       extends PropertyFilter
-  final case class Date(date: DatePropertyFilter, property: String)                     extends PropertyFilter
-  final case class People(people: PeoplePropertyFilter, property: String)               extends PropertyFilter
-  final case class Files(files: ExistencePropertyFilter, property: String)              extends PropertyFilter
-  final case class Url(url: TextPropertyFilter, property: String)                       extends PropertyFilter
-  final case class Email(title: TextPropertyFilter, property: String)                   extends PropertyFilter
-  final case class PhoneNumber(phoneNumber: TextPropertyFilter, property: String)       extends PropertyFilter
-  final case class Relation(relation: RelationPropertyFilter, property: String)         extends PropertyFilter
-  final case class CreatedBy(createdBy: PeoplePropertyFilter, property: String)         extends PropertyFilter
-  final case class CreatedTime(createdTime: DatePropertyFilter, property: String)       extends PropertyFilter
-  final case class LastEditedBy(lastEditedBy: DatePropertyFilter, property: String)     extends PropertyFilter
-  final case class LastEditedTime(lastEditedTime: DatePropertyFilter, property: String) extends PropertyFilter
-  final case class Formula(formula: FormulaPropertyFilter, property: String)            extends PropertyFilter
-  final case class Rollup(rollup: RollupPropertyFilter, property: String)               extends PropertyFilter
+  final case class MultiSelect(property: String, multiSelect: TextPropertyFilter)       extends PropertyFilter
+  final case class Date(property: String, date: DatePropertyFilter)                     extends PropertyFilter
+  final case class People(property: String, people: PeoplePropertyFilter)               extends PropertyFilter
+  final case class Files(property: String, files: ExistencePropertyFilter)              extends PropertyFilter
+  final case class Url(property: String, url: TextPropertyFilter)                       extends PropertyFilter
+  final case class Email(property: String, title: TextPropertyFilter)                   extends PropertyFilter
+  final case class PhoneNumber(property: String, phoneNumber: TextPropertyFilter)       extends PropertyFilter
+  final case class Relation(property: String, relation: RelationPropertyFilter)         extends PropertyFilter
+  final case class CreatedBy(property: String, createdBy: PeoplePropertyFilter)         extends PropertyFilter
+  final case class LastEditedBy(property: String, lastEditedBy: PeoplePropertyFilter)   extends PropertyFilter
+  final case class CreatedTime(property: String, createdTime: DatePropertyFilter)       extends PropertyFilter
+  final case class LastEditedTime(property: String, lastEditedTime: DatePropertyFilter) extends PropertyFilter
+  final case class Formula(property: String, formula: FormulaPropertyFilter)            extends PropertyFilter
+  final case class Rollup(property: String, rollup: RollupPropertyFilter)               extends PropertyFilter
 
   sealed trait ExistencePropertyFilter
 
