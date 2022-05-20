@@ -100,6 +100,13 @@ lazy val core =
       scalacOptions ++= Seq("-Ymacro-annotations")
     )
 
+def example(project: Project): Project = project.dependsOn(core)
+
+lazy val exampleUpdatePage    = (project in file("examples/update-page")).configure(example)
+lazy val exampleQueryDatabase = (project in file("examples/query-database")).configure(example)
+
+lazy val examples = (project in file("examples")).aggregate(exampleUpdatePage, exampleQueryDatabase)
+
 /**
  * Don't fail the compilation for warnings by default, you can still
  * activate it using system properties (It should always be activated in
