@@ -3,10 +3,8 @@ package zio.notion
 import sttp.client3.asynchttpclient.zio.{AsyncHttpClientZioBackend, SttpClient}
 
 import zio._
-import zio.notion.model.common.enumeration.Color
-import zio.notion.model.database.patch.PatchedPropertyDescription
-import zio.notion.model.database.patch.PatchedPropertyDescription.PropertyType
-import zio.notion.model.database.patch.PatchedPropertyDescription.PropertyType.SelectOption
+import zio.notion.dsl.DatabaseQueryDSL._
+import zio.notion.model.database.query.{Filter, Sorts}
 
 //TODO
 
@@ -38,19 +36,13 @@ object Main extends ZIOAppDefault {
   val sttpLayer: Layer[Throwable, SttpClient] = AsyncHttpClientZioBackend.layer()
   val configuration: NotionConfiguration      = NotionConfiguration(bearer = "secret_dnjrnOCfZBOiKsITF8AFDNL5QwYYHF5t7Rysbl0Mfzd")
 
-  // val description = PatchedPropertyDescription.rename("Hello").cast(PropertyType.Url).on("World")
+  val sorts: Sorts   = "Name".ascending
+  val filter: Filter = title("Name").startsWith("a")
 
   def app: ZIO[Notion, NotionError, Unit] =
     for {
-      database <- Notion.retrieveDatabase("0aa1fe6ab19a40799f36498ff2cc13af")
-      patch =
-        database.patch.updateProperty(
-          PatchedPropertyDescription
-            .as(PropertyType.Select(List(SelectOption("test", Some(Color.Blue)), SelectOption("test2", None))))
-            .onAll
-        )
-      _ <- Console.printLine(database.url).orDie
-      _ <- Notion.updateDatabase(patch)
+      database <- Notion.queryDatabase("0aa1fe6ab19a40799f36498ff2cc13af", sorts = sorts, filter = filter)
+      _        <- Console.printLine(database.results.length).orDie
     } yield ()
 
   override def run: ZIO[ZIOAppArgs, Any, Any] =

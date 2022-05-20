@@ -12,6 +12,7 @@ import zio._
 import zio.notion.NotionClient.NotionResponse
 import zio.notion.NotionError._
 import zio.notion.model.database.Database
+import zio.notion.model.database.query.Query
 import zio.notion.model.page.Page
 import zio.notion.model.printer
 
@@ -19,6 +20,8 @@ trait NotionClient {
   def retrievePage(pageId: String): IO[NotionError, NotionResponse]
   def retrieveDatabase(databaseId: String): IO[NotionError, NotionResponse]
   def retrieveUser(userId: String): IO[NotionError, NotionResponse]
+
+  def queryDatabase(databaseId: String, query: Query): IO[NotionError, NotionResponse]
 
   def updatePage(patch: Page.Patch): IO[NotionError, NotionResponse]
   def updateDatabase(patch: Database.Patch): IO[NotionError, NotionResponse]
@@ -31,6 +34,9 @@ object NotionClient {
     ZIO.service[NotionClient].flatMap(_.retrieveDatabase(databaseId))
   def retrieveUser(userId: String): ZIO[NotionClient, NotionError, NotionResponse] =
     ZIO.service[NotionClient].flatMap(_.retrieveUser(userId))
+
+  def queryDatabase(databaseId: String, query: Query): ZIO[NotionClient, NotionError, NotionResponse] =
+    ZIO.service[NotionClient].flatMap(_.queryDatabase(databaseId, query))
 
   def updatePage(patch: Page.Patch): ZIO[NotionClient, NotionError, NotionResponse] = ZIO.service[NotionClient].flatMap(_.updatePage(patch))
   def updateDatabase(patch: Database.Patch): ZIO[NotionClient, NotionError, NotionResponse] =
@@ -98,6 +104,12 @@ object NotionClient {
     override def retrieveUser(userId: String): IO[NotionError, NotionResponse] =
       defaultRequest
         .get(uri"$endpoint/users/$userId")
+        .handle
+
+    override def queryDatabase(databaseId: String, query: Query): IO[NotionError, NotionResponse] =
+      defaultRequest
+        .post(uri"$endpoint/databases/$databaseId/query")
+        .body(printer.print(query.asJson))
         .handle
 
     override def updatePage(patch: Page.Patch): IO[NotionError, NotionResponse] =

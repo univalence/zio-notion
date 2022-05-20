@@ -4,6 +4,7 @@ import zio._
 import zio.notion.Faker._
 import zio.notion.NotionClient.NotionResponse
 import zio.notion.model.database.Database
+import zio.notion.model.database.query.Query
 import zio.notion.model.page.Page
 
 /** Notion client mock for test purpose */
@@ -321,6 +322,8 @@ final case class TestNotionClient() extends NotionClient {
                    |        "email": "$fakeEmail"
                    |    }
                    |}""".stripMargin)
+
+  override def queryDatabase(databaseId: String, query: Query): IO[NotionError, NotionResponse] = ZIO.succeed("TODO")
 
   override def updatePage(patch: Page.Patch): IO[NotionError, NotionResponse] = retrievePage(patch.page.id)
 
