@@ -193,7 +193,7 @@ object DatabaseSpec extends ZIOSpecDefault {
           fakeDatabase.patch.updateProperty(
             PatchedPropertyDescription
               .rename("Date")
-              .as(date)
+              .cast(asDate)
               .on("Test")
           )
 
@@ -215,7 +215,7 @@ object DatabaseSpec extends ZIOSpecDefault {
         val patch =
           fakeDatabase.patch.updateProperty(
             PatchedPropertyDescription
-              .as(date)
+              .cast(asDate)
               .on("New field")
           )
 
@@ -237,7 +237,7 @@ object DatabaseSpec extends ZIOSpecDefault {
           fakeDatabase.patch.updateProperty(
             PatchedPropertyDescription
               .rename("Date")
-              .as(date)
+              .cast(asDate)
               .on("New field")
           )
 

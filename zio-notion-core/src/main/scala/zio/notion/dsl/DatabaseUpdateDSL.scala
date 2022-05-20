@@ -20,31 +20,31 @@ object DatabaseUpdateDSL {
     def red: SelectOption    = SelectOption(string, Some(Color.Red))
   }
 
-  val title: PropertyType    = PropertyType.Title
-  val richText: PropertyType = PropertyType.RichText
+  val asTitle: PropertyType    = PropertyType.Title
+  val asRichText: PropertyType = PropertyType.RichText
 
-  def number(format: NumberFormat): PropertyType.Number = PropertyType.Number(format)
-  val euro: PropertyType.Number                         = number(NumberFormat.Euro)
-  val dollar: PropertyType.Number                       = number(NumberFormat.Dollar)
-  val pound: PropertyType.Number                        = number(NumberFormat.Pound)
-  val percent: PropertyType.Number                      = number(NumberFormat.Percent)
+  def asNumber(format: NumberFormat): PropertyType.Number = PropertyType.Number(format)
+  val asEuro: PropertyType.Number                         = asNumber(NumberFormat.Euro)
+  val asDollar: PropertyType.Number                       = asNumber(NumberFormat.Dollar)
+  val asPound: PropertyType.Number                        = asNumber(NumberFormat.Pound)
+  val asPercent: PropertyType.Number                      = asNumber(NumberFormat.Percent)
 
-  def select(options: SelectOption*): PropertyType.Select           = PropertyType.Select(options)
-  def multiSelect(options: SelectOption*): PropertyType.MultiSelect = PropertyType.MultiSelect(options)
+  def asSelect(options: SelectOption*): PropertyType.Select           = PropertyType.Select(options)
+  def asMultiSelect(options: SelectOption*): PropertyType.MultiSelect = PropertyType.MultiSelect(options)
 
-  def date: PropertyType        = PropertyType.Date
-  def people: PropertyType      = PropertyType.People
-  def files: PropertyType       = PropertyType.Files
-  def checkbox: PropertyType    = PropertyType.Checkbox
-  def url: PropertyType         = PropertyType.Url
-  def email: PropertyType       = PropertyType.Email
-  def phoneNumber: PropertyType = PropertyType.PhoneNumber
+  def asDate: PropertyType        = PropertyType.Date
+  def asPeople: PropertyType      = PropertyType.People
+  def asFiles: PropertyType       = PropertyType.Files
+  def asCheckbox: PropertyType    = PropertyType.Checkbox
+  def asUrl: PropertyType         = PropertyType.Url
+  def asEmail: PropertyType       = PropertyType.Email
+  def asPhoneNumber: PropertyType = PropertyType.PhoneNumber
 
-  def formulaOf(expression: String): PropertyType.Formula     = PropertyType.Formula(expression)
-  def relationWith(databaseId: String): PropertyType.Relation = PropertyType.Relation(databaseId)
+  def asFormulaOf(expression: String): PropertyType.Formula     = PropertyType.Formula(expression)
+  def asRelationWith(databaseId: String): PropertyType.Relation = PropertyType.Relation(databaseId)
 
-  def createdTime: PropertyType    = PropertyType.CreatedTime
-  def createdBy: PropertyType      = PropertyType.CreatedBy
-  def lastEditedTime: PropertyType = PropertyType.LastEditedTime
-  def lastEditedBy: PropertyType   = PropertyType.LastEditedBy
+  def asCreatedTime: PropertyType    = PropertyType.CreatedTime
+  def asCreatedBy: PropertyType      = PropertyType.CreatedBy
+  def asLastEditedTime: PropertyType = PropertyType.LastEditedTime
+  def asLastEditedBy: PropertyType   = PropertyType.LastEditedBy
 }

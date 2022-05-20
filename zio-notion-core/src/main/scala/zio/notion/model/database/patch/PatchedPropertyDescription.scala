@@ -13,7 +13,7 @@ import zio.notion.model.magnolia.NoDiscriminantNoNullEncoderDerivation
 final case class PatchedPropertyDescription(name: Option[String], propertyType: Option[PropertyType]) { self =>
   def rename(name: String): PatchedPropertyDescription = copy(name = Some(name))
 
-  def as(propertyType: PropertyType): PatchedPropertyDescription = copy(propertyType = Some(propertyType))
+  def cast(propertyType: PropertyType): PatchedPropertyDescription = copy(propertyType = Some(propertyType))
 
   def on(fieldName: String): PatchedPropertyDescriptionMatcher = PatchedPropertyDescriptionMatcher(FieldMatcher.One(fieldName), self)
 
@@ -26,7 +26,7 @@ final case class PatchedPropertyDescription(name: Option[String], propertyType: 
 object PatchedPropertyDescription {
   def rename(name: String): PatchedPropertyDescription = PatchedPropertyDescription(name = Some(name), None)
 
-  def as(propertyType: PropertyType): PatchedPropertyDescription = PatchedPropertyDescription(None, propertyType = Some(propertyType))
+  def cast(propertyType: PropertyType): PatchedPropertyDescription = PatchedPropertyDescription(None, propertyType = Some(propertyType))
 
   final case class PatchedPropertyDescriptionMatcher(matcher: FieldMatcher, description: PatchedPropertyDescription)
 

@@ -14,7 +14,7 @@ object PatchedPropertyDescriptionSpec extends ZIOSpecDefault {
         val description: PatchedPropertyDescription =
           PatchedPropertyDescription
             .rename("Test")
-            .as(multiSelect("test".blue, "test2"))
+            .cast(asMultiSelect("test".blue, "test2"))
 
         val expected: String =
           """{
