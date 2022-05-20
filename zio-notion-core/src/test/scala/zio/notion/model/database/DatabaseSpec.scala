@@ -6,7 +6,7 @@ import io.circe.syntax.EncoderOps
 import zio.Scope
 import zio.notion.Faker.{fakeDatabase, fakeUUID}
 import zio.notion.NotionError.PropertyNotExist
-import zio.notion.dsl.DatabasePatchDSL._
+import zio.notion.dsl.DatabaseUpdateDSL._
 import zio.notion.model.database.patch.PatchedPropertyDescription
 import zio.notion.model.printer
 import zio.test.{assert, assertTrue, Spec, TestEnvironment, ZIOSpecDefault}

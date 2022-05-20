@@ -5,7 +5,7 @@ import zio.notion.model.database.description.NumberDescription.NumberFormat
 import zio.notion.model.database.patch.PatchedPropertyDescription.PropertyType
 import zio.notion.model.database.patch.PatchedPropertyDescription.PropertyType.SelectOption
 
-object DatabasePatchDSL {
+object DatabaseUpdateDSL {
   implicit def selectOptionConversion(string: String): SelectOption = SelectOption(string, None)
 
   implicit class stringOps(string: String) {
