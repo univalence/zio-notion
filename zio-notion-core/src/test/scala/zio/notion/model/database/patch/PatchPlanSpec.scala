@@ -7,14 +7,15 @@ import zio.notion.dsl.DatabaseUpdateDSL._
 import zio.notion.model.printer
 import zio.test._
 
-object PatchedPropertyDescriptionSpec extends ZIOSpecDefault {
+object PatchPlanSpec extends ZIOSpecDefault {
   override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("Patched property description")(
       test("Test patched property description encoding") {
-        val description: PatchedPropertyDescription =
-          PatchedPropertyDescription
-            .rename("Test")
-            .as(multiSelect("test".blue, "test2"))
+        val description: PatchPlan =
+          PatchPlan(
+            name         = Some("Test"),
+            propertyType = Some(multiSelect("test".blue, "test2"))
+          )
 
         val expected: String =
           """{

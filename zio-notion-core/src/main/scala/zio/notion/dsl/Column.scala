@@ -4,28 +4,50 @@ import zio.notion.dsl.DatabaseQueryDSL._
 import zio.notion.model.database.query.Sorts.Sorting
 import zio.notion.model.database.query.Sorts.Sorting.Property
 
-final case class Column(name: String) {
+final case class Column(colName: String) {
   // sorts
-  def ascending: Sorting  = Property(name, ascending = true)
-  def descending: Sorting = Property(name, ascending = false)
+  def ascending: Sorting = Property(colName, ascending = true)
+
+  def descending: Sorting = Property(colName, ascending = false)
+
+  def definition: ColumnDefinition = colDefinition(colName)
 
   // filters
-  def asNumber: NumberFilterConstructor                 = NumberFilterConstructor(name)
-  def asTitle: TitleFilterConstructor                   = TitleFilterConstructor(name)
-  def asRichText: RichTextFilterConstructor             = RichTextFilterConstructor(name)
-  def asCheckbox: CheckboxFilterConstructor             = CheckboxFilterConstructor(name)
-  def asSelect: SelectFilterConstructor                 = SelectFilterConstructor(name)
-  def asMultiSelect: MultiSelectFilterConstructor       = MultiSelectFilterConstructor(name)
-  def asDate: DateFilterConstructor                     = DateFilterConstructor(name)
-  def asPeople: PeopleConstructor                       = PeopleConstructor(name)
-  def asFiles: FilesConstructor                         = FilesConstructor(name)
-  def asUrl: UrlFilterConstructor                       = UrlFilterConstructor(name)
-  def asEmail: EmailFilterConstructor                   = EmailFilterConstructor(name)
-  def asPhoneNumber: PhoneNumberFilterConstructor       = PhoneNumberFilterConstructor(name)
-  def asRelation: RelationFilterConstructor             = RelationFilterConstructor(name)
-  def asCreatedBy: CreatedByConstructor                 = CreatedByConstructor(name)
-  def asLastEditedBy: LastEditedByConstructor           = LastEditedByConstructor(name)
-  def asCreatedTime: CreatedTimeFilterConstructor       = CreatedTimeFilterConstructor(name)
-  def asLastEditedTime: LastEditedTimeFilterConstructor = LastEditedTimeFilterConstructor(name)
+  def asNumber: NumberFilterConstructor = NumberFilterConstructor(colName)
 
+  def asTitle: TitleFilterConstructor = TitleFilterConstructor(colName)
+
+  def asRichText: RichTextFilterConstructor = RichTextFilterConstructor(colName)
+
+  def asCheckbox: CheckboxFilterConstructor = CheckboxFilterConstructor(colName)
+
+  def asSelect: SelectFilterConstructor = SelectFilterConstructor(colName)
+
+  def asMultiSelect: MultiSelectFilterConstructor = MultiSelectFilterConstructor(colName)
+
+  def asDate: DateFilterConstructor = DateFilterConstructor(colName)
+
+  def asPeople: PeopleConstructor = PeopleConstructor(colName)
+
+  def asFiles: FilesConstructor = FilesConstructor(colName)
+
+  def asUrl: UrlFilterConstructor = UrlFilterConstructor(colName)
+
+  def asEmail: EmailFilterConstructor = EmailFilterConstructor(colName)
+
+  def asPhoneNumber: PhoneNumberFilterConstructor = PhoneNumberFilterConstructor(colName)
+
+  def asRelation: RelationFilterConstructor = RelationFilterConstructor(colName)
+
+  def asCreatedBy: CreatedByConstructor = CreatedByConstructor(colName)
+
+  def asLastEditedBy: LastEditedByConstructor = LastEditedByConstructor(colName)
+
+  def asCreatedTime: CreatedTimeFilterConstructor = CreatedTimeFilterConstructor(colName)
+
+  def asLastEditedTime: LastEditedTimeFilterConstructor = LastEditedTimeFilterConstructor(colName)
+}
+
+final case class Columns(predicate: String => Boolean) {
+  def definition: ColumnDefinitions = columnDefinitionsMatching(predicate)
 }

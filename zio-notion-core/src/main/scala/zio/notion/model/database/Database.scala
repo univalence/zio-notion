@@ -5,12 +5,12 @@ import io.circe.generic.extras.ConfiguredJsonCodec
 
 import zio.notion.NotionError
 import zio.notion.NotionError.PropertyNotExist
-import zio.notion.PropertyUpdater.FieldMatcher
+import zio.notion.PropertyUpdater.ColumnMatcher
+import zio.notion.dsl.ColumnDefinition
 import zio.notion.model.common.{Cover, Icon, Parent, UserId}
 import zio.notion.model.common.richtext.{Annotations, RichTextData}
 import zio.notion.model.database.description.PropertyDescription
-import zio.notion.model.database.patch.PatchedPropertyDescription
-import zio.notion.model.database.patch.PatchedPropertyDescription.PatchedPropertyDescriptionMatcher
+import zio.notion.model.database.patch.PatchPlan
 import zio.notion.model.magnolia.PatchEncoderDerivation
 
 import java.time.OffsetDateTime
@@ -37,36 +37,29 @@ object Database {
   final case class Patch(
       database:   Database,
       title:      Option[Seq[RichTextData]],
-      properties: Map[String, Option[PatchedPropertyDescription]]
+      properties: Map[String, Option[PatchPlan]]
   ) { self =>
     def updateProperty(
-        propertyDescriptionMatcher: PatchedPropertyDescriptionMatcher
+        columnDefinition: ColumnDefinition
     )(implicit manifest: Manifest[PropertyDescription.Title]): Patch = {
-      val patchDescription = propertyDescriptionMatcher.description
+      val patchPlan = columnDefinition.patchPlan
 
-      propertyDescriptionMatcher.matcher match {
-        case FieldMatcher.All =>
-          val properties: Iterable[(String, Option[PatchedPropertyDescription])] =
+      columnDefinition.matcher match {
+        case ColumnMatcher.Predicate(f) =>
+          val properties: Iterable[(String, Option[PatchPlan])] =
             database.properties.collect {
-              case (key, property) if !manifest.runtimeClass.isInstance(property) => key -> Some(patchDescription)
+              case (key, property) if f(key) && !manifest.runtimeClass.isInstance(property) => key -> Some(patchPlan)
             }
 
           properties.foldLeft(self)((acc, curr) => acc.copy(properties = acc.properties + curr))
-        case FieldMatcher.Predicate(f) =>
-          val properties: Iterable[(String, Option[PatchedPropertyDescription])] =
-            database.properties.collect {
-              case (key, property) if f(key) && !manifest.runtimeClass.isInstance(property) => key -> Some(patchDescription)
-            }
-
-          properties.foldLeft(self)((acc, curr) => acc.copy(properties = acc.properties + curr))
-        case FieldMatcher.One(key) =>
+        case ColumnMatcher.One(key) =>
           database.properties.get(key) match {
             // Update an existing property
-            case Some(_) => copy(properties = properties + (key -> Some(patchDescription)))
+            case Some(_) => copy(properties = properties + (key -> Some(patchPlan)))
             // Create a new property
             case None =>
-              val newKey: String                            = patchDescription.name.getOrElse(key)
-              val value: Option[PatchedPropertyDescription] = Some(propertyDescriptionMatcher.description.copy(name = None))
+              val newKey: String           = patchPlan.name.getOrElse(key)
+              val value: Option[PatchPlan] = Some(patchPlan.copy(name = None))
 
               copy(properties = properties + (newKey -> value))
           }

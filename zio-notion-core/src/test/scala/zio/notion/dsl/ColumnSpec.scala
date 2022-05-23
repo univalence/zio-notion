@@ -2,6 +2,7 @@ package zio.notion.dsl
 
 import zio.Scope
 import zio.notion.Faker._
+import zio.notion.model.database.patch.PatchPlan
 import zio.notion.model.database.query.PropertyFilter._
 import zio.notion.model.database.query.PropertyFilter.DatePropertyFilter.Before
 import zio.test._
@@ -10,7 +11,7 @@ import java.time.LocalDate
 
 object ColumnSpec extends ZIOSpecDefault {
   override def spec: Spec[TestEnvironment with Scope, Any] =
-    suite("Colmun suite")(
+    suite("Column suite")(
       test("I can generate a column using string context") {
         val column = $"col1"
         assertTrue(column == Column("col1"))
@@ -87,6 +88,10 @@ object ColumnSpec extends ZIOSpecDefault {
       test("creates a lasteditedtime filter") {
         val filter = $"$fakeName".asLastEditedTime < LocalDate.MAX
         assertTrue(filter == LastEditedTime(fakeName, Before(LocalDate.MAX.toString)))
+      },
+      test("I can convert a column into a column definition") {
+        val columnDefinition = col("col1").definition
+        assertTrue(columnDefinition == ColumnDefinition("col1", PatchPlan.unit))
       }
     )
 }
