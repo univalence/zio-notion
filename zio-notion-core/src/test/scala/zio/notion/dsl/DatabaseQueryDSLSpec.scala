@@ -33,17 +33,17 @@ object DatabaseQueryDSLSpec extends ZIOSpecDefault {
   def sortsSpec: Spec[TestEnvironment with Scope, Any] =
     suite("Sort dsl helper functions suite")(
       test("We can use a String as a Sort") {
-        val sort: Sorts     = "checkbox"
+        val sort: Sorts     = $"checkbox"
         val expected: Sorts = Sorts(List(Property("checkbox", ascending = true)))
         assertTrue(sort == expected)
       },
       test("We can use ascending function on String") {
-        val sort: Sorts     = "checkbox".ascending
+        val sort: Sorts     = $"checkbox".ascending
         val expected: Sorts = Sorts(List(Property("checkbox", ascending = true)))
         assertTrue(sort == expected)
       },
       test("We can use descending function on String") {
-        val sort: Sorts     = "checkbox".descending
+        val sort: Sorts     = $"checkbox".descending
         val expected: Sorts = Sorts(List(Property("checkbox", ascending = false)))
         assertTrue(sort == expected)
       },
