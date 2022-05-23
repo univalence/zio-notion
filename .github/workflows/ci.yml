@@ -25,6 +25,10 @@ jobs:
   test:
     runs-on: ubuntu-20.04
     timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        scala: [ "2.12.15", "2.13.8" ]
     steps:
       - name: Checkout current branch
         uses: actions/checkout@v2.4.0
@@ -35,18 +39,26 @@ jobs:
           java-version: '17'
       - name: Cache scala dependencies
         uses: coursier/cache-action@v6
-      - name: Run tests
-        run: sbt testSpecificWithCoverage
+      - name: Run tests for 2.12.X without coverage
+        if: ${{ !startsWith(matrix.scala, '2.13.') }}
+        run: sbt ++${{ matrix.scala }}! "project core" testSpecific
+      - name: Run tests for 2.13.X with coverage
+        if: ${{ startsWith(matrix.scala, '2.13.') }}
+        run: sbt ++${{ matrix.scala }}! "project core" testSpecificWithCoverage
       - name: Publish coverage to codecov
+        if: ${{ startsWith(matrix.scala, '2.13.') }}
         uses: codecov/codecov-action@v2
-        with:
-          token: ${{ secrets.CODECOV_SECRET }}
 
   publish:
     runs-on: ubuntu-20.04
     timeout-minutes: 60
     needs: [check, test]
     if: github.event_name != 'pull_request'
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        scala: [ "2.12.15", "2.13.8" ]
     steps:
       - name: Checkout current branch
         uses: actions/checkout@v2.4.0
@@ -58,7 +70,7 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
       - name: Publish the library
-        run: sbt ci-release
+        run: sbt ++${{ matrix.scala }}! "project core" ci-release
         env:
           PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
           PGP_SECRET: ${{ secrets.PGP_SECRET }}
