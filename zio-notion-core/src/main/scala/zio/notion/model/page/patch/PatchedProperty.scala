@@ -2,11 +2,8 @@ package zio.notion.model.page.patch
 
 import io.circe.{Encoder, Json}
 
-import zio.Clock
-import zio.notion.PropertyUpdater.{Setter, Transformation, UTransformation}
 import zio.notion.model.common.UserId
-import zio.notion.model.common.enumeration.Color
-import zio.notion.model.common.richtext.{Annotations, RichTextData}
+import zio.notion.model.common.richtext.RichTextData
 import zio.notion.model.magnolia.{NoDiscriminantNoNullEncoderDerivation, PatchedPropertyEncoderDerivation}
 import zio.notion.model.page.property.Link
 
@@ -16,71 +13,39 @@ sealed trait PatchedProperty
 
 // TODO: Add formula and rollup patches
 object PatchedProperty {
+  final case class PatchedTitle(title: Seq[RichTextData]) extends PatchedProperty
+
+  object PatchedTitle {
+    implicit val encoder: Encoder[PatchedTitle] = PatchedPropertyEncoderDerivation.gen[PatchedTitle]
+  }
+
+  final case class PatchedRichText(richText: Seq[RichTextData]) extends PatchedProperty
+
+  object PatchedRichText {
+    implicit val encoder: Encoder[PatchedRichText] = PatchedPropertyEncoderDerivation.gen[PatchedRichText]
+  }
+
   final case class PatchedNumber(number: Double) extends PatchedProperty
 
   object PatchedNumber {
-    def set(number: Double): Setter[PatchedNumber] = Setter(PatchedNumber(number))
-
-    def update(f: Double => Double): UTransformation[PatchedNumber] =
-      Transformation.succeed(number => number.copy(number = f(number.number)))
-
-    def maybeUpdate[E](f: Double => Either[E, Double]): Transformation[E, PatchedNumber] =
-      Transformation.apply(number => f(number.number).map(double => PatchedNumber(double)))
-
-    def add(number: Double): UTransformation[PatchedNumber] = update(_ + number)
-
-    def minus(number: Double): UTransformation[PatchedNumber] = update(_ - number)
-
-    def times(number: Double): UTransformation[PatchedNumber] = update(_ * number)
-
-    // Transform to maybe update
-    def divide(number: Double): UTransformation[PatchedNumber] = update(_ / number)
-
-    def pow(number: Double): UTransformation[PatchedNumber] = update(Math.pow(_, number))
-
-    def floor: UTransformation[PatchedNumber] = update(Math.floor)
-
-    def ceil: UTransformation[PatchedNumber] = update(Math.ceil)
-
     implicit val encoder: Encoder[PatchedNumber] = PatchedPropertyEncoderDerivation.gen[PatchedNumber]
   }
 
-  final case class PatchedUrl(url: String) extends PatchedProperty
+  final case class PatchedCheckbox(checkbox: Boolean) extends PatchedProperty
 
-  object PatchedUrl {
-    def set(url: String): Setter[PatchedUrl] = Setter(PatchedUrl(url))
-
-    implicit val encoder: Encoder[PatchedUrl] = PatchedPropertyEncoderDerivation.gen[PatchedUrl]
+  object PatchedCheckbox {
+    implicit val encoder: Encoder[PatchedCheckbox] = PatchedPropertyEncoderDerivation.gen[PatchedCheckbox]
   }
 
   final case class PatchedSelect(id: Option[String], name: Option[String]) extends PatchedProperty
 
   object PatchedSelect {
-    def set(id: Option[String], name: Option[String]): Setter[PatchedSelect] = Setter(PatchedSelect(id, name))
-
-    def setUsingId(id: String): Setter[PatchedSelect] = set(Some(id), None)
-
-    def setUsingName(name: String): Setter[PatchedSelect] = set(None, Some(name))
-
     implicit val encoder: Encoder[PatchedSelect] = PatchedPropertyEncoderDerivation.gen[PatchedSelect]
   }
 
   final case class PatchedMultiSelect(multiSelect: List[PatchedSelect]) extends PatchedProperty
 
   object PatchedMultiSelect {
-    def set(selects: List[PatchedSelect]): Setter[PatchedMultiSelect] = Setter(PatchedMultiSelect(selects))
-
-    def update(f: List[PatchedSelect] => List[PatchedSelect]): UTransformation[PatchedMultiSelect] =
-      Transformation.succeed(multiSelect => multiSelect.copy(multiSelect = f(multiSelect.multiSelect)))
-
-    def removeUsingIdIfExists(id: String): UTransformation[PatchedMultiSelect] = update(_.filterNot(_.id.contains(id)))
-
-    def removeUsingNameIfExists(name: String): UTransformation[PatchedMultiSelect] = update(_.filterNot(_.name.contains(name)))
-
-    def addUsingId(id: String): UTransformation[PatchedMultiSelect] = update(_ :+ PatchedSelect(Some(id), None))
-
-    def addUsingName(name: String): UTransformation[PatchedMultiSelect] = update(_ :+ PatchedSelect(None, Some(name)))
-
     implicit val encoder: Encoder[PatchedMultiSelect] =
       (property: PatchedMultiSelect) => {
         val encodedMultiSelect = property.multiSelect.map(NoDiscriminantNoNullEncoderDerivation.gen[PatchedSelect].apply)
@@ -91,140 +56,37 @@ object PatchedProperty {
   final case class PatchedDate(start: LocalDate, end: Option[LocalDate], timeZone: Option[String]) extends PatchedProperty
 
   object PatchedDate {
-    def set(start: LocalDate, end: Option[LocalDate], timeZone: Option[String]): Setter[PatchedDate] =
-      Setter(PatchedDate(start, end, timeZone))
-
-    def startAt(date: LocalDate): Setter[PatchedDate] = set(date, None, None)
-
-    def endAt(f: LocalDate => LocalDate): UTransformation[PatchedDate] =
-      Transformation.succeed(property => property.copy(end = Some(f(property.start))))
-
-    def endAt(date: LocalDate): UTransformation[PatchedDate] = endAt(_ => date)
-
-    def between(start: LocalDate, end: LocalDate): Setter[PatchedDate] = set(start, Some(end), None)
-
-    def today: zio.UIO[Setter[PatchedDate]] = Clock.localDateTime.map(_.toLocalDate).map(startAt)
-
     implicit val encoder: Encoder[PatchedDate] = PatchedPropertyEncoderDerivation.gen[PatchedDate]
+  }
+
+  final case class PatchedPeople(people: Seq[UserId]) extends PatchedProperty
+
+  object PatchedPeople {
+    implicit val encoder: Encoder[PatchedPeople] = PatchedPropertyEncoderDerivation.gen[PatchedPeople]
+  }
+
+  final case class PatchedFiles(files: Seq[Link]) extends PatchedProperty
+
+  object PatchedFiles {
+    implicit val encoder: Encoder[PatchedFiles] = PatchedPropertyEncoderDerivation.gen[PatchedFiles]
+  }
+
+  final case class PatchedUrl(url: String) extends PatchedProperty
+
+  object PatchedUrl {
+    implicit val encoder: Encoder[PatchedUrl] = PatchedPropertyEncoderDerivation.gen[PatchedUrl]
   }
 
   final case class PatchedEmail(email: String) extends PatchedProperty
 
   object PatchedEmail {
-    def set(email: String): Setter[PatchedEmail] = Setter(PatchedEmail(email))
-
-    def update(f: String => String): UTransformation[PatchedEmail] =
-      Transformation.succeed(property => property.copy(email = f(property.email)))
-
     implicit val encoder: Encoder[PatchedEmail] = PatchedPropertyEncoderDerivation.gen[PatchedEmail]
   }
 
   final case class PatchedPhoneNumber(phoneNumber: String) extends PatchedProperty
 
   object PatchedPhoneNumber {
-    def set(phoneNumber: String): Setter[PatchedPhoneNumber] = Setter(PatchedPhoneNumber(phoneNumber))
-
-    def update(f: String => String): UTransformation[PatchedPhoneNumber] =
-      Transformation.succeed(property => property.copy(phoneNumber = f(property.phoneNumber)))
-
     implicit val encoder: Encoder[PatchedPhoneNumber] = PatchedPropertyEncoderDerivation.gen[PatchedPhoneNumber]
-  }
-
-  final case class PatchedCheckbox(checkbox: Boolean) extends PatchedProperty
-
-  object PatchedCheckbox {
-    def set(checkbox: Boolean): Setter[PatchedCheckbox] = Setter(PatchedCheckbox(checkbox))
-
-    def update(f: Boolean => Boolean): UTransformation[PatchedCheckbox] =
-      Transformation.succeed(property => property.copy(checkbox = f(property.checkbox)))
-
-    def check: Setter[PatchedCheckbox] = set(true)
-
-    def uncheck: Setter[PatchedCheckbox] = set(false)
-
-    def reverse: UTransformation[PatchedCheckbox] = update(!_)
-
-    implicit val encoder: Encoder[PatchedCheckbox] = PatchedPropertyEncoderDerivation.gen[PatchedCheckbox]
-  }
-
-  final case class PatchedFiles(files: Seq[Link]) extends PatchedProperty
-
-  object PatchedFiles {
-    def set(files: Seq[Link]): Setter[PatchedFiles] = Setter(PatchedFiles(files))
-
-    def update(f: Seq[Link] => Seq[Link]): UTransformation[PatchedFiles] =
-      Transformation.succeed(property => property.copy(files = f(property.files)))
-
-    def add(files: Seq[Link]): UTransformation[PatchedFiles] = update(_ ++ files)
-
-    def add(file: Link): UTransformation[PatchedFiles] = add(List(file))
-
-    def filter(predicate: Link => Boolean): UTransformation[PatchedFiles] = update(_.filter(predicate))
-
-    implicit val encoder: Encoder[PatchedFiles] = PatchedPropertyEncoderDerivation.gen[PatchedFiles]
-  }
-
-  final case class PatchedTitle(title: Seq[RichTextData]) extends PatchedProperty
-
-  object PatchedTitle {
-    def set(title: Seq[RichTextData.Text]): Setter[PatchedTitle] = Setter(PatchedTitle(title))
-
-    def set(title: String): Setter[PatchedTitle] = set(Seq(RichTextData.default(title, Annotations.default)))
-
-    def update(f: Seq[RichTextData] => Seq[RichTextData]): UTransformation[PatchedTitle] =
-      Transformation.succeed(property => property.copy(title = f(property.title)))
-
-    def capitalize: UTransformation[PatchedTitle] =
-      update(_.map {
-        case d: RichTextData.Text => d.copy(text = d.text.copy(content = d.text.content.capitalize), plainText = d.plainText.capitalize)
-        case d                    => d
-      })
-
-    implicit val encoder: Encoder[PatchedTitle] = PatchedPropertyEncoderDerivation.gen[PatchedTitle]
-  }
-
-  final case class PatchedRichText(richText: Seq[RichTextData]) extends PatchedProperty
-
-  object PatchedRichText {
-    def set(richText: List[RichTextData]): Setter[PatchedRichText] = Setter(PatchedRichText(richText))
-
-    def write(text: String, annotations: Annotations = Annotations.default): Setter[PatchedRichText] =
-      set(List(RichTextData.default(text, annotations)))
-
-    def update(f: Seq[RichTextData] => Seq[RichTextData]): UTransformation[PatchedRichText] =
-      Transformation.succeed(property => property.copy(richText = f(property.richText)))
-
-    def annotate(f: Annotations => Annotations): UTransformation[PatchedRichText] =
-      update(_.map {
-        case d: RichTextData.Text     => d.copy(annotations = f(d.annotations))
-        case d: RichTextData.Mention  => d.copy(annotations = f(d.annotations))
-        case d: RichTextData.Equation => d.copy(annotations = f(d.annotations))
-      })
-
-    def reset: UTransformation[PatchedRichText]               = annotate(_ => Annotations.default)
-    def bold: UTransformation[PatchedRichText]                = annotate(_.copy(bold = true))
-    def italic: UTransformation[PatchedRichText]              = annotate(_.copy(italic = true))
-    def strikethrough: UTransformation[PatchedRichText]       = annotate(_.copy(strikethrough = true))
-    def underline: UTransformation[PatchedRichText]           = annotate(_.copy(underline = true))
-    def code: UTransformation[PatchedRichText]                = annotate(_.copy(code = true))
-    def color(color: Color): UTransformation[PatchedRichText] = annotate(_.copy(color = color))
-
-    implicit val encoder: Encoder[PatchedRichText] = PatchedPropertyEncoderDerivation.gen[PatchedRichText]
-  }
-
-  final case class PatchedPeople(people: Seq[UserId]) extends PatchedProperty
-
-  object PatchedPeople {
-    def set(people: Seq[UserId]): Setter[PatchedPeople] = Setter(PatchedPeople(people))
-
-    def update(f: Seq[UserId] => Seq[UserId]): UTransformation[PatchedPeople] =
-      Transformation.succeed(property => property.copy(people = f(property.people)))
-
-    def add(people: Seq[UserId]): UTransformation[PatchedPeople] = update(_ ++ people)
-
-    def add(people: UserId): UTransformation[PatchedPeople] = add(List(people))
-
-    implicit val encoder: Encoder[PatchedPeople] = PatchedPropertyEncoderDerivation.gen[PatchedPeople]
   }
 
   implicit val encoder: Encoder[PatchedProperty] = PatchedPropertyEncoderDerivation.gen[PatchedProperty]

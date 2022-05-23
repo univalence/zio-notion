@@ -4,8 +4,8 @@ import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
 
 import zio._
 import zio.notion._
+import zio.notion.dsl._
 import zio.notion.model.page.Page
-import zio.notion.model.page.patch.PatchedProperty._
 
 import java.time.LocalDate
 
@@ -20,8 +20,8 @@ object UpdatePage extends ZIOAppDefault {
 
     for {
       patch0 <- Right(page.patch)
-      patch1 <- patch0.updateProperty(PatchedNumber.ceil.on("Col1"))
-      patch2 <- patch1.updateProperty(PatchedDate.between(date, date.plusDays(14)).on("Col2"))
+      patch1 <- patch0.updateProperty($"col1".asNumber.patch.ceil)
+      patch2 <- patch1.updateProperty($"col2".asDate.patch.between(date, date.plusDays(14)))
     } yield patch2.archive
   }
 

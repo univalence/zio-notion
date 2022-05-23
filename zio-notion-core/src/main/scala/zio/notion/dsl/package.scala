@@ -1,7 +1,5 @@
 package zio.notion
 
-import zio.notion.model.database.patch.PatchPlan
-
 package object dsl {
   implicit class ColumnContext(val sc: StringContext) {
     def $(args: Any*): Column = col(sc.s(args: _*))
@@ -13,11 +11,11 @@ package object dsl {
 
   val allColumns: Columns = columnsMatching(_ => true)
 
-  def columnDefinitionsMatching(predicate: String => Boolean): ColumnDefinitions = ColumnDefinitions(predicate, PatchPlan.unit)
+  def columnDefinitionsMatching(predicate: String => Boolean): ColumnDefinitions = ColumnDefinitions(predicate)
 
   val allColumnDefinitions: ColumnDefinitions = columnDefinitionsMatching(_ => true)
 
   def col(colName: String): Column = Column(colName)
 
-  def colDefinition(colName: String): ColumnDefinition = ColumnDefinition(colName, PatchPlan.unit)
+  def colDefinition(colName: String): ColumnDefinition = ColumnDefinition(colName)
 }

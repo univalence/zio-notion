@@ -189,7 +189,7 @@ object DatabaseSpec extends ZIOSpecDefault {
   def patchSpec: Spec[TestEnvironment with Scope, Any] =
     suite("Database update suite")(
       test("We should be able to update one property") {
-        val patch = fakeDatabase.patch.updateProperty($$"Test".as(date).rename("Date"))
+        val patch = fakeDatabase.patch.updateProperty($$"Test".patch.as(date).rename("Date"))
 
         val expected =
           """{
@@ -206,7 +206,7 @@ object DatabaseSpec extends ZIOSpecDefault {
         assertTrue(printer.print(patch.asJson) == expected)
       },
       test("We should be able to create a new property description") {
-        val patch = fakeDatabase.patch.updateProperty($$"New field".as(date))
+        val patch = fakeDatabase.patch.updateProperty($$"New field".patch.as(date))
 
         val expected =
           """{
@@ -222,7 +222,7 @@ object DatabaseSpec extends ZIOSpecDefault {
         assertTrue(printer.print(patch.asJson) == expected)
       },
       test("We should be able to rename a newly created property description (if we rename on create, we have to use the rename value)") {
-        val patch = fakeDatabase.patch.updateProperty($$"New field".as(date).rename("Date"))
+        val patch = fakeDatabase.patch.updateProperty($$"New field".patch.as(date).rename("Date"))
 
         val expected =
           """{

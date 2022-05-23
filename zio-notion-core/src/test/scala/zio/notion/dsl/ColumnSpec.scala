@@ -2,7 +2,6 @@ package zio.notion.dsl
 
 import zio.Scope
 import zio.notion.Faker._
-import zio.notion.model.database.patch.PatchPlan
 import zio.notion.model.database.query.PropertyFilter._
 import zio.notion.model.database.query.PropertyFilter.DatePropertyFilter.Before
 import zio.test._
@@ -91,7 +90,7 @@ object ColumnSpec extends ZIOSpecDefault {
       },
       test("I can convert a column into a column definition") {
         val columnDefinition = col("col1").definition
-        assertTrue(columnDefinition == ColumnDefinition("col1", PatchPlan.unit))
+        assertTrue(columnDefinition == ColumnDefinition("col1"))
       }
     )
 }

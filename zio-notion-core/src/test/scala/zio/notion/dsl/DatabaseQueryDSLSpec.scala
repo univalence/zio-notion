@@ -18,13 +18,13 @@ object DatabaseQueryDSLSpec extends ZIOSpecDefault {
   def filterSpec: Spec[TestEnvironment with Scope, Any] =
     suite("Filter dsl helper functions suite")(
       test("We can use a PropertyFilter as a Filter") {
-        val filter: Filter   = title("Title").startsWith("Toto")
+        val filter: Filter   = $"Title".asTitle.startsWith("Toto")
         val expected: Filter = Filter.One(Title("Title", StartsWith("Toto")))
 
         assertTrue(filter == expected)
       },
       test("We can use a dsl to express date filters") {
-        val filter: Date = date("Date").before(LocalDate.of(2022, 2, 2))
+        val filter: Date = $"Date".asDate.before(LocalDate.of(2022, 2, 2))
 
         assertTrue(filter.date == Before("2022-02-02"))
       }

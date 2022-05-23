@@ -38,7 +38,7 @@ object Main extends ZIOAppDefault {
   val configuration: NotionConfiguration      = NotionConfiguration(bearer = "secret_dnjrnOCfZBOiKsITF8AFDNL5QwYYHF5t7Rysbl0Mfzd")
 
   val sorts: Sorts   = $"Name".ascending
-  val filter: Filter = title("Name").startsWith("a")
+  val filter: Filter = $"Name".asTitle.startsWith("a")
 
   def app: ZIO[Notion, NotionError, Unit] =
     for {
