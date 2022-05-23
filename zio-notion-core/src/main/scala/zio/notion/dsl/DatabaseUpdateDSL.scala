@@ -2,8 +2,8 @@ package zio.notion.dsl
 
 import zio.notion.model.common.enumeration.Color
 import zio.notion.model.database.description.NumberDescription.NumberFormat
-import zio.notion.model.database.patch.PatchedPropertyDescription.PropertyType
-import zio.notion.model.database.patch.PatchedPropertyDescription.PropertyType.SelectOption
+import zio.notion.model.database.patch.PatchPlan.PropertyType
+import zio.notion.model.database.patch.PatchPlan.PropertyType.SelectOption
 
 trait DatabaseUpdateDSL {
   implicit def selectOptionConversion(string: String): SelectOption = SelectOption(string, None)

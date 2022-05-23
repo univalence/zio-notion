@@ -4,31 +4,15 @@ import io.circe.{Encoder, Json}
 import io.circe.generic.extras.Configuration.snakeCaseTransformation
 import io.circe.syntax.EncoderOps
 
-import zio.notion.PropertyUpdater.FieldMatcher
 import zio.notion.model.common.enumeration.{BaseColor, RollupFunction}
 import zio.notion.model.database.description.NumberDescription.NumberFormat
-import zio.notion.model.database.patch.PatchedPropertyDescription.{PatchedPropertyDescriptionMatcher, PropertyType}
+import zio.notion.model.database.patch.PatchPlan.PropertyType
 import zio.notion.model.magnolia.NoDiscriminantNoNullEncoderDerivation
 
-final case class PatchedPropertyDescription(name: Option[String], propertyType: Option[PropertyType]) { self =>
-  def rename(name: String): PatchedPropertyDescription = copy(name = Some(name))
+final case class PatchPlan(name: Option[String], propertyType: Option[PropertyType])
 
-  def as(propertyType: PropertyType): PatchedPropertyDescription = copy(propertyType = Some(propertyType))
-
-  def on(fieldName: String): PatchedPropertyDescriptionMatcher = PatchedPropertyDescriptionMatcher(FieldMatcher.One(fieldName), self)
-
-  def onAll: PatchedPropertyDescriptionMatcher = PatchedPropertyDescriptionMatcher(FieldMatcher.All, self)
-
-  def onAllMatching(predicate: String => Boolean): PatchedPropertyDescriptionMatcher =
-    PatchedPropertyDescriptionMatcher(FieldMatcher.Predicate(predicate), self)
-}
-
-object PatchedPropertyDescription {
-  def rename(name: String): PatchedPropertyDescription = PatchedPropertyDescription(name = Some(name), None)
-
-  def as(propertyType: PropertyType): PatchedPropertyDescription = PatchedPropertyDescription(None, propertyType = Some(propertyType))
-
-  final case class PatchedPropertyDescriptionMatcher(matcher: FieldMatcher, description: PatchedPropertyDescription)
+object PatchPlan {
+  val unit: PatchPlan = PatchPlan(None, None)
 
   sealed trait PropertyType
 
@@ -68,8 +52,8 @@ object PatchedPropertyDescription {
     implicit val encoder: Encoder[PropertyType] = NoDiscriminantNoNullEncoderDerivation.gen[PropertyType]
   }
 
-  implicit val encoder: Encoder[PatchedPropertyDescription] =
-    (patch: PatchedPropertyDescription) => {
+  implicit val encoder: Encoder[PatchPlan] =
+    (patch: PatchPlan) => {
       val name: Seq[(String, Json)] = patch.name.fold(List.empty[(String, Json)])(n => List("name" -> Json.fromString(n)))
       val propertyType =
         patch.propertyType.fold(List.empty[(String, Json)]) { p =>
