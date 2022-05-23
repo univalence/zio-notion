@@ -4,6 +4,7 @@ import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
 
 import zio._
 import zio.notion._
+import zio.notion.dsl._
 import zio.notion.dsl.DatabaseQueryDSL._
 
 import java.time.LocalDate
@@ -16,7 +17,7 @@ object QueryDatabase extends ZIOAppDefault {
 
   def example: ZIO[Notion, NotionError, Unit] = {
     val filter = number("Col1") >= 10 and date("Col2") <= LocalDate.of(2022, 2, 2)
-    val sorts  = "Col1".descending andThen createdTime
+    val sorts  = $"Col1".descending andThen createdTime
 
     for {
       database <- Notion.queryDatabase("6A074793-D735-4BF6-9159-24351D239BBC", filter, sorts) // Insert your own page ID
