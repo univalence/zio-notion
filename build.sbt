@@ -71,12 +71,13 @@ addCommandAlias("testAll", "; clean;+ test;")
 addCommandAlias("testSpecific", "; clean; test;")
 addCommandAlias("testSpecificWithCoverage", "; clean; coverage; test; coverageReport;")
 
+lazy val scalaMajorVersion: SettingKey[Long] = SettingKey("scala major version")
+
 // -- Lib versions
-val zio          = "2.0.0-RC6"
-val circe        = "0.14.1"
-val sttp         = "3.6.1"
-val magnolia     = "1.1.2"
-val scalaReflect = "2.13.8"
+val zio      = "2.0.0-RC6"
+val circe    = "0.14.1"
+val sttp     = "3.6.1"
+val magnolia = "1.1.2"
 
 // -- Main project settings
 lazy val core =
@@ -84,6 +85,7 @@ lazy val core =
     .settings(
       name := "zio-notion",
       scalacOptions ~= fatalWarningsAsProperties,
+      scalaMajorVersion := CrossVersion.partialVersion(scalaVersion.value).get._2,
       libraryDependencies ++= Seq(
         "com.softwaremill.sttp.client3" %% "async-http-client-backend-zio" % sttp,
         "com.softwaremill.sttp.client3" %% "core"                          % sttp,
@@ -94,12 +96,27 @@ lazy val core =
         "io.circe"                      %% "circe-generic-extras"          % circe,
         "dev.zio"                       %% "zio-test"                      % zio % Test,
         "dev.zio"                       %% "zio-test-sbt"                  % zio % Test,
-        "com.softwaremill.magnolia1_2"  %% "magnolia"                      % magnolia,
-        "org.scala-lang"                 % "scala-reflect"                 % scalaReflect
-      ),
+        "com.softwaremill.magnolia1_2"  %% "magnolia"                      % magnolia
+      ) ++ generateVersionSpecificDependency(scalaMajorVersion.value),
       testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")),
-      scalacOptions ++= Seq("-Ymacro-annotations")
+      scalacOptions ++= generateVersionSpecificScalacOptions(scalaMajorVersion.value)
     )
+
+/** Generates required libraries for magnolia. */
+def generateVersionSpecificDependency(scalaMinor: Long): Seq[ModuleID] =
+  scalaMinor match {
+    case 12 => Seq("org.scala-lang" % "scala-reflect" % scala212)
+    case 13 => Seq("org.scala-lang" % "scala-reflect" % scala213)
+    case _  => throw new Exception("It should be unreachable.")
+  }
+
+/** Generates required libraries for magnolia. */
+def generateVersionSpecificScalacOptions(scalaMinor: Long): Seq[String] =
+  scalaMinor match {
+    case 12 => Seq.empty
+    case 13 => Seq("-Ymacro-annotations")
+    case _  => throw new Exception("It should be unreachable.")
+  }
 
 def example(project: Project): Project = project.dependsOn(core)
 
