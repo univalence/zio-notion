@@ -5,9 +5,9 @@ import io.circe.syntax.EncoderOps
 
 import zio.Scope
 import zio.notion.Faker._
+import zio.notion.dsl._
 import zio.notion.model.common._
 import zio.notion.model.common.Icon.Emoji
-import zio.notion.model.page.patch.PatchedProperty._
 import zio.notion.model.printer
 import zio.test._
 import zio.test.Assertion.isRight
@@ -171,7 +171,7 @@ object PageSpec extends ZIOSpecDefault {
   def patchSpec: Spec[TestEnvironment with Scope, Any] =
     suite("Page update suite")(
       test("We should be able to update one property") {
-        val maybePatch = fakePage.patch.updateProperty(PatchedCheckbox.check.on("Checkbox"))
+        val maybePatch = fakePage.patch.updateProperty($"Checkbox".asCheckbox.patch.check)
 
         val expected =
           """{
@@ -268,8 +268,8 @@ object PageSpec extends ZIOSpecDefault {
       test("Updating a property twice should apply the second update on the first one") {
         val maybePatch =
           for {
-            p1 <- fakePage.patch.updateProperty(PatchedCheckbox.check.on("Checkbox"))
-            p2 <- p1.updateProperty(PatchedCheckbox.reverse.onAll)
+            p1 <- fakePage.patch.updateProperty($"Checkbox".asCheckbox.patch.check)
+            p2 <- p1.updateProperty(allColumns.asCheckbox.patch.reverse)
           } yield p2
 
         val expected =

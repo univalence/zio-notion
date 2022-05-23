@@ -6,7 +6,7 @@ import io.circe.generic.extras.ConfiguredJsonCodec
 import zio.notion.NotionError
 import zio.notion.NotionError.PropertyNotExist
 import zio.notion.PropertyUpdater.ColumnMatcher
-import zio.notion.dsl.ColumnDefinition
+import zio.notion.dsl.PatchedDefinition
 import zio.notion.model.common.{Cover, Icon, Parent, UserId}
 import zio.notion.model.common.richtext.{Annotations, RichTextData}
 import zio.notion.model.database.description.PropertyDescription
@@ -40,11 +40,11 @@ object Database {
       properties: Map[String, Option[PatchPlan]]
   ) { self =>
     def updateProperty(
-        columnDefinition: ColumnDefinition
+        patchedDefinition: PatchedDefinition
     )(implicit manifest: Manifest[PropertyDescription.Title]): Patch = {
-      val patchPlan = columnDefinition.patchPlan
+      val patchPlan = patchedDefinition.patchPlan
 
-      columnDefinition.matcher match {
+      patchedDefinition.matcher match {
         case ColumnMatcher.Predicate(f) =>
           val properties: Iterable[(String, Option[PatchPlan])] =
             database.properties.collect {

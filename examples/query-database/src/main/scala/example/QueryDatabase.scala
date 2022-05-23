@@ -16,7 +16,7 @@ object QueryDatabase extends ZIOAppDefault {
     )
 
   def example: ZIO[Notion, NotionError, Unit] = {
-    val filter = number("Col1") >= 10 and date("Col2") <= LocalDate.of(2022, 2, 2)
+    val filter = $"Col1".asNumber >= 10 and $"Col2".asDate <= LocalDate.of(2022, 2, 2)
     val sorts  = $"Col1".descending andThen createdTime
 
     for {
