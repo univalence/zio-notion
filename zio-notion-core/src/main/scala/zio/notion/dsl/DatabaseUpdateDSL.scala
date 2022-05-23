@@ -5,7 +5,7 @@ import zio.notion.model.database.description.NumberDescription.NumberFormat
 import zio.notion.model.database.patch.PatchedPropertyDescription.PropertyType
 import zio.notion.model.database.patch.PatchedPropertyDescription.PropertyType.SelectOption
 
-object DatabaseUpdateDSL {
+trait DatabaseUpdateDSL {
   implicit def selectOptionConversion(string: String): SelectOption = SelectOption(string, None)
 
   implicit class stringOps(string: String) {
@@ -48,3 +48,5 @@ object DatabaseUpdateDSL {
   def lastEditedTime: PropertyType = PropertyType.LastEditedTime
   def lastEditedBy: PropertyType   = PropertyType.LastEditedBy
 }
+
+object DatabaseUpdateDSL extends DatabaseUpdateDSL

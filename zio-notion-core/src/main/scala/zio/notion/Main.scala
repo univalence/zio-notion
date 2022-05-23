@@ -3,6 +3,7 @@ package zio.notion
 import sttp.client3.asynchttpclient.zio.{AsyncHttpClientZioBackend, SttpClient}
 
 import zio._
+import zio.notion.dsl.ColumnContext
 import zio.notion.dsl.DatabaseQueryDSL._
 import zio.notion.model.database.query.{Filter, Sorts}
 
@@ -36,7 +37,7 @@ object Main extends ZIOAppDefault {
   val sttpLayer: Layer[Throwable, SttpClient] = AsyncHttpClientZioBackend.layer()
   val configuration: NotionConfiguration      = NotionConfiguration(bearer = "secret_dnjrnOCfZBOiKsITF8AFDNL5QwYYHF5t7Rysbl0Mfzd")
 
-  val sorts: Sorts   = "Name".ascending
+  val sorts: Sorts   = $"Name".ascending
   val filter: Filter = title("Name").startsWith("a")
 
   def app: ZIO[Notion, NotionError, Unit] =

@@ -11,18 +11,13 @@ import zio.notion.model.database.query.Sorts.Sorting.TimestampType.{CreatedTime,
 
 import java.time.LocalDate
 
-object DatabaseQueryDSL {
+trait DatabaseQueryDSL {
 
   // Sort helpers
 
-  implicit class StringOps(string: String) {
-    def ascending: Sorting  = Property(string, ascending = true)
-    def descending: Sorting = Property(string, ascending = false)
-  }
-
   implicit def timestampTypeToSort(timestampType: TimestampType): Sorts = Timestamp(timestampType, ascending = true)
 
-  implicit def stringToSorting(string: String): Sorts = Property(string, ascending = true)
+  implicit def columnToSorting(column: Column): Sorts = Property(column.name, ascending = true)
 
   implicit def sortingToSort(sorting: Sorting): Sorts = Sorts(List(sorting))
 
@@ -255,3 +250,5 @@ object DatabaseQueryDSL {
 
   // TODO Rollup DSL
 }
+
+object DatabaseQueryDSL extends DatabaseQueryDSL
