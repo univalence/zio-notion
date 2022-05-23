@@ -6,8 +6,8 @@ import io.circe.syntax.EncoderOps
 import zio.Scope
 import zio.notion.Faker.{fakeDatabase, fakeUUID}
 import zio.notion.NotionError.PropertyNotExist
+import zio.notion.dsl._
 import zio.notion.dsl.DatabaseUpdateDSL._
-import zio.notion.model.database.patch.PatchedPropertyDescription
 import zio.notion.model.printer
 import zio.test.{assert, assertTrue, Spec, TestEnvironment, ZIOSpecDefault}
 import zio.test.Assertion.isRight
@@ -189,13 +189,7 @@ object DatabaseSpec extends ZIOSpecDefault {
   def patchSpec: Spec[TestEnvironment with Scope, Any] =
     suite("Database update suite")(
       test("We should be able to update one property") {
-        val patch =
-          fakeDatabase.patch.updateProperty(
-            PatchedPropertyDescription
-              .rename("Date")
-              .as(date)
-              .on("Test")
-          )
+        val patch = fakeDatabase.patch.updateProperty($$"Test".as(date).rename("Date"))
 
         val expected =
           """{
@@ -212,12 +206,7 @@ object DatabaseSpec extends ZIOSpecDefault {
         assertTrue(printer.print(patch.asJson) == expected)
       },
       test("We should be able to create a new property description") {
-        val patch =
-          fakeDatabase.patch.updateProperty(
-            PatchedPropertyDescription
-              .as(date)
-              .on("New field")
-          )
+        val patch = fakeDatabase.patch.updateProperty($$"New field".as(date))
 
         val expected =
           """{
@@ -233,13 +222,7 @@ object DatabaseSpec extends ZIOSpecDefault {
         assertTrue(printer.print(patch.asJson) == expected)
       },
       test("We should be able to rename a newly created property description (if we rename on create, we have to use the rename value)") {
-        val patch =
-          fakeDatabase.patch.updateProperty(
-            PatchedPropertyDescription
-              .rename("Date")
-              .as(date)
-              .on("New field")
-          )
+        val patch = fakeDatabase.patch.updateProperty($$"New field".as(date).rename("Date"))
 
         val expected =
           """{

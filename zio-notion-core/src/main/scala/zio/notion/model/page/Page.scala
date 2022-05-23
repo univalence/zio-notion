@@ -5,7 +5,7 @@ import io.circe.generic.extras.ConfiguredJsonCodec
 
 import zio.notion.{NotionError, Patchable, PropertyUpdater, Removable}
 import zio.notion.NotionError._
-import zio.notion.PropertyUpdater.FieldMatcher
+import zio.notion.PropertyUpdater.ColumnMatcher
 import zio.notion.Removable.{Ignore, Keep, Remove}
 import zio.notion.model.common.{Cover, Icon, Parent, UserId}
 import zio.notion.model.magnolia.PatchEncoderDerivation
@@ -115,15 +115,13 @@ object Page {
       updater match {
         case PropertyUpdater.FieldSetter(matcher, value) =>
           matcher match {
-            case FieldMatcher.All          => setProperties(_ => true, value)
-            case FieldMatcher.Predicate(f) => setProperties(f, value)
-            case FieldMatcher.One(key)     => updateOneProperty(key, _ => Right(value))
+            case ColumnMatcher.Predicate(f) => setProperties(f, value)
+            case ColumnMatcher.One(key)     => updateOneProperty(key, _ => Right(value))
           }
         case PropertyUpdater.FieldUpdater(matcher, transform) =>
           matcher match {
-            case FieldMatcher.All          => transformProperties(_ => true, transform)
-            case FieldMatcher.Predicate(f) => transformProperties(f, transform)
-            case FieldMatcher.One(key) =>
+            case ColumnMatcher.Predicate(f) => transformProperties(f, transform)
+            case ColumnMatcher.One(key) =>
               updateOneProperty(
                 key,
                 {
