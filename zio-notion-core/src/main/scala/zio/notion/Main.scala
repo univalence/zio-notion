@@ -1,7 +1,5 @@
 package zio.notion
 
-import sttp.client3.asynchttpclient.zio.{AsyncHttpClientZioBackend, SttpClient}
-
 import zio._
 import zio.notion.dsl.ColumnContext
 import zio.notion.dsl.DatabaseQueryDSL._
@@ -33,10 +31,6 @@ import zio.notion.model.database.query.{Filter, Sorts}
 /* trait Ref[T] { def deref:ZIO[NotionClient, Error, T] } */
 
 object Main extends ZIOAppDefault {
-
-  val sttpLayer: Layer[Throwable, SttpClient] = AsyncHttpClientZioBackend.layer()
-  val configuration: NotionConfiguration      = NotionConfiguration(bearer = "secret_dnjrnOCfZBOiKsITF8AFDNL5QwYYHF5t7Rysbl0Mfzd")
-
   val sorts: Sorts   = $"Name".ascending
   val filter: Filter = $"Name".asTitle.startsWith("a")
 
@@ -47,5 +41,5 @@ object Main extends ZIOAppDefault {
     } yield ()
 
   override def run: ZIO[ZIOAppArgs, Any, Any] =
-    app.tapError(e => Console.printLine(e.humanize)).provide(sttpLayer, ZLayer.succeed(configuration), NotionClient.live, Notion.live)
+    app.tapError(e => Console.printLine(e.humanize)).provide(Notion.layerWith("secret_dnjrnOCfZBOiKsITF8AFDNL5QwYYHF5t7Rysbl0Mfzd"))
 }
