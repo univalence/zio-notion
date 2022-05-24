@@ -3,7 +3,10 @@ package zio.notion
 import zio._
 import zio.notion.Faker._
 import zio.notion.NotionClient.NotionResponse
+import zio.notion.model.common.{Cover, Icon}
+import zio.notion.model.common.richtext.RichTextData
 import zio.notion.model.database.Database
+import zio.notion.model.database.patch.PatchPlan
 import zio.notion.model.database.query.Query
 import zio.notion.model.page.Page
 
@@ -328,6 +331,14 @@ final case class TestNotionClient() extends NotionClient {
   override def updatePage(patch: Page.Patch): IO[NotionError, NotionResponse] = retrievePage(patch.page.id)
 
   override def updateDatabase(patch: Database.Patch): IO[NotionError, NotionResponse] = retrieveDatabase(patch.database.id)
+
+  override def createDatabase(
+      pageId: String,
+      title: Seq[RichTextData],
+      icon: Option[Icon],
+      cover: Option[Cover],
+      properties: Map[String, PatchPlan.PropertyType]
+  ): IO[NotionError, NotionResponse] = retrieveDatabase(fakeUUID)
 }
 
 object TestNotionClient {

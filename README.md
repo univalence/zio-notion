@@ -73,7 +73,7 @@ object UpdatePage extends ZIOAppDefault {
 - You can update a database
 - You can retrieve a database
 - You can query a database
-- ~~You can create a database~~ 🕦 COMING SOON
+- You can create a database
 
 ### Block
 

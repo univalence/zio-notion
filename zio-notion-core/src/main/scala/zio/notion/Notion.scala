@@ -7,7 +7,10 @@ import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
 import zio._
 import zio.notion.NotionClient.NotionResponse
 import zio.notion.NotionError.JsonError
+import zio.notion.model.common.{Cover, Icon}
+import zio.notion.model.common.richtext.RichTextData
 import zio.notion.model.database.{Database, DatabaseQuery}
+import zio.notion.model.database.patch.PatchPlan.PropertyType
 import zio.notion.model.database.query.{Filter, Query, Sorts}
 import zio.notion.model.page.Page
 import zio.notion.model.user.User
@@ -27,6 +30,14 @@ sealed trait Notion {
 
   def updatePage(patch: Page.Patch): IO[NotionError, Page]
   def updateDatabase(patch: Database.Patch): IO[NotionError, Database]
+
+  def createDatabase(
+      pageId: String,
+      title: Seq[RichTextData],
+      icon: Option[Icon],
+      cover: Option[Cover],
+      properties: Map[String, PropertyType]
+  ): IO[NotionError, Database]
 }
 
 object Notion {
@@ -47,6 +58,14 @@ object Notion {
   def updatePage(patch: Page.Patch): ZIO[Notion, NotionError, Page]             = ZIO.service[Notion].flatMap(_.updatePage(patch))
   def updateDatabase(patch: Database.Patch): ZIO[Notion, NotionError, Database] = ZIO.service[Notion].flatMap(_.updateDatabase(patch))
 
+  def createDatabase(
+      pageId: String,
+      title: Seq[RichTextData],
+      icon: Option[Icon],
+      cover: Option[Cover],
+      properties: Map[String, PropertyType]
+  ): ZIO[Notion, NotionError, Database] = ZIO.service[Notion].flatMap(_.createDatabase(pageId, title, icon, cover, properties))
+
   val live: URLayer[NotionClient, Notion] = ZLayer(ZIO.service[NotionClient].map(LiveNotion))
 
   def layerWith(bearer: String): Layer[Throwable, Notion] =
@@ -66,5 +85,13 @@ object Notion {
     override def updatePage(patch: Page.Patch): IO[NotionError, Page] = decodeResponse[Page](notionClient.updatePage(patch))
     override def updateDatabase(patch: Database.Patch): IO[NotionError, Database] =
       decodeResponse[Database](notionClient.updateDatabase(patch))
+
+    override def createDatabase(
+        pageId: String,
+        title: Seq[RichTextData],
+        icon: Option[Icon],
+        cover: Option[Cover],
+        properties: Map[String, PropertyType]
+    ): IO[NotionError, Database] = decodeResponse[Database](notionClient.createDatabase(pageId, title, icon, cover, properties))
   }
 }
