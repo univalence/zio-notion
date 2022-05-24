@@ -27,43 +27,26 @@ final case class Column(colName: String) {
   def definition: ColumnDefinition = colDefinition(colName)
 
   // sorts
-  def ascending: Sorting = Property(colName, ascending = true)
-
+  def ascending: Sorting  = Property(colName, ascending = true)
   def descending: Sorting = Property(colName, ascending = false)
 
   // filters
-  def asNumber: NumberDSLConstructor = NumberDSLConstructor(colName)
-
-  def asTitle: TitleDSLConstructor = TitleDSLConstructor(colName)
-
-  def asRichText: RichTextDSLConstructor = RichTextDSLConstructor(colName)
-
-  def asCheckbox: CheckboxDSLConstructor = CheckboxDSLConstructor(colName)
-
-  def asSelect: SelectDSLConstructor = SelectDSLConstructor(colName)
-
-  def asMultiSelect: MultiSelectDSLConstructor = MultiSelectDSLConstructor(colName)
-
-  def asDate: DateDSLConstructor = DateDSLConstructor(colName)
-
-  def asPeople: PeopleDSLConstructor = PeopleDSLConstructor(colName)
-
-  def asFiles: FilesDSLConstructor = FilesDSLConstructor(colName)
-
-  def asUrl: UrlDSLConstructor = UrlDSLConstructor(colName)
-
-  def asEmail: EmailDSLConstructor = EmailDSLConstructor(colName)
-
-  def asPhoneNumber: PhoneNumberDSLConstructor = PhoneNumberDSLConstructor(colName)
-
-  def asRelation: RelationDSLConstructor = RelationDSLConstructor(colName)
-
-  def asCreatedBy: CreatedByDSLConstructor = CreatedByDSLConstructor(colName)
-
-  def asLastEditedBy: LastEditedByDSLConstructor = LastEditedByDSLConstructor(colName)
-
-  def asCreatedTime: CreatedTimeDSLConstructor = CreatedTimeDSLConstructor(colName)
-
+  def asNumber: NumberDSLConstructor                 = NumberDSLConstructor(colName)
+  def asTitle: TitleDSLConstructor                   = TitleDSLConstructor(colName)
+  def asRichText: RichTextDSLConstructor             = RichTextDSLConstructor(colName)
+  def asCheckbox: CheckboxDSLConstructor             = CheckboxDSLConstructor(colName)
+  def asSelect: SelectDSLConstructor                 = SelectDSLConstructor(colName)
+  def asMultiSelect: MultiSelectDSLConstructor       = MultiSelectDSLConstructor(colName)
+  def asDate: DateDSLConstructor                     = DateDSLConstructor(colName)
+  def asPeople: PeopleDSLConstructor                 = PeopleDSLConstructor(colName)
+  def asFiles: FilesDSLConstructor                   = FilesDSLConstructor(colName)
+  def asUrl: UrlDSLConstructor                       = UrlDSLConstructor(colName)
+  def asEmail: EmailDSLConstructor                   = EmailDSLConstructor(colName)
+  def asPhoneNumber: PhoneNumberDSLConstructor       = PhoneNumberDSLConstructor(colName)
+  def asRelation: RelationDSLConstructor             = RelationDSLConstructor(colName)
+  def asCreatedBy: CreatedByDSLConstructor           = CreatedByDSLConstructor(colName)
+  def asLastEditedBy: LastEditedByDSLConstructor     = LastEditedByDSLConstructor(colName)
+  def asCreatedTime: CreatedTimeDSLConstructor       = CreatedTimeDSLConstructor(colName)
   def asLastEditedTime: LastEditedTimeDSLConstructor = LastEditedTimeDSLConstructor(colName)
 
   // TODO Formula DSL
@@ -72,6 +55,7 @@ final case class Column(colName: String) {
 }
 
 object Column {
+
   final case class TitleDSLConstructor private (property: String) {
     def startsWith(string: String): Title     = Title(property, StartsWith(string))
     def endsWith(string: String): Title       = Title(property, EndsWith(string))

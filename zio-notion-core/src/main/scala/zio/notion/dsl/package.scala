@@ -1,6 +1,7 @@
 package zio.notion
 
 package object dsl {
+
   implicit class ColumnContext(val sc: StringContext) {
     def $(args: Any*): Column = col(sc.s(args: _*))
 

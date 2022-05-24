@@ -153,6 +153,7 @@ object PropertyFilter {
       with MultiSelectPropertyFilter
       with PeoplePropertyFilter
       with RelationPropertyFilter
+
   final case class DoesNotContain(doesNotContain: String)
       extends TextPropertyFilter
       with MultiSelectPropertyFilter

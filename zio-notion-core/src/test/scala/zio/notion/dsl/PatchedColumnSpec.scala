@@ -30,6 +30,7 @@ import zio.test.{assertTrue, Spec, TestEnvironment, TestResult, ZIOSpecDefault}
 import java.time.LocalDate
 
 object PatchedColumnSpec extends ZIOSpecDefault {
+
   override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("Test property patching action")(
       specPatchedNumber,

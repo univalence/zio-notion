@@ -9,6 +9,7 @@ import zio.notion.model.page.Page
 
 /** Notion client mock for test purpose */
 final case class TestNotionClient() extends NotionClient {
+
   def pagePayload(pageId: String): String =
     s"""{
        |    "object": "page",

@@ -12,6 +12,7 @@ import zio.notion.model.page.Page
 import zio.notion.model.user.User
 
 sealed trait Notion {
+
   protected def decodeJson[T: Decoder](content: String): IO[NotionError, T] =
     decode[T](content) match {
       case Right(t)    => ZIO.succeed(t)
@@ -36,10 +37,13 @@ object Notion {
   def queryDatabase(databaseId: String, query: Query): ZIO[Notion, NotionError, DatabaseQuery] =
     ZIO.service[Notion].flatMap(_.queryDatabase(databaseId, query))
   def queryDatabase(databaseId: String): ZIO[Notion, NotionError, DatabaseQuery] = queryDatabase(databaseId, Query(None, None))
+
   def queryDatabase(databaseId: String, filter: Filter, sorts: Sorts): ZIO[Notion, NotionError, DatabaseQuery] =
     queryDatabase(databaseId, Query(Some(filter), Some(sorts)))
+
   def queryDatabase(databaseId: String, sorts: Sorts): ZIO[Notion, NotionError, DatabaseQuery] =
     queryDatabase(databaseId, Query(None, Some(sorts)))
+
   def queryDatabase(databaseId: String, filter: Filter): ZIO[Notion, NotionError, DatabaseQuery] =
     queryDatabase(databaseId, Query(Some(filter), None))
 
@@ -52,14 +56,17 @@ object Notion {
     private def decodeResponse[T: Decoder](request: IO[NotionError, NotionResponse]): IO[NotionError, T] = request.flatMap(decodeJson[T])
 
     override def retrievePage(pageId: String): IO[NotionError, Page] = decodeResponse[Page](notionClient.retrievePage(pageId))
+
     override def retrieveDatabase(databaseId: String): IO[NotionError, Database] =
       decodeResponse[Database](notionClient.retrieveDatabase(databaseId))
+
     override def retrieveUser(userId: String): IO[NotionError, User] = decodeResponse[User](notionClient.retrieveUser(userId))
 
     override def queryDatabase(databaseId: String, query: Query): IO[NotionError, DatabaseQuery] =
       decodeResponse[DatabaseQuery](notionClient.queryDatabase(databaseId, query))
 
     override def updatePage(patch: Page.Patch): IO[NotionError, Page] = decodeResponse[Page](notionClient.updatePage(patch))
+
     override def updateDatabase(patch: Database.Patch): IO[NotionError, Database] =
       decodeResponse[Database](notionClient.updateDatabase(patch))
   }

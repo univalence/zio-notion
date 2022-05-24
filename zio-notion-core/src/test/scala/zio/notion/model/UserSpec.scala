@@ -9,6 +9,7 @@ import zio.test._
 import zio.test.Assertion._
 
 object UserSpec extends ZIOSpecDefault {
+
   override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("User serde suite")(
       test("We should be able to parse a user payload as json") {

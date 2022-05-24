@@ -14,6 +14,7 @@ import zio.notion.model.common.enumeration.Color
 )
 
 object Annotations {
+
   val default: Annotations =
     Annotations(
       bold          = false,

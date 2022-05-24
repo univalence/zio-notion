@@ -9,6 +9,7 @@ import zio.notion.model.printer
 import zio.test._
 
 object SortSpec extends ZIOSpecDefault {
+
   override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("Sort suite")(
       test("Sort serialization") {

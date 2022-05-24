@@ -31,6 +31,7 @@ object PatchPlan {
     final case object PhoneNumber                            extends PropertyType
     final case class Formula(expression: String)             extends PropertyType
     final case class Relation(databaseId: String)            extends PropertyType
+
     final case class Rollup(
         rollupPropertyName:   Option[String],
         relationPropertyName: Option[String],

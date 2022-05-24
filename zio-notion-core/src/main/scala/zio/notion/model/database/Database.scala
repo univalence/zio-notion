@@ -34,11 +34,13 @@ final case class Database(
 }
 
 object Database {
+
   final case class Patch(
       database:   Database,
       title:      Option[Seq[RichTextData]],
       properties: Map[String, Option[PatchPlan]]
   ) { self =>
+
     def updateProperty(
         patchedDefinition: PatchedDefinition
     )(implicit manifest: Manifest[PropertyDescription.Title]): Patch = {

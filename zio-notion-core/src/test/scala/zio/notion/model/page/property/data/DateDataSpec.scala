@@ -8,6 +8,7 @@ import zio.test._
 import zio.test.Assertion._
 
 object DateDataSpec extends ZIOSpecDefault {
+
   override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("DateData serde suite")(
       test("We should be able to parse a date as json") {

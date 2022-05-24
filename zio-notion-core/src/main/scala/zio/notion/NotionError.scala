@@ -7,11 +7,13 @@ sealed trait NotionError extends Throwable {
 }
 
 object NotionError {
+
   final case class ConnectionError(throwable: Throwable) extends NotionError {
     override def humanize: String = throwable.getMessage
   }
 
   final case class HttpError(curl: String, status: Int, code: String, message: String) extends NotionError {
+
     override def humanize: String =
       s"""$message
          |

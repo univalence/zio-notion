@@ -8,6 +8,7 @@ import zio.notion.model.printer
 import zio.test._
 
 object PatchPlanSpec extends ZIOSpecDefault {
+
   override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("Patched property description")(
       test("Test patched property description encoding") {

@@ -20,18 +20,19 @@ trait NotionClient {
   def retrievePage(pageId: String): IO[NotionError, NotionResponse]
   def retrieveDatabase(databaseId: String): IO[NotionError, NotionResponse]
   def retrieveUser(userId: String): IO[NotionError, NotionResponse]
-
   def queryDatabase(databaseId: String, query: Query): IO[NotionError, NotionResponse]
-
   def updatePage(patch: Page.Patch): IO[NotionError, NotionResponse]
   def updateDatabase(patch: Database.Patch): IO[NotionError, NotionResponse]
 }
 
 object NotionClient {
+
   def retrievePage(pageId: String): ZIO[NotionClient, NotionError, NotionResponse] =
     ZIO.service[NotionClient].flatMap(_.retrievePage(pageId))
+
   def retrieveDatabase(databaseId: String): ZIO[NotionClient, NotionError, NotionResponse] =
     ZIO.service[NotionClient].flatMap(_.retrieveDatabase(databaseId))
+
   def retrieveUser(userId: String): ZIO[NotionClient, NotionError, NotionResponse] =
     ZIO.service[NotionClient].flatMap(_.retrieveUser(userId))
 
@@ -39,6 +40,7 @@ object NotionClient {
     ZIO.service[NotionClient].flatMap(_.queryDatabase(databaseId, query))
 
   def updatePage(patch: Page.Patch): ZIO[NotionClient, NotionError, NotionResponse] = ZIO.service[NotionClient].flatMap(_.updatePage(patch))
+
   def updateDatabase(patch: Database.Patch): ZIO[NotionClient, NotionError, NotionResponse] =
     ZIO.service[NotionClient].flatMap(_.updateDatabase(patch))
 
@@ -66,6 +68,7 @@ object NotionClient {
     val endpoint: Uri = uri"https://api.notion.com/v1"
 
     implicit private class RequestOps(request: Request[Either[String, String], Any]) {
+
       def handle: IO[NotionError, NotionResponse] =
         sttpClient
           .send(request)

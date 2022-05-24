@@ -33,6 +33,7 @@ final case class Columns(predicate: String => Boolean) {
 }
 
 object Columns {
+
   final case class TitleDSLConstructor private (predicate: String => Boolean) {
     def patch: PatchedColumnTitle = PatchedColumnTitle(Predicate(predicate))
   }
