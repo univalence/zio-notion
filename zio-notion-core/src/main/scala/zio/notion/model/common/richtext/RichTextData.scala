@@ -49,5 +49,4 @@ object RichTextData {
 
   def default(text: String, annotations: Annotations): Text =
     RichTextData.Text(RichTextData.Text.TextData(text, None), annotations, text, None)
-
 }

@@ -1,6 +1,6 @@
 package zio.notion
 
-import io.circe.Decoder
+import io.circe.{Decoder, Json}
 import io.circe.generic.semiauto.deriveDecoder
 import io.circe.parser.decode
 import io.circe.syntax.EncoderOps
@@ -11,7 +11,10 @@ import sttp.model.Uri
 import zio._
 import zio.notion.NotionClient.NotionResponse
 import zio.notion.NotionError._
+import zio.notion.model.common.{Cover, Icon}
+import zio.notion.model.common.richtext.RichTextData
 import zio.notion.model.database.Database
+import zio.notion.model.database.patch.PatchPlan.PropertyType
 import zio.notion.model.database.query.Query
 import zio.notion.model.page.Page
 import zio.notion.model.printer
@@ -25,6 +28,14 @@ trait NotionClient {
 
   def updatePage(patch: Page.Patch): IO[NotionError, NotionResponse]
   def updateDatabase(patch: Database.Patch): IO[NotionError, NotionResponse]
+
+  def createDatabase(
+      pageId: String,
+      title: Seq[RichTextData],
+      icon: Option[Icon],
+      cover: Option[Cover],
+      properties: Map[String, PropertyType]
+  ): IO[NotionError, NotionResponse]
 }
 
 object NotionClient {
@@ -123,5 +134,30 @@ object NotionClient {
         .patch(uri"$endpoint/databases/${patch.database.id}")
         .body(printer.print(patch.asJson))
         .handle
+
+    override def createDatabase(
+        pageId: String,
+        title: Seq[RichTextData],
+        icon: Option[Icon],
+        cover: Option[Cover],
+        properties: Map[String, PropertyType]
+    ): IO[NotionError, NotionResponse] = {
+      val json =
+        Json.obj(
+          "parent" -> Json.obj(
+            "type"    -> "page_id".asJson,
+            "page_id" -> pageId.asJson
+          ),
+          "title"      -> title.asJson,
+          "icon"       -> icon.asJson,
+          "cover"      -> cover.asJson,
+          "properties" -> properties.asJson
+        )
+
+      defaultRequest
+        .post(uri"$endpoint/databases/")
+        .body(printer.print(json))
+        .handle
+    }
   }
 }

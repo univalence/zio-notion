@@ -1,13 +1,12 @@
 package zio.notion.model.database.patch
 
 import io.circe.{Encoder, Json}
-import io.circe.generic.extras.Configuration.snakeCaseTransformation
 import io.circe.syntax.EncoderOps
 
 import zio.notion.model.common.enumeration.{BaseColor, RollupFunction}
 import zio.notion.model.database.description.NumberDescription.NumberFormat
 import zio.notion.model.database.patch.PatchPlan.PropertyType
-import zio.notion.model.magnolia.NoDiscriminantNoNullEncoderDerivation
+import zio.notion.model.magnolia.{NoDiscriminantNoNullEncoderDerivation, PropertyTypeEncoderDerivation}
 
 final case class PatchPlan(name: Option[String], propertyType: Option[PropertyType])
 
@@ -49,18 +48,14 @@ object PatchPlan {
       implicit val encoder: Encoder[SelectOption] = NoDiscriminantNoNullEncoderDerivation.gen[SelectOption]
     }
 
-    implicit val encoder: Encoder[PropertyType] = NoDiscriminantNoNullEncoderDerivation.gen[PropertyType]
+    implicit val encoder: Encoder[PropertyType] = PropertyTypeEncoderDerivation.gen[PropertyType]
   }
 
   implicit val encoder: Encoder[PatchPlan] =
     (patch: PatchPlan) => {
-      val name: Seq[(String, Json)] = patch.name.fold(List.empty[(String, Json)])(n => List("name" -> Json.fromString(n)))
-      val propertyType =
-        patch.propertyType.fold(List.empty[(String, Json)]) { p =>
-          val name = snakeCaseTransformation(p.getClass.getSimpleName.split('$').head)
-          List(name -> p.asJson)
-        }
+      val name: Json     = patch.name.fold(Json.obj())(n => Json.obj("name" -> n.asJson))
+      val property: Json = patch.propertyType.fold(Json.obj())(p => p.asJson)
 
-      Json.obj(name ++ propertyType: _*)
+      property.deepMerge(name)
     }
 }
