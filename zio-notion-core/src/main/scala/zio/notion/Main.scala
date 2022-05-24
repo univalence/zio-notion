@@ -1,7 +1,5 @@
 package zio.notion
 
-import sttp.client3.asynchttpclient.zio.{AsyncHttpClientZioBackend, SttpClient}
-
 import zio._
 import zio.notion.dsl.ColumnContext
 import zio.notion.dsl.DatabaseQueryDSL._

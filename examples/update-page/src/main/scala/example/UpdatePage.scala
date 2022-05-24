@@ -1,7 +1,5 @@
 package example
 
-import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
-
 import zio._
 import zio.notion._
 import zio.notion.dsl._
