@@ -9,8 +9,6 @@ import zio.notion.PropertyUpdater.ColumnMatcher
 import zio.notion.dsl.PatchedDefinition
 import zio.notion.model.common.{Cover, Icon, Parent, UserId}
 import zio.notion.model.common.richtext.{Annotations, RichTextData}
-import zio.notion.model.database.description.PropertyDescription
-import zio.notion.model.database.patch.PatchPlan
 import zio.notion.model.magnolia.PatchEncoderDerivation
 
 import java.time.OffsetDateTime
@@ -27,7 +25,7 @@ final case class Database(
     icon:           Option[Icon],
     parent:         Parent,
     archived:       Boolean,
-    properties:     Map[String, PropertyDescription],
+    properties:     Map[String, PropertyDefinition],
     url:            String
 ) { self =>
   def patch: Database.Patch = Database.Patch(self)
@@ -37,16 +35,16 @@ object Database {
   final case class Patch(
       database:   Database,
       title:      Option[Seq[RichTextData]],
-      properties: Map[String, Option[PatchPlan]]
+      properties: Map[String, Option[PropertyDefinitionPatch]]
   ) { self =>
     def updateProperty(
         patchedDefinition: PatchedDefinition
-    )(implicit manifest: Manifest[PropertyDescription.Title]): Patch = {
-      val patchPlan = patchedDefinition.patchPlan
+    )(implicit manifest: Manifest[PropertyDefinition.Title]): Patch = {
+      val patchPlan = patchedDefinition.patch
 
       patchedDefinition.matcher match {
         case ColumnMatcher.Predicate(f) =>
-          val properties: Iterable[(String, Option[PatchPlan])] =
+          val properties: Iterable[(String, Option[PropertyDefinitionPatch])] =
             database.properties.collect {
               case (key, property) if f(key) && !manifest.runtimeClass.isInstance(property) => key -> Some(patchPlan)
             }
@@ -58,8 +56,8 @@ object Database {
             case Some(_) => copy(properties = properties + (key -> Some(patchPlan)))
             // Create a new property
             case None =>
-              val newKey: String           = patchPlan.name.getOrElse(key)
-              val value: Option[PatchPlan] = Some(patchPlan.copy(name = None))
+              val newKey: String                         = patchPlan.name.getOrElse(key)
+              val value: Option[PropertyDefinitionPatch] = Some(patchPlan.copy(name = None))
 
               copy(properties = properties + (newKey -> value))
           }

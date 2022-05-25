@@ -14,7 +14,7 @@ import zio.notion.NotionError._
 import zio.notion.model.common.{Cover, Icon}
 import zio.notion.model.common.richtext.RichTextData
 import zio.notion.model.database.Database
-import zio.notion.model.database.patch.PatchPlan.PropertyType
+import zio.notion.model.database.PropertyDefinitionPatch.PropertySchema
 import zio.notion.model.database.query.Query
 import zio.notion.model.page.Page
 import zio.notion.model.printer
@@ -34,7 +34,7 @@ trait NotionClient {
       title: Seq[RichTextData],
       icon: Option[Icon],
       cover: Option[Cover],
-      properties: Map[String, PropertyType]
+      properties: Map[String, PropertySchema]
   ): IO[NotionError, NotionResponse]
 }
 
@@ -140,7 +140,7 @@ object NotionClient {
         title: Seq[RichTextData],
         icon: Option[Icon],
         cover: Option[Cover],
-        properties: Map[String, PropertyType]
+        properties: Map[String, PropertySchema]
     ): IO[NotionError, NotionResponse] = {
       val json =
         Json.obj(
