@@ -1,20 +1,20 @@
-package zio.notion.model.database.patch
+package zio.notion.model.database
 
 import io.circe.syntax.EncoderOps
 
 import zio.Scope
 import zio.notion.dsl.DatabaseUpdateDSL._
-import zio.notion.model.printer
-import zio.test._
+import zio.notion.model.{database, printer}
+import zio.test.{assertTrue, Spec, TestEnvironment, ZIOSpecDefault}
 
-object PatchPlanSpec extends ZIOSpecDefault {
+object PropertyDefinitionPatchSpec extends ZIOSpecDefault {
   override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("Patched property description")(
       test("Test patched property description encoding") {
-        val description: PatchPlan =
-          PatchPlan(
-            name         = Some("Test"),
-            propertyType = Some(multiSelect("test".blue, "test2"))
+        val description: PropertyDefinitionPatch =
+          database.PropertyDefinitionPatch(
+            name           = Some("Test"),
+            propertySchema = Some(multiSelect("test".blue, "test2"))
           )
 
         val expected: String =

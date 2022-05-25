@@ -10,7 +10,7 @@ import zio.notion.NotionError.JsonError
 import zio.notion.model.common.{Cover, Icon}
 import zio.notion.model.common.richtext.RichTextData
 import zio.notion.model.database.{Database, DatabaseQuery}
-import zio.notion.model.database.patch.PatchPlan.PropertyType
+import zio.notion.model.database.PropertyDefinitionPatch.PropertySchema
 import zio.notion.model.database.query.{Filter, Query, Sorts}
 import zio.notion.model.page.Page
 import zio.notion.model.user.User
@@ -36,7 +36,7 @@ sealed trait Notion {
       title: Seq[RichTextData],
       icon: Option[Icon],
       cover: Option[Cover],
-      properties: Map[String, PropertyType]
+      properties: Map[String, PropertySchema]
   ): IO[NotionError, Database]
 }
 
@@ -63,7 +63,7 @@ object Notion {
       title: Seq[RichTextData],
       icon: Option[Icon],
       cover: Option[Cover],
-      properties: Map[String, PropertyType]
+      properties: Map[String, PropertySchema]
   ): ZIO[Notion, NotionError, Database] = ZIO.service[Notion].flatMap(_.createDatabase(pageId, title, icon, cover, properties))
 
   val live: URLayer[NotionClient, Notion] = ZLayer(ZIO.service[NotionClient].map(LiveNotion))
@@ -91,7 +91,7 @@ object Notion {
         title: Seq[RichTextData],
         icon: Option[Icon],
         cover: Option[Cover],
-        properties: Map[String, PropertyType]
+        properties: Map[String, PropertySchema]
     ): IO[NotionError, Database] = decodeResponse[Database](notionClient.createDatabase(pageId, title, icon, cover, properties))
   }
 }

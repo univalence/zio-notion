@@ -3,8 +3,7 @@ package zio.notion
 import zio.notion.Faker.FakeProperty.{fakeCheckbox, fakeTitle}
 import zio.notion.model.common.{Parent, UserId}
 import zio.notion.model.common.richtext.{Annotations, RichTextData}
-import zio.notion.model.database.Database
-import zio.notion.model.database.description.PropertyDescription
+import zio.notion.model.database.{Database, PropertyDefinition}
 import zio.notion.model.page.Page
 import zio.notion.model.page.property.Property.{Checkbox, Date, Title}
 
@@ -69,7 +68,7 @@ object Faker {
       icon           = None,
       parent         = Parent.Workspace,
       archived       = false,
-      properties     = Map("Test" -> PropertyDescription.CreatedTime("id", "Test")),
+      properties     = Map("Test" -> PropertyDefinition.CreatedTime("id", "Test")),
       url            = fakeUrl
     )
 
