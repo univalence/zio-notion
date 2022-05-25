@@ -5,7 +5,8 @@ import io.circe.parser.decode
 import zio.Scope
 import zio.notion.Faker._
 import zio.notion.model.common.enumeration.RollupFunction.Count
-import zio.notion.model.page.property.Property.{Rollup, _}
+import zio.notion.model.page.Property
+import zio.notion.model.page.Property.{Rollup, _}
 import zio.notion.model.page.property.data.RollupData
 import zio.test._
 import zio.test.Assertion._

@@ -1,11 +1,11 @@
 package zio.notion
 
 import zio.notion.Faker.FakeProperty.{fakeCheckbox, fakeTitle}
-import zio.notion.model.common.{Parent, UserId}
+import zio.notion.model.common.{Id, Parent}
 import zio.notion.model.common.richtext.{Annotations, RichTextData}
 import zio.notion.model.database.{Database, PropertyDefinition}
 import zio.notion.model.page.Page
-import zio.notion.model.page.property.Property.{Checkbox, Date, Title}
+import zio.notion.model.page.Property.{Checkbox, Date, Title}
 
 import java.time.{LocalDate, OffsetDateTime, ZoneOffset}
 
@@ -45,8 +45,8 @@ object Faker {
     Page(
       createdTime    = fakeDatetime,
       lastEditedTime = fakeDatetime,
-      createdBy      = UserId(fakeUUID),
-      lastEditedBy   = UserId(fakeUUID),
+      createdBy      = Id(fakeUUID),
+      lastEditedBy   = Id(fakeUUID),
       id             = fakeUUID,
       cover          = None,
       icon           = None,
@@ -60,8 +60,8 @@ object Faker {
     Database(
       createdTime    = fakeDatetime,
       lastEditedTime = fakeDatetime,
-      createdBy      = UserId(fakeUUID),
-      lastEditedBy   = UserId(fakeUUID),
+      createdBy      = Id(fakeUUID),
+      lastEditedBy   = Id(fakeUUID),
       id             = fakeUUID,
       title          = List(RichTextData.default("test", Annotations.default)),
       cover          = None,

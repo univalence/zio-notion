@@ -5,7 +5,7 @@ import zio.notion.Faker._
 import zio.notion.NotionClient.NotionResponse
 import zio.notion.model.common.{Cover, Icon}
 import zio.notion.model.common.richtext.RichTextData
-import zio.notion.model.database.{Database, PropertyDefinitionPatch}
+import zio.notion.model.database.{Database, PatchedPropertyDefinition}
 import zio.notion.model.database.query.Query
 import zio.notion.model.page.Page
 
@@ -336,7 +336,7 @@ final case class TestNotionClient() extends NotionClient {
       title: Seq[RichTextData],
       icon: Option[Icon],
       cover: Option[Cover],
-      properties: Map[String, PropertyDefinitionPatch.PropertySchema]
+      properties: Map[String, PatchedPropertyDefinition.PropertySchema]
   ): IO[NotionError, NotionResponse] = retrieveDatabase(fakeUUID)
 }
 

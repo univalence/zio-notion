@@ -1,8 +1,8 @@
 package zio.notion.dsl
 
 import zio.notion.model.common.enumeration.Color
-import zio.notion.model.database.PropertyDefinitionPatch.PropertySchema
-import zio.notion.model.database.PropertyDefinitionPatch.PropertySchema.SelectOption
+import zio.notion.model.database.PatchedPropertyDefinition.PropertySchema
+import zio.notion.model.database.PatchedPropertyDefinition.PropertySchema.SelectOption
 import zio.notion.model.database.metadata.NumberMetadata.NumberFormat
 
 trait DatabaseUpdateDSL {

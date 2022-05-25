@@ -1,9 +1,10 @@
-package zio.notion.model.page.property
+package zio.notion.model.page
 
 import io.circe.generic.extras._
 
-import zio.notion.model.common.UserId
+import zio.notion.model.common.Id
 import zio.notion.model.common.richtext.RichTextData
+import zio.notion.model.page.property.Link
 import zio.notion.model.page.property.data.{DateData, FormulaData, RollupData, SelectData}
 
 @ConfiguredJsonCodec sealed trait Property
@@ -28,11 +29,11 @@ object Property {
 
   final case class Files(id: String, files: Seq[Link]) extends Property
 
-  final case class CreatedBy(id: String, createdBy: UserId) extends Property
+  final case class CreatedBy(id: String, createdBy: Id) extends Property
 
   final case class CreatedTime(id: String, createdTime: String) extends Property
 
-  final case class LastEditedBy(id: String, lastEditedBy: UserId) extends Property
+  final case class LastEditedBy(id: String, lastEditedBy: Id) extends Property
 
   final case class LastEditedTime(id: String, lastEditedTime: String) extends Property
 
@@ -42,7 +43,7 @@ object Property {
 
   final case class RichText(id: String, richText: Seq[RichTextData]) extends Property
 
-  final case class People(id: String, people: Seq[UserId]) extends Property
+  final case class People(id: String, people: Seq[Id]) extends Property
 
   final case class Rollup(id: String, rollup: RollupData) extends Property
 

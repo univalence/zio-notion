@@ -4,14 +4,14 @@ import io.circe.{Encoder, Json}
 import io.circe.syntax.EncoderOps
 
 import zio.notion.model.common.enumeration.{BaseColor, RollupFunction}
-import zio.notion.model.database.PropertyDefinitionPatch.PropertySchema
+import zio.notion.model.database.PatchedPropertyDefinition.PropertySchema
 import zio.notion.model.database.metadata.NumberMetadata.NumberFormat
 import zio.notion.model.magnolia.{NoDiscriminantNoNullEncoderDerivation, PropertyTypeEncoderDerivation}
 
-final case class PropertyDefinitionPatch(name: Option[String], propertySchema: Option[PropertySchema])
+final case class PatchedPropertyDefinition(name: Option[String], propertySchema: Option[PropertySchema])
 
-object PropertyDefinitionPatch {
-  val unit: PropertyDefinitionPatch = PropertyDefinitionPatch(None, None)
+object PatchedPropertyDefinition {
+  val unit: PatchedPropertyDefinition = PatchedPropertyDefinition(None, None)
 
   sealed trait PropertySchema
 
@@ -51,8 +51,8 @@ object PropertyDefinitionPatch {
     implicit val encoder: Encoder[PropertySchema] = PropertyTypeEncoderDerivation.gen[PropertySchema]
   }
 
-  implicit val encoder: Encoder[PropertyDefinitionPatch] =
-    (patch: PropertyDefinitionPatch) => {
+  implicit val encoder: Encoder[PatchedPropertyDefinition] =
+    (patch: PatchedPropertyDefinition) => {
       val name: Json     = patch.name.fold(Json.obj())(n => Json.obj("name" -> n.asJson))
       val property: Json = patch.propertySchema.fold(Json.obj())(p => p.asJson)
 
