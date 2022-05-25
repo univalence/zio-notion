@@ -1,8 +1,7 @@
 package zio.notion
 
 import zio._
-import zio.notion.dsl.ColumnContext
-import zio.notion.dsl.DatabaseQueryDSL._
+import zio.notion.dsl._
 import zio.notion.model.database.query.{Filter, Sorts}
 
 //TODO
