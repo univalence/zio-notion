@@ -7,7 +7,6 @@ import zio.Scope
 import zio.notion.Faker.{fakeDatabase, fakeUUID}
 import zio.notion.NotionError.PropertyNotExist
 import zio.notion.dsl._
-import zio.notion.dsl.DatabaseUpdateDSL._
 import zio.notion.model.printer
 import zio.test.{assert, assertTrue, Spec, TestEnvironment, ZIOSpecDefault}
 import zio.test.Assertion.isRight
