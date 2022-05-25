@@ -2,10 +2,10 @@ package zio.notion.dsl
 
 import zio.Clock
 import zio.notion.PropertyUpdater._
-import zio.notion.model.common.UserId
+import zio.notion.model.common.Id
 import zio.notion.model.common.enumeration.Color
 import zio.notion.model.common.richtext.{Annotations, RichTextData}
-import zio.notion.model.page.patch.PatchedProperty._
+import zio.notion.model.page.PatchedProperty._
 import zio.notion.model.page.property.Link
 
 import java.time.LocalDate
@@ -104,12 +104,12 @@ object PatchedColumn {
   }
 
   final case class PatchedColumnPeople(matcher: ColumnMatcher) {
-    def set(people: Seq[UserId]): FieldSetter[PatchedPeople] = FieldSetter(matcher, PatchedPeople(people))
-    def update(f: Seq[UserId] => Seq[UserId]): UFieldUpdater[PatchedPeople] =
+    def set(people: Seq[Id]): FieldSetter[PatchedPeople] = FieldSetter(matcher, PatchedPeople(people))
+    def update(f: Seq[Id] => Seq[Id]): UFieldUpdater[PatchedPeople] =
       FieldUpdater.succeed(matcher, property => property.copy(people = f(property.people)))
 
-    def add(people: Seq[UserId]): UFieldUpdater[PatchedPeople] = update(_ ++ people)
-    def add(people: UserId): UFieldUpdater[PatchedPeople]      = add(List(people))
+    def add(people: Seq[Id]): UFieldUpdater[PatchedPeople] = update(_ ++ people)
+    def add(people: Id): UFieldUpdater[PatchedPeople]      = add(List(people))
   }
 
   final case class PatchedColumnFiles(matcher: ColumnMatcher) {

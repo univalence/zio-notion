@@ -11,8 +11,8 @@ object PropertyDefinitionPatchSpec extends ZIOSpecDefault {
   override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("Patched property description")(
       test("Test patched property description encoding") {
-        val description: PropertyDefinitionPatch =
-          database.PropertyDefinitionPatch(
+        val description: PatchedPropertyDefinition =
+          database.PatchedPropertyDefinition(
             name           = Some("Test"),
             propertySchema = Some(multiSelect("test".blue, "test2"))
           )

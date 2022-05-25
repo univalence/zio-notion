@@ -1,7 +1,7 @@
 package zio
 
-import zio.notion.model.page.patch.PatchedProperty._
-import zio.notion.model.page.property.Property._
+import zio.notion.model.page.PatchedProperty._
+import zio.notion.model.page.Property._
 
 package object notion {
   implicit val patchableNumber: Patchable[Number, PatchedNumber] = (input: Number) => input.number.map(PatchedNumber.apply)

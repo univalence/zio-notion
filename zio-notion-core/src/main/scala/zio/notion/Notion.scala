@@ -10,7 +10,7 @@ import zio.notion.NotionError.JsonError
 import zio.notion.model.common.{Cover, Icon}
 import zio.notion.model.common.richtext.RichTextData
 import zio.notion.model.database.{Database, DatabaseQuery}
-import zio.notion.model.database.PropertyDefinitionPatch.PropertySchema
+import zio.notion.model.database.PatchedPropertyDefinition.PropertySchema
 import zio.notion.model.database.query.{Filter, Query, Sorts}
 import zio.notion.model.page.Page
 import zio.notion.model.user.User

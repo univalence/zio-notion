@@ -1,8 +1,8 @@
-package zio.notion.model.page.patch
+package zio.notion.model.page
 
 import io.circe.{Encoder, Json}
 
-import zio.notion.model.common.UserId
+import zio.notion.model.common.Id
 import zio.notion.model.common.richtext.RichTextData
 import zio.notion.model.magnolia.{NoDiscriminantNoNullEncoderDerivation, PatchedPropertyEncoderDerivation}
 import zio.notion.model.page.property.Link
@@ -59,7 +59,7 @@ object PatchedProperty {
     implicit val encoder: Encoder[PatchedDate] = PatchedPropertyEncoderDerivation.gen[PatchedDate]
   }
 
-  final case class PatchedPeople(people: Seq[UserId]) extends PatchedProperty
+  final case class PatchedPeople(people: Seq[Id]) extends PatchedProperty
 
   object PatchedPeople {
     implicit val encoder: Encoder[PatchedPeople] = PatchedPropertyEncoderDerivation.gen[PatchedPeople]
