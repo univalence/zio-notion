@@ -42,8 +42,8 @@ object Main extends ZIOAppDefault {
 
   def app: ZIO[Notion, NotionError, Unit] =
     for {
-      database <- Notion.retrieveDatabase("0aa1fe6ab19a40799f36498ff2cc13af")
-      patch    <- Console.printLine(database.results.length).orDie
+      database <- Notion.queryDatabase("0aa1fe6ab19a40799f36498ff2cc13af", sorts = sorts, filter = filter)
+      _        <- Console.printLine(database.results.length).orDie
     } yield ()
 
   override def run: ZIO[ZIOAppArgs, Any, Any] =

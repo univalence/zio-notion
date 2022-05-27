@@ -35,8 +35,6 @@ import zio.notion._
 import zio.notion.dsl._
 import zio.notion.model.page.Page
 
-import java.time.LocalDate
-
 object UpdatePage extends ZIOAppDefault {
   def buildPatch(page: Page): Either[NotionError, Page.Patch] = {
     val date = LocalDate.of(2022, 2, 2)
