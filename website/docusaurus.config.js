@@ -4,12 +4,14 @@
 const lightCodeTheme = require('prism-react-renderer/themes/github');
 const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 
+const repoUrl = "https://github.com/univalence/zio-notion";
+
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'zio-notion',
+  title: 'ZIO Notion',
   tagline: 'A strongly typed interface to interact with Notion using ZIO',
-  url: 'https://univalence.github.io/zio-notion/',
-  baseUrl: '/',
+  url: 'https://univalence.github.io/',
+  baseUrl: '/zio-notion/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
@@ -27,15 +29,17 @@ const config = {
     locales: ['en'],
   },
 
+
   presets: [
     [
       'classic',
       /** @type {import('@docusaurus/preset-classic').Options} */
       ({
         docs: {
-          //routeBasePath: '/',
+          routeBasePath: '/',
           sidebarPath: require.resolve('./sidebars.js'),
-          path: './docs',
+          editUrl: `${repoUrl}/edit/master/docs/`,
+          path: '../docs',
         },
         blog: false,
         theme: {
@@ -49,10 +53,10 @@ const config = {
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       navbar: {
-        title: 'ZIO-NOTION',
+        title: 'ZIO for Notion',
         items: [
           {
-            href: 'https://github.com/facebook/docusaurus',
+            href: repoUrl,
             label: 'GitHub',
             position: 'right',
           },
@@ -62,11 +66,41 @@ const config = {
         style: 'dark',
         links: [
           {
-            title: 'Docs',
+            title: 'Documentation',
             items: [
               {
-                label: 'Tutorial',
-                to: '/docs/intro',
+                label: 'Introduction',
+                to: '/',
+              },
+            ],
+          },
+          {
+            title: 'More',
+            items: [
+              {
+                label: 'ZIO',
+                href: 'https://zio.dev/',
+              },
+              {
+                label: 'Notion API',
+                href: 'https://developers.notion.com/',
+              },
+            ],
+          },
+          {
+            title: 'Univalence',
+            items: [
+              {
+                label: 'Website',
+                href: 'https://univalence.io/',
+              },
+              {
+                label: 'Blog',
+                href: 'https://univalence.io/blog/',
+              },
+              {
+                label: 'Github',
+                href: 'https://github.com/UNIVALENCE',
               },
             ],
           },
