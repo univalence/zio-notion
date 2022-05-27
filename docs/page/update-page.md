@@ -29,7 +29,7 @@ There is two foreign concepts here, **PatchedProperty** and **Removable** traits
 - A **PatchedProperty** is the new value to apply to a specific property. There is a PatchedProperty for every 
   properties of a page. For the moment, you can't set a patched property if the property doesn't exist.
 
-We provide several helper function to update a patch with ease.
+We provide several helper functions to update a patch with ease.
 
 Here is an example:
 

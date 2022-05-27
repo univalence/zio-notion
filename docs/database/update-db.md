@@ -25,7 +25,7 @@ Using patch plan, you can:
 - Update the name of the property schema
 - Update the type of the property schema (cast the property from one type to another)
 
-We provide several helper function to update a patch with ease.
+We provide several helper functions to update a patch with ease.
 
 Here is an example:
 
@@ -33,24 +33,18 @@ Here is an example:
 import zio._
 import zio.notion._
 import zio.notion.dsl._
-import zio.notion.model.page.Page
+import zio.notion.model.database.Database
 
-object UpdatePage extends ZIOAppDefault {
-  def buildPatch(page: Page): Either[NotionError, Page.Patch] = {
-    val date = LocalDate.of(2022, 2, 2)
-
-    for {
-      patch0 <- Right(page.patch)
-      patch1 <- patch0.updateProperty($"col1".asNumber.patch.ceil)
-      patch2 <- patch1.updateProperty($"col2".asDate.patch.between(date, date.plusDays(14)))
-    } yield patch2.archive
-  }
-
+object UpdateDatabase extends ZIOAppDefault {
   def example: ZIO[Notion, NotionError, Unit] =
     for {
-      page  <- Notion.retrievePage("6A074793-D735-4BF6-9159-24351D239BBC") // Insert your own page ID
-      patch <- ZIO.fromEither(buildPatch(page))
-      _     <- Notion.updatePage(patch)
+      database <- Notion.retrieveDatabase("6A074793-D735-4BF6-9159-24351D239BBC") // Insert your own database ID
+      patch =
+        database.patch
+          .updateProperty($$"col1".patch.rename("Column 1"))
+          .updateProperty($$"col2".patch.as(euro))
+          .rename("My database")
+      _ <- Notion.updateDatabase(patch)
     } yield ()
 
   override def run: ZIO[Any with ZIOAppArgs with Scope, Any, Any] =
@@ -58,7 +52,9 @@ object UpdatePage extends ZIOAppDefault {
 }
 ```
 
-In this example, we apply three different patches to the notion page:
-- We update the property "col1" applying the *ceil* function to the already existing number
-- We set the property "col2" with a start date and an end date 14 days later
-- We archive the page
+`$$"col1"` is an alias for `$"col1".definition`.
+
+In this example, we apply three different patches to the notion database:
+- We rename the property schema "col1" to "Column 1"
+- We cast the property "col2" to be a number with the **euro** unit
+- We rename the database as "My database"
