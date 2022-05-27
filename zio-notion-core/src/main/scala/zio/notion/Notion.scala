@@ -8,6 +8,7 @@ import zio._
 import zio.notion.NotionClient.NotionResponse
 import zio.notion.NotionError.JsonError
 import zio.notion.model.common.{Cover, Icon}
+import zio.notion.model.common.Parent.PageId
 import zio.notion.model.common.richtext.RichTextData
 import zio.notion.model.database.{Database, DatabaseQuery}
 import zio.notion.model.database.PatchedPropertyDefinition.PropertySchema
@@ -57,6 +58,8 @@ object Notion {
 
   def updatePage(patch: Page.Patch): ZIO[Notion, NotionError, Page]             = ZIO.service[Notion].flatMap(_.updatePage(patch))
   def updateDatabase(patch: Database.Patch): ZIO[Notion, NotionError, Database] = ZIO.service[Notion].flatMap(_.updateDatabase(patch))
+
+  def deletePage(page: Page): ZIO[Notion, NotionError, Unit] = Notion.updatePage(page.patch.archive).unit
 
   def createDatabase(
       pageId: String,
