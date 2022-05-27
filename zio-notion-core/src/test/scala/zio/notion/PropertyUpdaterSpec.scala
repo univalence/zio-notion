@@ -4,7 +4,7 @@ import zio.Scope
 import zio.notion.Faker.fakeLocalDate
 import zio.notion.PropertyUpdater.{FieldSetter, FieldUpdater}
 import zio.notion.dsl._
-import zio.notion.model.page.patch.PatchedProperty.{PatchedDate, PatchedNumber}
+import zio.notion.model.page.PatchedProperty.{PatchedDate, PatchedNumber}
 import zio.test._
 
 object PropertyUpdaterSpec extends ZIOSpecDefault {

@@ -1,7 +1,9 @@
 package zio.notion.model.database
+
 import io.circe.generic.extras.{Configuration => CirceConfiguration}
 
 import zio.notion.model
-package object description {
+
+package object metadata {
   implicit val config: CirceConfiguration = model.config
 }

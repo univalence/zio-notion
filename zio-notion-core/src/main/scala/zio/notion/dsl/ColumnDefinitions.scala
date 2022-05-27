@@ -1,7 +1,8 @@
 package zio.notion.dsl
 
-import zio.notion.model.database.patch.PatchPlan
+import zio.notion.PropertyUpdater.ColumnMatcher.Predicate
+import zio.notion.model.database.PatchedPropertyDefinition
 
 final case class ColumnDefinitions(predicate: String => Boolean) {
-  def patch: PatchedColumnDefinitions = PatchedColumnDefinitions(predicate, PatchPlan.unit)
+  def patch: PatchedColumnDefinition = PatchedColumnDefinition(Predicate(predicate), PatchedPropertyDefinition.unit)
 }

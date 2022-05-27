@@ -15,8 +15,8 @@ trait DatabaseQueryDSL {
 
   implicit def sortingToSort(sorting: Sorting): Sorts = Sorts(List(sorting))
 
-  val createdTime: TimestampType    = CreatedTime
-  val lastEditedTime: TimestampType = LastEditedTime
+  val byCreatedTime: TimestampType    = CreatedTime
+  val byLastEditedTime: TimestampType = LastEditedTime
 
   // Filter helpers
 

@@ -2,8 +2,7 @@ package zio.notion.model.common.richtext
 
 import io.circe.generic.extras._
 
-import zio.notion.model.common.{Url, UserId}
-import zio.notion.model.page.property.data.Id
+import zio.notion.model.common.{Id, Url}
 
 @ConfiguredJsonCodec sealed trait RichTextData
 
@@ -22,7 +21,7 @@ object RichTextData {
     @ConfiguredJsonCodec sealed trait MentionData
 
     object MentionData {
-      final case class User(user: UserId)            extends MentionData
+      final case class User(user: Id)                extends MentionData
       final case class LinkPreview(linkPreview: Url) extends MentionData
       final case class Page(page: Id)                extends MentionData
       final case class Database(database: Id)        extends MentionData
@@ -49,5 +48,4 @@ object RichTextData {
 
   def default(text: String, annotations: Annotations): Text =
     RichTextData.Text(RichTextData.Text.TextData(text, None), annotations, text, None)
-
 }

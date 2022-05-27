@@ -1,7 +1,5 @@
 package example
 
-import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
-
 import zio._
 import zio.notion._
 import zio.notion.dsl._
@@ -10,11 +8,6 @@ import zio.notion.model.page.Page
 import java.time.LocalDate
 
 object UpdatePage extends ZIOAppDefault {
-  val notionConfiguration: NotionConfiguration =
-    NotionConfiguration(
-      bearer = "6A074793-D735-4BF6-9159-24351D239BBC" // Insert your own bearer
-    )
-
   def buildPatch(page: Page): Either[NotionError, Page.Patch] = {
     val date = LocalDate.of(2022, 2, 2)
 
@@ -33,10 +26,5 @@ object UpdatePage extends ZIOAppDefault {
     } yield ()
 
   override def run: ZIO[Any with ZIOAppArgs with Scope, Any, Any] =
-    example.provide(
-      AsyncHttpClientZioBackend.layer(),
-      notionConfiguration.asLayer,
-      NotionClient.live,
-      Notion.live
-    )
+    example.provide(Notion.layerWith("6A074793-D735-4BF6-9159-24351D239BBC")) // Insert your own bearer
 }

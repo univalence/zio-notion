@@ -4,7 +4,7 @@ import zio.{Scope, ZIO}
 import zio.notion.Faker._
 import zio.notion.model.database.Database
 import zio.notion.model.page.Page
-import zio.notion.model.user.User
+import zio.notion.model.user.{User, Users}
 import zio.test._
 
 object NotionSpec extends ZIOSpecDefault {
@@ -23,6 +23,12 @@ object NotionSpec extends ZIOSpecDefault {
         effect
           .provide(TestNotionClient.layer, Notion.live)
           .map(user => assertTrue(user.isInstanceOf[User.Person]))
+      },
+      test("User can retrieve users from Notion") {
+        val effect: ZIO[Notion, NotionError, Users] = Notion.retrieveUsers
+        effect
+          .provide(TestNotionClient.layer, Notion.live)
+          .map(users => assertTrue(users.results.length == 2))
       }
     )
 }

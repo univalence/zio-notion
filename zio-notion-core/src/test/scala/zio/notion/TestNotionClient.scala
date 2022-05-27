@@ -3,7 +3,9 @@ package zio.notion
 import zio._
 import zio.notion.Faker._
 import zio.notion.NotionClient.NotionResponse
-import zio.notion.model.database.Database
+import zio.notion.model.common.{Cover, Icon}
+import zio.notion.model.common.richtext.RichTextData
+import zio.notion.model.database.{Database, PatchedPropertyDefinition}
 import zio.notion.model.database.query.Query
 import zio.notion.model.page.Page
 
@@ -323,11 +325,45 @@ final case class TestNotionClient() extends NotionClient {
                    |    }
                    |}""".stripMargin)
 
+  override def retrieveUsers: IO[NotionError, NotionResponse] =
+    ZIO.succeed(s"""{
+                   |  "results": [
+                   |    {
+                   |      "object": "user",
+                   |      "id": "d40e767c-d7af-4b18-a86d-55c61f1e39a4",
+                   |      "type": "person",
+                   |      "person": {
+                   |        "email": "avo@example.org"
+                   |      },
+                   |      "name": "Avocado Lovelace",
+                   |      "avatar_url": "https://secure.notion-static.com/e6a352a8-8381-44d0-a1dc-9ed80e62b53d.jpg"
+                   |    },
+                   |    {
+                   |      "object": "user",
+                   |      "id": "9a3b5ae0-c6e6-482d-b0e1-ed315ee6dc57",
+                   |      "type": "bot",
+                   |      "bot": {},
+                   |      "name": "Doug Engelbot",
+                   |      "avatar_url": "https://secure.notion-static.com/6720d746-3402-4171-8ebb-28d15144923c.jpg"
+                   |    }
+                   |  ],
+                   |  "next_cursor": "fe2cc560-036c-44cd-90e8-294d5a74cebc",
+                   |  "has_more": true
+                   |}""".stripMargin)
+
   override def queryDatabase(databaseId: String, query: Query): IO[NotionError, NotionResponse] = ZIO.succeed("TODO")
 
   override def updatePage(patch: Page.Patch): IO[NotionError, NotionResponse] = retrievePage(patch.page.id)
 
   override def updateDatabase(patch: Database.Patch): IO[NotionError, NotionResponse] = retrieveDatabase(patch.database.id)
+
+  override def createDatabase(
+      pageId: String,
+      title: Seq[RichTextData],
+      icon: Option[Icon],
+      cover: Option[Cover],
+      properties: Map[String, PatchedPropertyDefinition.PropertySchema]
+  ): IO[NotionError, NotionResponse] = retrieveDatabase(fakeUUID)
 }
 
 object TestNotionClient {
