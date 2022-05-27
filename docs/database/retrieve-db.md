@@ -1,35 +1,16 @@
-# How to retrieve a DB
-## Example
+# Retrieve a database
+
+To retrieve a page you can call the following function providing the id of the database:
+
 ```scala
-import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
-import zio._
-import zio.notion._
-
-object QueryDatabase extends ZIOAppDefault {
-  val notionConfiguration: NotionConfiguration =
-    NotionConfiguration(
-      bearer = "YOUR_BEARER"
-    )
-
-  def example: ZIO[Notion, NotionError, Unit] = {
-    for {
-      db <- Notion.retrieveDatabase("YOUR_DB_ID")
-      _ <- Console.printLine(db.properties).orDie
-    } yield ()
-  }
-
-  override def run: ZIO[Any with ZIOAppArgs with Scope, Any, Any] =
-    example.provide(
-      AsyncHttpClientZioBackend.layer(),
-      notionConfiguration.asLayer,
-      NotionClient.live,
-      Notion.live
-    )
-}
+for {
+  database <- Notion.retrieveDatabase("database-id")
+} yield database
 ```
-## Return type
-The `Database` type provides you with several properties and methods
-### Properties
+
+The **Database** type provides you with several properties and methods.
+
+You can retrieve the following kind or properties:
 - createdTime
 - lastEditedTime
 - createdBy
@@ -43,6 +24,6 @@ The `Database` type provides you with several properties and methods
 - properties
 - url
 
-### Methods
+The **Database** type provides you with patching functions described in the patch a `How to patch a database` section.
 
-The `Database` type provides you with patching functions described in the patch a `How to patch a database` section 
+For more information, you can check the [notion documentation](https://developers.notion.com/reference/retrieve-a-database).
