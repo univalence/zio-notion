@@ -6,7 +6,7 @@ import zio.Scope
 import zio.test.{assert, Spec, TestEnvironment, ZIOSpecDefault}
 import zio.test.Assertion.isRight
 
-object DatabaseQueryResponseSpec extends ZIOSpecDefault {
+object DatabaseQuerySpec extends ZIOSpecDefault {
   override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("DB query response serde suite")(
       test("We should be able to parse a database query response json") {

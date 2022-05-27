@@ -1,10 +1,7 @@
 package zio.notion
 
-import sttp.client3.asynchttpclient.zio.{AsyncHttpClientZioBackend, SttpClient}
-
 import zio._
 import zio.notion.dsl._
-import zio.notion.model.database.Database
 import zio.notion.model.database.query.{Filter, Sorts}
 
 //TODO
@@ -33,25 +30,15 @@ import zio.notion.model.database.query.{Filter, Sorts}
 /* trait Ref[T] { def deref:ZIO[NotionClient, Error, T] } */
 
 object Main extends ZIOAppDefault {
-  def buildPatch(database: Database): Either[NotionError, Database.Patch] =
-    for {
-      patch0 <- Right(database.patch)
-      patch1 <- patch0.updateProperty($$"col1".patch.rename("Column 1"))
-      patch2 <- patch1.updateProperty($$"col2".patch.rename("Column 1"))
+  val sorts: Sorts   = $"Name".ascending
+  val filter: Filter = $"Name".asTitle.startsWith("a")
 
-    } yield patch2.archive
-
-  def example: ZIO[Notion, NotionError, Unit] =
+  def app: ZIO[Notion, NotionError, Unit] =
     for {
-      database <- Notion.retrieveDatabase("6A074793-D735-4BF6-9159-24351D239BBC") // Insert your own database ID
-      patch =
-        database.patch
-          .updateProperty($$"col1".patch.rename("Column 1"))
-          .updateProperty($$"col2".patch.as(euro))
-          .rename("My database")
-      _ <- Notion.updateDatabase(patch)
+      database <- Notion.queryDatabase("0aa1fe6ab19a40799f36498ff2cc13af", sorts = sorts, filter = filter)
+      _        <- Console.printLine(database.results.length).orDie
     } yield ()
 
-  override def run: ZIO[Any with ZIOAppArgs with Scope, Any, Any] =
-    example.provide(Notion.layerWith("6A074793-D735-4BF6-9159-24351D239BBC")) // Insert your own bearer
+  override def run: ZIO[ZIOAppArgs, Any, Any] =
+    app.tapError(e => Console.printLine(e.humanize)).provide(Notion.layerWith("secret_dnjrnOCfZBOiKsITF8AFDNL5QwYYHF5t7Rysbl0Mfzd"))
 }

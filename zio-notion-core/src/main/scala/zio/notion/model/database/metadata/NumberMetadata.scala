@@ -1,15 +1,14 @@
-package zio.notion.model.database.description
+package zio.notion.model.database.metadata
 
 import io.circe.Codec
 import io.circe.generic.extras.ConfiguredJsonCodec
 import io.circe.generic.extras.semiauto.deriveEnumerationCodec
 
-import zio.notion.model.database.description.NumberDescription.NumberFormat
+import zio.notion.model.database.metadata.NumberMetadata.NumberFormat
 
-@ConfiguredJsonCodec final case class NumberDescription(format: NumberFormat)
+@ConfiguredJsonCodec final case class NumberMetadata(format: NumberFormat)
 
-object NumberDescription {
-
+object NumberMetadata {
   sealed trait NumberFormat
 
   object NumberFormat {
