@@ -23,6 +23,7 @@ trait NotionClient {
   def retrievePage(pageId: String): IO[NotionError, NotionResponse]
   def retrieveDatabase(databaseId: String): IO[NotionError, NotionResponse]
   def retrieveUser(userId: String): IO[NotionError, NotionResponse]
+  def retrieveUsers: IO[NotionError, NotionResponse]
 
   def queryDatabase(databaseId: String, query: Query): IO[NotionError, NotionResponse]
 
@@ -115,6 +116,11 @@ object NotionClient {
     override def retrieveUser(userId: String): IO[NotionError, NotionResponse] =
       defaultRequest
         .get(uri"$endpoint/users/$userId")
+        .handle
+
+    override def retrieveUsers: IO[NotionError, NotionResponse] =
+      defaultRequest
+        .get(uri"$endpoint/users")
         .handle
 
     override def queryDatabase(databaseId: String, query: Query): IO[NotionError, NotionResponse] =

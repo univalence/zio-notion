@@ -8,13 +8,12 @@ import zio._
 import zio.notion.NotionClient.NotionResponse
 import zio.notion.NotionError.JsonError
 import zio.notion.model.common.{Cover, Icon}
-import zio.notion.model.common.Parent.PageId
 import zio.notion.model.common.richtext.RichTextData
 import zio.notion.model.database.{Database, DatabaseQuery}
 import zio.notion.model.database.PatchedPropertyDefinition.PropertySchema
 import zio.notion.model.database.query.{Filter, Query, Sorts}
 import zio.notion.model.page.Page
-import zio.notion.model.user.User
+import zio.notion.model.user.{User, Users}
 
 sealed trait Notion {
   protected def decodeJson[T: Decoder](content: String): IO[NotionError, T] =
@@ -26,6 +25,7 @@ sealed trait Notion {
   def retrievePage(pageId: String): IO[NotionError, Page]
   def retrieveDatabase(databaseId: String): IO[NotionError, Database]
   def retrieveUser(userId: String): IO[NotionError, User]
+  def retrieveUsers: IO[NotionError, Users]
 
   def queryDatabase(databaseId: String, query: Query): IO[NotionError, DatabaseQuery]
 
@@ -45,6 +45,7 @@ object Notion {
   def retrievePage(pageId: String): ZIO[Notion, NotionError, Page]             = ZIO.service[Notion].flatMap(_.retrievePage(pageId))
   def retrieveDatabase(databaseId: String): ZIO[Notion, NotionError, Database] = ZIO.service[Notion].flatMap(_.retrieveDatabase(databaseId))
   def retrieveUser(userId: String): ZIO[Notion, NotionError, User]             = ZIO.service[Notion].flatMap(_.retrieveUser(userId))
+  def retrieveUsers: ZIO[Notion, NotionError, Users]                           = ZIO.service[Notion].flatMap(_.retrieveUsers)
 
   def queryDatabase(databaseId: String, query: Query): ZIO[Notion, NotionError, DatabaseQuery] =
     ZIO.service[Notion].flatMap(_.queryDatabase(databaseId, query))
@@ -81,6 +82,7 @@ object Notion {
     override def retrieveDatabase(databaseId: String): IO[NotionError, Database] =
       decodeResponse[Database](notionClient.retrieveDatabase(databaseId))
     override def retrieveUser(userId: String): IO[NotionError, User] = decodeResponse[User](notionClient.retrieveUser(userId))
+    override def retrieveUsers: IO[NotionError, Users]               = decodeResponse[Users](notionClient.retrieveUsers)
 
     override def queryDatabase(databaseId: String, query: Query): IO[NotionError, DatabaseQuery] =
       decodeResponse[DatabaseQuery](notionClient.queryDatabase(databaseId, query))
