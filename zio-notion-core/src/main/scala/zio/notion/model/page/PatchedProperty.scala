@@ -66,6 +66,12 @@ object PatchedProperty {
     implicit val encoder: Encoder[PatchedPeople] = PatchedPropertyEncoderDerivation.gen[PatchedPeople]
   }
 
+  final case class PatchedRelation(relation: Seq[Id]) extends PatchedProperty
+
+  object PatchedRelation {
+    implicit val encoder: Encoder[PatchedRelation] = PatchedPropertyEncoderDerivation.gen[PatchedRelation]
+  }
+
   final case class PatchedFiles(files: Seq[Link]) extends PatchedProperty
 
   object PatchedFiles {
