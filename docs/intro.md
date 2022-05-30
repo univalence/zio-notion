@@ -11,7 +11,7 @@ STTP, Circe and ZIO to communicate with the Notion API. Thus, we tend to follow 
 To install the library, add the following line to your **build.sbt**:
 
 ```scala
-libraryDependencies += "io.univalence" %% "zio-notion" % "0.1.0"
+libraryDependencies += "io.univalence" %% "zio-notion" % "0.2.0"
 ```
 
 You will need to create a Notion integration to use this library. You can rapidly create one integration for free at
