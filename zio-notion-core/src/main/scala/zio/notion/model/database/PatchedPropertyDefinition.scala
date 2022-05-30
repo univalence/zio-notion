@@ -30,6 +30,7 @@ object PatchedPropertyDefinition {
     final case object PhoneNumber                            extends PropertySchema
     final case class Formula(expression: String)             extends PropertySchema
     final case class Relation(databaseId: String)            extends PropertySchema
+
     final case class Rollup(
         rollupPropertyName:   Option[String],
         relationPropertyName: Option[String],

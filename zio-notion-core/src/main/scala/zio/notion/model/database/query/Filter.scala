@@ -9,7 +9,9 @@ sealed trait Filter {
 }
 
 object Filter {
+
   final case class And(filters: Seq[Filter]) extends Filter { self =>
+
     override def and(other: Filter): Filter =
       other match {
         case And(otherFilters) => copy(filters = filters ++ otherFilters)
@@ -40,6 +42,7 @@ object Filter {
   }
 
   final case class One(filter: PropertyFilter) extends Filter { self =>
+
     override def and(other: Filter): Filter =
       other match {
         case And(filters) => And(self +: filters)

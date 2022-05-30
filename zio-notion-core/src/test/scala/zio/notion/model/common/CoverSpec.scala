@@ -9,6 +9,7 @@ import zio.test.{assert, Spec, TestEnvironment, ZIOSpecDefault}
 import zio.test.Assertion.{equalTo, isRight}
 
 object CoverSpec extends ZIOSpecDefault {
+
   override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("Cover serde suite")(
       test("We should be able to parse an external cover as json") {

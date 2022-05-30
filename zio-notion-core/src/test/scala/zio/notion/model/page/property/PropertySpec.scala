@@ -12,6 +12,7 @@ import zio.test._
 import zio.test.Assertion._
 
 object PropertySpec extends ZIOSpecDefault {
+
   override def spec: Spec[TestEnvironment with Scope, Nothing] =
     suite("RollupData serde suite")(
       test("We should be able to parse a rollup object as json") {

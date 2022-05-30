@@ -28,6 +28,7 @@ import magnolia1._
  * }}}
  */
 object PatchEncoderDerivation extends EncoderDerivation {
+
   def join[T](ctx: CaseClass[Encoder, T]): Encoder[T] =
     (value: T) => {
       val values: Seq[(String, Json)] =

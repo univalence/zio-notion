@@ -9,6 +9,7 @@ import zio.test.{assert, Spec, TestEnvironment, ZIOSpecDefault}
 import zio.test.Assertion.{equalTo, isRight}
 
 object TemporaryUrlSpec extends ZIOSpecDefault {
+
   override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("ExpirableUrl serde suite")(
       test("We should be able to parse an expriable url as json") {

@@ -4,6 +4,7 @@ import zio.Scope
 import zio.test._
 
 object ColumnDefinitionSpec extends ZIOSpecDefault {
+
   override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("Column definition suite")(
       test("I can generate a column definition using string context") {

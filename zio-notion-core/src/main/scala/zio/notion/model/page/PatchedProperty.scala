@@ -46,6 +46,7 @@ object PatchedProperty {
   final case class PatchedMultiSelect(multiSelect: List[PatchedSelect]) extends PatchedProperty
 
   object PatchedMultiSelect {
+
     implicit val encoder: Encoder[PatchedMultiSelect] =
       (property: PatchedMultiSelect) => {
         val encodedMultiSelect = property.multiSelect.map(NoDiscriminantNoNullEncoderDerivation.gen[PatchedSelect].apply)

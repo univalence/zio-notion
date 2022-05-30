@@ -8,6 +8,7 @@ import zio.notion.model.user.User.{BotData, PersonData}
 import zio.test._
 
 object UserSpec extends ZIOSpecDefault {
+
   override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("User serde suite")(
       test("We should be able to parse a user payload as json") {

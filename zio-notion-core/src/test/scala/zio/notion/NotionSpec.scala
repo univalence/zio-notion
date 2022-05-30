@@ -8,6 +8,7 @@ import zio.notion.model.user.{User, Users}
 import zio.test._
 
 object NotionSpec extends ZIOSpecDefault {
+
   override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("Notion high level api suite")(
       test("User can retrieve a page from Notion") {

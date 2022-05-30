@@ -7,6 +7,12 @@ import zio.notion.dsl._
 import java.time.LocalDate
 
 object QueryDatabase extends ZIOAppDefault {
+
+  val notionConfiguration: NotionConfiguration =
+    NotionConfiguration(
+      bearer = "6A074793-D735-4BF6-9159-24351D239BBC" // Insert your own bearer
+    )
+
   def example: ZIO[Notion, NotionError, Unit] = {
     val filter = $"col1".asNumber >= 10 and $"col2".asDate <= LocalDate.of(2022, 2, 2)
     val sorts  = $"col1".descending andThen byCreatedTime

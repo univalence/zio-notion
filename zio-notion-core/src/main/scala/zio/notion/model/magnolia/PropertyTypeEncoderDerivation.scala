@@ -23,6 +23,7 @@ import magnolia1._
  * }}}
  */
 object PropertyTypeEncoderDerivation extends EncoderDerivation {
+
   def join[T](ctx: CaseClass[Encoder, T]): Encoder[T] =
     (value: T) =>
       ctx.parameters.length match {

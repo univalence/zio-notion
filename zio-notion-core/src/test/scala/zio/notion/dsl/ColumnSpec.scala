@@ -9,6 +9,7 @@ import zio.test._
 import java.time.LocalDate
 
 object ColumnSpec extends ZIOSpecDefault {
+
   override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("Column suite")(
       test("I can generate a column using string context") {

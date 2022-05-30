@@ -8,6 +8,7 @@ import zio.notion.model.page.PatchedProperty.{PatchedDate, PatchedNumber}
 import zio.test._
 
 object PropertyUpdaterSpec extends ZIOSpecDefault {
+
   override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("Property Updater suite")(
       test("We can map a setter") {

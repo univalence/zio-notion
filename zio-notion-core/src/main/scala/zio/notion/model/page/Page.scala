@@ -32,6 +32,7 @@ final case class Page(
 }
 
 object Page {
+
   final case class Patch(
       page:       Page,
       properties: Map[String, Option[PatchedProperty]],

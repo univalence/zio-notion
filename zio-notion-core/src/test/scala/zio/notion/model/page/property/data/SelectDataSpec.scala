@@ -10,6 +10,7 @@ import zio.test._
 import zio.test.Assertion.{equalTo, isRight}
 
 object SelectDataSpec extends ZIOSpecDefault {
+
   override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("SelectData serde suite")(
       test("We should be able to parse a select as json") {

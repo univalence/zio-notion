@@ -19,6 +19,7 @@ import magnolia1._
  * }}}
  */
 object NoDiscriminantNoNullEncoderDerivation extends EncoderDerivation {
+
   def join[T](ctx: CaseClass[Encoder, T]): Encoder[T] =
     (value: T) => {
       val values =

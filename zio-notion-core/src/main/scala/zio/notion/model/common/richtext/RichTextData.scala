@@ -7,6 +7,7 @@ import zio.notion.model.common.{Id, Url}
 @ConfiguredJsonCodec sealed trait RichTextData
 
 object RichTextData {
+
   @ConfiguredJsonCodec final case class Text(text: Text.TextData, annotations: Annotations, plainText: String, href: Option[String])
       extends RichTextData
 
