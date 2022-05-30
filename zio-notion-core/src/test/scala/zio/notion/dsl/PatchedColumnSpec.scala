@@ -5,10 +5,10 @@ import io.circe.syntax.EncoderOps
 import zio.{Scope, UIO}
 import zio.notion.Faker._
 import zio.notion.PropertyUpdater.{FieldSetter, FieldUpdater, UFieldUpdater}
-import zio.notion.model.common.{richtext, Url, UserId}
+import zio.notion.model.common.{richtext, Id, Url}
 import zio.notion.model.common.enumeration.Color
 import zio.notion.model.common.richtext.RichTextData
-import zio.notion.model.page.patch.PatchedProperty.{
+import zio.notion.model.page.PatchedProperty.{
   PatchedCheckbox,
   PatchedDate,
   PatchedEmail,
@@ -302,16 +302,16 @@ object PatchedColumnSpec extends ZIOSpecDefault {
   def specPatchedPeople: Spec[TestEnvironment with Scope, Any] =
     suite("Test patching people")(
       test("We can set a list of people") {
-        val people: List[UserId] = List(UserId(fakeUUID))
+        val people: List[Id] = List(Id(fakeUUID))
 
         val patch: FieldSetter[PatchedPeople] = allColumns.asPeople.patch.set(people)
 
         assertTrue(patch.value.people == people)
       },
       test("We can set a new person") {
-        val patch: FieldUpdater[Nothing, PatchedPeople] = allColumns.asPeople.patch.add(UserId(fakeUUID))
+        val patch: FieldUpdater[Nothing, PatchedPeople] = allColumns.asPeople.patch.add(Id(fakeUUID))
 
-        assertTrue(patch.f(PatchedPeople(Seq.empty)).map(_.people) == Right(Seq(UserId(fakeUUID))))
+        assertTrue(patch.f(PatchedPeople(Seq.empty)).map(_.people) == Right(Seq(Id(fakeUUID))))
       }
     )
 
@@ -495,7 +495,7 @@ object PatchedColumnSpec extends ZIOSpecDefault {
         assertTrue(printer.print(property.asJson) == expected)
       },
       test("PatchedPeople encoding") {
-        val property: PatchedPeople = PatchedPeople(List(UserId(fakeUUID)))
+        val property: PatchedPeople = PatchedPeople(List(Id(fakeUUID)))
 
         val expected: String =
           s"""{

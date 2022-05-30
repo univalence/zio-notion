@@ -1,7 +1,6 @@
 package zio.notion.dsl
 
 import zio.Scope
-import zio.notion.dsl.DatabaseQueryDSL._
 import zio.notion.model.database.query.{Filter, Sorts}
 import zio.notion.model.database.query.PropertyFilter.{Date, Title}
 import zio.notion.model.database.query.PropertyFilter.DatePropertyFilter.Before
@@ -53,12 +52,12 @@ object DatabaseQueryDSLSpec extends ZIOSpecDefault {
         assertTrue(sort == expected)
       },
       test("We can use createdTime as a Sorting") {
-        val sort: Sorts     = createdTime
+        val sort: Sorts     = byCreatedTime
         val expected: Sorts = Sorts(List(Timestamp(CreatedTime, ascending = true)))
         assertTrue(sort == expected)
       },
       test("We can use lastEditedTime as a Sorting") {
-        val sort: Sorts     = lastEditedTime
+        val sort: Sorts     = byLastEditedTime
         val expected: Sorts = Sorts(List(Timestamp(LastEditedTime, ascending = true)))
         assertTrue(sort == expected)
       }

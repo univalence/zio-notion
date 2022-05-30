@@ -1,6 +1,6 @@
 package zio.notion
 
-import zio.notion.model.page.patch.PatchedProperty
+import zio.notion.model.page.PatchedProperty
 
 sealed trait PropertyUpdater[+E, T <: PatchedProperty]
 

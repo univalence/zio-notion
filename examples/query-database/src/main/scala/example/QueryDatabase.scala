@@ -3,7 +3,6 @@ package example
 import zio._
 import zio.notion._
 import zio.notion.dsl._
-import zio.notion.dsl.DatabaseQueryDSL._
 
 import java.time.LocalDate
 
@@ -16,7 +15,7 @@ object QueryDatabase extends ZIOAppDefault {
 
   def example: ZIO[Notion, NotionError, Unit] = {
     val filter = $"col1".asNumber >= 10 and $"col2".asDate <= LocalDate.of(2022, 2, 2)
-    val sorts  = $"col1".descending andThen createdTime
+    val sorts  = $"col1".descending andThen byCreatedTime
 
     for {
       database <- Notion.queryDatabase("6A074793-D735-4BF6-9159-24351D239BBC", filter, sorts) // Insert your own page ID

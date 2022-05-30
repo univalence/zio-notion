@@ -7,10 +7,8 @@ import zio.notion.{NotionError, Patchable, PropertyUpdater, Removable}
 import zio.notion.NotionError._
 import zio.notion.PropertyUpdater.ColumnMatcher
 import zio.notion.Removable.{Ignore, Keep, Remove}
-import zio.notion.model.common.{Cover, Icon, Parent, UserId}
+import zio.notion.model.common.{Cover, Icon, Id, Parent}
 import zio.notion.model.magnolia.PatchEncoderDerivation
-import zio.notion.model.page.patch.PatchedProperty
-import zio.notion.model.page.property.Property
 
 import scala.reflect.ClassTag
 
@@ -20,8 +18,8 @@ import java.time.OffsetDateTime
 final case class Page(
     createdTime:    OffsetDateTime,
     lastEditedTime: OffsetDateTime,
-    createdBy:      UserId,
-    lastEditedBy:   UserId,
+    createdBy:      Id,
+    lastEditedBy:   Id,
     id:             String,
     cover:          Option[Cover],
     icon:           Option[Icon],

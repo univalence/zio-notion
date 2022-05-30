@@ -18,9 +18,9 @@ object UserIdSpec extends ZIOSpecDefault {
              |    "id": "$fakeUUID"
              |}""".stripMargin
 
-        val expected: UserId = UserId(fakeUUID)
+        val expected: Id = Id(fakeUUID)
 
-        assert(decode[UserId](json))(isRight(equalTo(expected)))
+        assert(decode[Id](json))(isRight(equalTo(expected)))
       }
     )
 }
