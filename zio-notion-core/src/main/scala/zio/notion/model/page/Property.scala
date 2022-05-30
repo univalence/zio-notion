@@ -47,6 +47,7 @@ object Property {
 
   final case class People(id: String, people: Seq[Id]) extends Property
 
-  final case class Rollup(id: String, rollup: RollupData) extends Property
+  final case class Relation(id: String, relation: Seq[Id]) extends Property
 
+  final case class Rollup(id: String, rollup: RollupData) extends Property
 }
