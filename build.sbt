@@ -7,7 +7,6 @@ inThisBuild(
   List(
     scalaVersion         := scala213,
     crossScalaVersions   := supportedScalaVersions,
-    version              := "0.1.0",
     description          := "A strongly typed interface to interact with Notion using ZIO",
     organization         := "io.univalence",
     organizationName     := "Univalence",
