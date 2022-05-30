@@ -4,7 +4,9 @@ import io.circe.generic.extras.ConfiguredJsonCodec
 
 import zio.notion.model.database.metadata.{FormulaMetadata, NumberMetadata, RelationMetadata, RollupMetadata, SelectMetadata}
 
-@ConfiguredJsonCodec sealed trait PropertyDefinition
+@ConfiguredJsonCodec sealed trait PropertyDefinition {
+  def id: String
+}
 
 object PropertyDefinition {
   final case class Title(id: String, name: String)                                    extends PropertyDefinition
