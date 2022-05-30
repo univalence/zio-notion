@@ -7,7 +7,9 @@ import zio.notion.model.common.richtext.RichTextData
 import zio.notion.model.page.property.Link
 import zio.notion.model.page.property.data.{DateData, FormulaData, RollupData, SelectData}
 
-@ConfiguredJsonCodec sealed trait Property
+@ConfiguredJsonCodec sealed trait Property {
+  def id: String
+}
 
 // https://github.com/makenotion/notion-sdk-js/blob/main/src/api-endpoints.ts#L8870
 object Property {
