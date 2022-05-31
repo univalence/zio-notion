@@ -12,7 +12,7 @@ import zio.notion.model.page.property.data.{DateData, RollupData}
 import zio.test._
 import zio.test.Assertion._
 
-import java.time.{ZonedDateTime, ZoneId}
+import java.time.ZoneId
 
 object PropertySpec extends ZIOSpecDefault {
 

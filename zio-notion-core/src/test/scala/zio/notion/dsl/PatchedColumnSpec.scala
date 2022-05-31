@@ -27,7 +27,7 @@ import zio.notion.model.page.property.Link.External
 import zio.notion.model.printer
 import zio.test.{assertTrue, Spec, TestEnvironment, TestResult, ZIOSpecDefault}
 
-import java.time.{LocalDate, LocalDateTime, ZonedDateTime, ZoneId, ZoneOffset}
+import java.time.{ZonedDateTime, ZoneOffset}
 
 object PatchedColumnSpec extends ZIOSpecDefault {
 
