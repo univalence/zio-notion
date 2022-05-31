@@ -20,7 +20,7 @@ final case class Database(
     createdBy:      Id,
     lastEditedBy:   Id,
     id:             String,
-    title:          List[RichTextData.Text],
+    title:          Seq[RichTextData],
     cover:          Option[Cover],
     icon:           Option[Icon],
     parent:         Parent,
