@@ -6,6 +6,9 @@ import zio.Scope
 import zio.notion.Faker._
 import zio.notion.model.common.Id
 import zio.notion.model.common.enumeration.RollupFunction.Count
+import zio.notion.model.common.richtext
+import zio.notion.model.common.richtext.RichTextData
+import zio.notion.model.common.richtext.RichTextData.Mention.MentionData
 import zio.notion.model.page.Property
 import zio.notion.model.page.Property._
 import zio.notion.model.page.property.data.{DateData, RollupData}
@@ -71,6 +74,52 @@ object PropertySpec extends ZIOSpecDefault {
                   fakeZonedDateTime.withZoneSameLocal(ZoneId.of("+02:00")),
                   None,
                   None
+                )
+              )
+          )
+
+        assert(decode[Property](json))(isRight(equalTo(expected)))
+      },
+      test("We should be able to parse a title object as json containing mention") {
+        val json: String =
+          s"""{
+             |    "id": "$fakeUUID",
+             |    "type": "title",
+             |    "title": [
+             |        {
+             |            "type": "mention",
+             |            "mention": {
+             |                "type": "date",
+             |                "date": {
+             |                    "start": "2022-02-22T00:00Z",
+             |                    "end": null,
+             |                    "time_zone": null
+             |                }
+             |            },
+             |            "annotations": {
+             |                "bold": false,
+             |                "italic": false,
+             |                "strikethrough": false,
+             |                "underline": false,
+             |                "code": false,
+             |                "color": "default"
+             |            },
+             |            "plain_text": "Untitled",
+             |            "href": "https://www.notion.so/46cec14b98f44f2bb3135fe3a1a40a88"
+             |        }
+             |    ]
+             |}""".stripMargin
+
+        val expected =
+          Title(
+            id = fakeUUID,
+            title =
+              List(
+                RichTextData.Mention(
+                  mention     = MentionData.Date(DateData(fakeZonedDateTime, None, None)),
+                  annotations = richtext.Annotations.default,
+                  plainText   = "Untitled",
+                  href        = Some("https://www.notion.so/46cec14b98f44f2bb3135fe3a1a40a88")
                 )
               )
           )
