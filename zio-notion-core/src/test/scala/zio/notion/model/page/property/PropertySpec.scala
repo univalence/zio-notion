@@ -7,10 +7,12 @@ import zio.notion.Faker._
 import zio.notion.model.common.Id
 import zio.notion.model.common.enumeration.RollupFunction.Count
 import zio.notion.model.page.Property
-import zio.notion.model.page.Property.{Rollup, _}
-import zio.notion.model.page.property.data.RollupData
+import zio.notion.model.page.Property._
+import zio.notion.model.page.property.data.{DateData, RollupData}
 import zio.test._
 import zio.test.Assertion._
+
+import java.time.ZoneId
 
 object PropertySpec extends ZIOSpecDefault {
 
@@ -45,6 +47,33 @@ object PropertySpec extends ZIOSpecDefault {
              |}""".stripMargin
 
         val expected = Relation(id = fakeUUID, relation = List(Id(fakeUUID)))
+
+        assert(decode[Property](json))(isRight(equalTo(expected)))
+      },
+      test("We should be able to parse a date object as json containing datetime") {
+        val json: String =
+          s"""{
+             |    "id": "$fakeUUID",
+             |    "type": "date",
+             |    "date": {
+             |        "start": "2022-02-22T00:00:00.000+02:00",
+             |        "end": null,
+             |        "time_zone": null
+             |    }
+             |}""".stripMargin
+
+        val expected =
+          Date(
+            id = fakeUUID,
+            date =
+              Some(
+                DateData(
+                  fakeZonedDateTime.withZoneSameLocal(ZoneId.of("+02:00")),
+                  None,
+                  None
+                )
+              )
+          )
 
         assert(decode[Property](json))(isRight(equalTo(expected)))
       }

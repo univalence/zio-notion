@@ -27,7 +27,7 @@ import zio.notion.model.page.property.Link.External
 import zio.notion.model.printer
 import zio.test.{assertTrue, Spec, TestEnvironment, TestResult, ZIOSpecDefault}
 
-import java.time.LocalDate
+import java.time.{ZonedDateTime, ZoneOffset}
 
 object PatchedColumnSpec extends ZIOSpecDefault {
 
@@ -162,24 +162,24 @@ object PatchedColumnSpec extends ZIOSpecDefault {
   def specPatchedDate: Spec[TestEnvironment with Scope, Any] =
     suite("Test patching dates")(
       test("We can set a start date") {
-        val patch: FieldSetter[PatchedDate] = allColumns.asDate.patch.startAt(fakeLocalDate)
+        val patch: FieldSetter[PatchedDate] = allColumns.asDate.patch.startAt(fakeZonedDateTime)
 
-        assertTrue(patch.value.start == fakeLocalDate)
+        assertTrue(patch.value.start == fakeZonedDateTime)
       },
       test("We can add an end date") {
-        val patch: FieldUpdater[Nothing, PatchedDate] = allColumns.asDate.patch.endAt(fakeLocalDate.plusDays(2))
+        val patch: FieldUpdater[Nothing, PatchedDate] = allColumns.asDate.patch.endAt(fakeZonedDateTime.plusDays(2))
 
-        assertTrue(patch.f(PatchedDate(fakeLocalDate, None, None)).map(_.end) == Right(Some(fakeLocalDate.plusDays(2))))
+        assertTrue(patch.f(PatchedDate(fakeZonedDateTime, None, None)).map(_.end) == Right(Some(fakeZonedDateTime.plusDays(2))))
       },
       test("We can set a date between two dates") {
-        val patch: FieldSetter[PatchedDate] = allColumns.asDate.patch.between(fakeLocalDate, fakeLocalDate.plusDays(2))
+        val patch: FieldSetter[PatchedDate] = allColumns.asDate.patch.between(fakeZonedDateTime, fakeZonedDateTime.plusDays(2))
 
-        assertTrue(patch.value.start == fakeLocalDate && patch.value.end.contains(fakeLocalDate.plusDays(2)))
+        assertTrue(patch.value.start == fakeZonedDateTime && patch.value.end.contains(fakeZonedDateTime.plusDays(2)))
       },
       test("We can set a start date to today") {
         val patch: UIO[FieldSetter[PatchedDate]] = allColumns.asDate.patch.today
 
-        patch.map(p => assertTrue(p.value.start == LocalDate.of(1970, 1, 1)))
+        patch.map(p => assertTrue(p.value.start == ZonedDateTime.of(1970, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC)))
       }
     )
 
@@ -367,13 +367,13 @@ object PatchedColumnSpec extends ZIOSpecDefault {
         assertTrue(printer.print(property.asJson) == expected)
       },
       test("PatchedDate encoding") {
-        val property: PatchedDate = PatchedDate(fakeLocalDate, Some(fakeLocalDate.plusDays(2)), Some("America/New_York"))
+        val property: PatchedDate = PatchedDate(fakeZonedDateTime, Some(fakeZonedDateTime.plusDays(2)), Some("America/New_York"))
 
         val expected: String =
           s"""{
              |  "date" : {
-             |    "start" : "2022-02-22",
-             |    "end" : "2022-02-24",
+             |    "start" : "2022-02-22T00:00:00Z",
+             |    "end" : "2022-02-24T00:00:00Z",
              |    "time_zone" : "America/New_York"
              |  }
              |}""".stripMargin
