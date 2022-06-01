@@ -1,6 +1,8 @@
 # Retrieve a database
 
-To retrieve a page you can call the following function providing the id of the database:
+Retrieve a database is useful if you want to retrieve all the properties (the metadata) of a database.
+
+To retrieve a retrieve you can call the following function providing the id of the database:
 
 ```scala
 for {
