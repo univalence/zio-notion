@@ -1,11 +1,14 @@
 package zio.notion.dsl
 
-import zio.notion.model.database.query.{Filter, PropertyFilter, Sorts}
+import zio.notion.model.database.query.{Filter, PropertyFilter, Query, Sorts}
 import zio.notion.model.database.query.Sorts.Sorting
 import zio.notion.model.database.query.Sorts.Sorting._
 import zio.notion.model.database.query.Sorts.Sorting.TimestampType.{CreatedTime, LastEditedTime}
 
 trait DatabaseQueryDSL {
+  implicit def sortsToQuery(sorts: Sorts): Query = Query(None, Some(sorts))
+
+  implicit def filterToQuery(filter: Filter): Query = Query(Some(filter), None)
 
   // Sort helpers
 
