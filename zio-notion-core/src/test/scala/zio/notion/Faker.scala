@@ -7,7 +7,7 @@ import zio.notion.model.database.{Database, PropertyDefinition}
 import zio.notion.model.page.Page
 import zio.notion.model.page.Property.{Checkbox, Date, Title}
 
-import java.time.{OffsetDateTime, ZonedDateTime, ZoneOffset}
+import java.time.{OffsetDateTime, ZoneOffset}
 
 object Faker {
   val fakeEmoji: String = "🎉"
@@ -29,18 +29,6 @@ object Faker {
       24,
       15,
       10,
-      0,
-      0,
-      ZoneOffset.UTC
-    )
-
-  val fakeZonedDateTime: ZonedDateTime =
-    ZonedDateTime.of(
-      2022,
-      2,
-      22,
-      0,
-      0,
       0,
       0,
       ZoneOffset.UTC

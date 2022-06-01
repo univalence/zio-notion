@@ -8,7 +8,7 @@ import zio.notion.model.common.richtext.{Annotations, RichTextData}
 import zio.notion.model.page.PatchedProperty._
 import zio.notion.model.page.property.Link
 
-import java.time.{LocalDate, LocalDateTime, ZonedDateTime, ZoneId, ZoneOffset}
+import java.time.{LocalDate, LocalDateTime, OffsetDateTime, ZoneOffset}
 
 object PatchedColumn {
 
@@ -101,25 +101,24 @@ object PatchedColumn {
   final case class PatchedColumnDate(matcher: ColumnMatcher) {
     private val utc = ZoneOffset.UTC
 
-    def set(start: ZonedDateTime, end: Option[ZonedDateTime], timeZone: Option[String]): FieldSetter[PatchedDate] =
+    def set(start: OffsetDateTime, end: Option[OffsetDateTime], timeZone: Option[String]): FieldSetter[PatchedDate] =
       FieldSetter(matcher, PatchedDate(start, end, timeZone))
 
-    def startAt(date: ZonedDateTime): FieldSetter[PatchedDate] = set(date, None, None)
-    def startAt(date: LocalDateTime): FieldSetter[PatchedDate] = startAt(date.atZone(utc))
-    def startAt(date: LocalDate): FieldSetter[PatchedDate]     = startAt(date.atStartOfDay())
+    def startAt(date: OffsetDateTime): FieldSetter[PatchedDate] = set(date, None, None)
+    def startAt(date: LocalDateTime): FieldSetter[PatchedDate]  = startAt(date.atOffset(utc))
+    def startAt(date: LocalDate): FieldSetter[PatchedDate]      = startAt(date.atStartOfDay())
 
-    def endAt(f: ZonedDateTime => ZonedDateTime): UFieldUpdater[PatchedDate] =
+    def endAt(f: OffsetDateTime => OffsetDateTime): UFieldUpdater[PatchedDate] =
       FieldUpdater.succeed(matcher, property => property.copy(end = Some(f(property.start))))
-    def endAt(date: ZonedDateTime): UFieldUpdater[PatchedDate] = endAt(_ => date)
-    def endAt(date: LocalDateTime): UFieldUpdater[PatchedDate] = endAt(date.atZone(utc))
-    def endAt(date: LocalDate): UFieldUpdater[PatchedDate]     = endAt(date.atStartOfDay())
+    def endAt(date: OffsetDateTime): UFieldUpdater[PatchedDate] = endAt(_ => date)
+    def endAt(date: LocalDateTime): UFieldUpdater[PatchedDate]  = endAt(date.atOffset(utc))
+    def endAt(date: LocalDate): UFieldUpdater[PatchedDate]      = endAt(date.atStartOfDay())
 
-    def between(start: ZonedDateTime, end: ZonedDateTime): FieldSetter[PatchedDate] = set(start, Some(end), None)
-    def between(start: LocalDateTime, end: LocalDateTime): FieldSetter[PatchedDate] = between(start.atZone(utc), end.atZone(utc))
-    def between(start: LocalDate, end: LocalDate): FieldSetter[PatchedDate]         = between(start.atStartOfDay(), end.atStartOfDay())
+    def between(start: OffsetDateTime, end: OffsetDateTime): FieldSetter[PatchedDate] = set(start, Some(end), None)
+    def between(start: LocalDateTime, end: LocalDateTime): FieldSetter[PatchedDate]   = between(start.atOffset(utc), end.atOffset(utc))
+    def between(start: LocalDate, end: LocalDate): FieldSetter[PatchedDate]           = between(start.atStartOfDay(), end.atStartOfDay())
 
-    def today(zoneId: ZoneId): zio.UIO[FieldSetter[PatchedDate]] = Clock.localDateTime.map(_.atZone(zoneId)).map(startAt)
-    def today: zio.UIO[FieldSetter[PatchedDate]]                 = today(utc)
+    def today: zio.UIO[FieldSetter[PatchedDate]] = Clock.currentDateTime.map(startAt)
   }
 
   final case class PatchedColumnPeople(matcher: ColumnMatcher) {
