@@ -14,12 +14,12 @@ object DateDataSpec extends ZIOSpecDefault {
       test("We should be able to parse a date as json") {
         val json: String =
           s"""{
-             |    "start": "$fakeZonedDateTime",
+             |    "start": "$fakeDatetime",
              |    "end": null,
              |    "time_zone": null
              |}""".stripMargin
 
-        val expected: DateData = DateData(start = fakeZonedDateTime, end = None, timeZone = None)
+        val expected: DateData = DateData(start = fakeDatetime, end = None, timeZone = None)
 
         assert(decode[DateData](json))(isRight(equalTo(expected)))
       }

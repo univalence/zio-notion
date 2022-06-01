@@ -4,9 +4,8 @@ import io.circe.parser.decode
 
 import zio.Scope
 import zio.notion.Faker._
-import zio.notion.model.common.Id
+import zio.notion.model.common.{richtext, Id}
 import zio.notion.model.common.enumeration.RollupFunction.Count
-import zio.notion.model.common.richtext
 import zio.notion.model.common.richtext.RichTextData
 import zio.notion.model.common.richtext.RichTextData.Mention.MentionData
 import zio.notion.model.page.Property
@@ -15,7 +14,7 @@ import zio.notion.model.page.property.data.{DateData, RollupData}
 import zio.test._
 import zio.test.Assertion._
 
-import java.time.ZoneId
+import java.time.ZoneOffset
 
 object PropertySpec extends ZIOSpecDefault {
 
@@ -59,7 +58,7 @@ object PropertySpec extends ZIOSpecDefault {
              |    "id": "$fakeUUID",
              |    "type": "date",
              |    "date": {
-             |        "start": "2022-02-22T00:00:00.000+02:00",
+             |        "start": "2022-12-24T17:10+02:00",
              |        "end": null,
              |        "time_zone": null
              |    }
@@ -67,15 +66,8 @@ object PropertySpec extends ZIOSpecDefault {
 
         val expected =
           Date(
-            id = fakeUUID,
-            date =
-              Some(
-                DateData(
-                  fakeZonedDateTime.withZoneSameLocal(ZoneId.of("+02:00")),
-                  None,
-                  None
-                )
-              )
+            id   = fakeUUID,
+            date = Some(DateData(fakeDatetime.withOffsetSameInstant(ZoneOffset.ofHours(2)), None, None))
           )
 
         assert(decode[Property](json))(isRight(equalTo(expected)))
@@ -91,7 +83,7 @@ object PropertySpec extends ZIOSpecDefault {
              |            "mention": {
              |                "type": "date",
              |                "date": {
-             |                    "start": "2022-02-22T00:00Z",
+             |                    "start": "2022-12-24T15:10Z",
              |                    "end": null,
              |                    "time_zone": null
              |                }
@@ -116,7 +108,7 @@ object PropertySpec extends ZIOSpecDefault {
             title =
               List(
                 RichTextData.Mention(
-                  mention     = MentionData.Date(DateData(fakeZonedDateTime, None, None)),
+                  mention     = MentionData.Date(DateData(fakeDatetime, None, None)),
                   annotations = richtext.Annotations.default,
                   plainText   = "Untitled",
                   href        = Some("https://www.notion.so/46cec14b98f44f2bb3135fe3a1a40a88")
