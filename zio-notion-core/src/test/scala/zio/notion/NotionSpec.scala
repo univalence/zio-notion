@@ -3,6 +3,7 @@ package zio.notion
 import zio.{Scope, ZIO}
 import zio.notion.Faker._
 import zio.notion.model.database.{Database, DatabaseQuery}
+import zio.notion.model.database.query.Query
 import zio.notion.model.page.Page
 import zio.notion.model.user.{User, Users}
 import zio.test._
@@ -13,17 +14,19 @@ object NotionSpec extends ZIOSpecDefault {
     suite("Notion high level api suite")(
       test("User can retrieve a page from Notion") {
         val effect: ZIO[Notion, NotionError, Page] = Notion.retrievePage(fakeUUID)
-        effect.provide(TestNotionClient.layer, Notion.live).map(page => assertTrue(page.id == fakeUUID))
+        effect.map(page => assertTrue(page.id == fakeUUID))
       },
       test("User can retrieve a database from Notion") {
         val effect: ZIO[Notion, NotionError, Database] = Notion.retrieveDatabase(fakeUUID)
-        effect.provide(TestNotionClient.layer, Notion.live).map(database => assertTrue(database.id == fakeUUID))
+        effect.map(database => assertTrue(database.id == fakeUUID))
+      },
+      test("User can query a database from Notion") {
+        val effect: ZIO[Notion, NotionError, DatabaseQuery] = Notion.queryAllDatabase(fakeUUID)
+        effect.map(database => assertTrue(database.results.length == 3))
       },
       test("User can retrieve an user from Notion") {
         val effect: ZIO[Notion, NotionError, User] = Notion.retrieveUser(fakeUUID)
-        effect
-          .provide(TestNotionClient.layer, Notion.live)
-          .map(user => assertTrue(user.isInstanceOf[User.Person]))
+        effect.map(user => assertTrue(user.isInstanceOf[User.Person]))
       },
       test("User can retrieve users from Notion") {
         val effect: ZIO[Notion, NotionError, Users] = Notion.retrieveUsers
@@ -32,7 +35,7 @@ object NotionSpec extends ZIOSpecDefault {
           .map(users => assertTrue(users.results.length == 2))
       },
       test("User can query a DB") {
-        val effect: ZIO[Notion, NotionError, DatabaseQuery] = Notion.queryDatabase(fakeUUID)
+        val effect: ZIO[Notion, NotionError, DatabaseQuery] = Notion.queryDatabase(fakeUUID, Query.empty, Pagination.default)
         effect
           .provide(TestNotionClient.layer, Notion.live)
           .map(res => assertTrue(res.results.length == 1))
@@ -58,5 +61,5 @@ object NotionSpec extends ZIOSpecDefault {
           .provide(TestNotionClient.layer, Notion.live)
           .map(res => assertTrue(res.id == fakeUUID))
       }
-    )
+    ).provide(TestNotionClient.layer, Notion.live)
 }

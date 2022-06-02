@@ -3,7 +3,7 @@ package zio.notion.model.page.property.data
 import io.circe.parser.decode
 
 import zio.Scope
-import zio.notion.Faker.fakeLocalDate
+import zio.notion.Faker.fakeDatetime
 import zio.notion.model.page.property.data.FormulaData.{Date, Number}
 import zio.test._
 import zio.test.Assertion._
@@ -28,13 +28,13 @@ object FormulaDataSpec extends ZIOSpecDefault {
           s"""{
              |    "type": "date",
              |    "date": {
-             |       "start": "$fakeLocalDate",
+             |       "start": "$fakeDatetime",
              |       "end": null,
              |       "time_zone": null 
              |    }
              |}""".stripMargin
 
-        val expected: Date = Date(date = Some(DateData(start = fakeLocalDate, None, None)))
+        val expected: Date = Date(date = Some(DateData(start = fakeDatetime, None, None)))
 
         assert(decode[FormulaData](json))(isRight(equalTo(expected)))
       },

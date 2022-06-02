@@ -3,9 +3,12 @@ package zio.notion.model.database.query
 import io.circe.{Encoder, Json}
 import io.circe.syntax.EncoderOps
 
-sealed trait Filter {
+sealed trait Filter { self =>
   def and(other: Filter): Filter
   def or(other: Filter): Filter
+
+  def combine(sorts: Sorts): Query = Query(Some(self), Some(sorts))
+  def <>(sorts: Sorts): Query      = combine(sorts)
 }
 
 object Filter {

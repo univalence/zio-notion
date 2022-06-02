@@ -35,7 +35,7 @@ object Main extends ZIOAppDefault {
 
   def app: ZIO[Notion, NotionError, Unit] =
     for {
-      database <- Notion.queryDatabase("0aa1fe6ab19a40799f36498ff2cc13af", sorts = sorts, filter = filter)
+      database <- Notion.queryAllDatabase("0aa1fe6ab19a40799f36498ff2cc13af", sorts combine filter)
       _        <- Console.printLine(database.results.length).orDie
     } yield ()
 

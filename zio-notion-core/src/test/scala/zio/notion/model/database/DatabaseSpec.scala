@@ -182,6 +182,55 @@ object DatabaseSpec extends ZIOSpecDefault {
             |}""".stripMargin
 
         assert(decode[Database](json))(isRight)
+      },
+      test("We should be able to parse a database json with rich text title") {
+        val json: String =
+          """{
+            |    "object": "database",
+            |    "id": "7caa81b5-6383-4270-b89c-c386a9f0de13",
+            |    "cover": null,
+            |    "icon": null,
+            |    "created_time": "2022-03-28T07:05:00.000Z",
+            |    "created_by": {
+            |        "object": "user",
+            |        "id": "99907f33-df93-4a31-91a9-c662d7437cdd"
+            |    },
+            |    "last_edited_by": {
+            |        "object": "user",
+            |        "id": "99907f33-df93-4a31-91a9-c662d7437cdd"
+            |    },
+            |    "last_edited_time": "2022-05-03T13:35:00.000Z",
+            |    "title": [
+            |        {
+            |            "type": "mention",
+            |            "mention": {
+            |                "type": "page",
+            |                "page": {
+            |                    "id": "46cec14b-98f4-4f2b-b313-5fe3a1a40a88"
+            |                }
+            |            },
+            |            "annotations": {
+            |                "bold": false,
+            |                "italic": false,
+            |                "strikethrough": false,
+            |                "underline": false,
+            |                "code": false,
+            |                "color": "default"
+            |            },
+            |            "plain_text": "Untitled",
+            |            "href": "https://www.notion.so/46cec14b98f44f2bb3135fe3a1a40a88"
+            |        }
+            |    ],
+            |    "properties": {},
+            |    "parent": {
+            |        "type": "page_id",
+            |        "page_id": "a43aaa9d-601d-4d74-802a-f5681db935e1"
+            |    },
+            |    "url": "https://www.notion.so/7caa81b563834270b89cc386a9f0de13",
+            |    "archived": false
+            |}""".stripMargin
+
+        assert(decode[Database](json))(isRight)
       }
     )
 

@@ -1,7 +1,7 @@
 package zio.notion
 
 import zio.Scope
-import zio.notion.Faker.fakeLocalDate
+import zio.notion.Faker.fakeDatetime
 import zio.notion.PropertyUpdater.{FieldSetter, FieldUpdater}
 import zio.notion.dsl._
 import zio.notion.model.page.PatchedProperty.{PatchedDate, PatchedNumber}
@@ -14,10 +14,10 @@ object PropertyUpdaterSpec extends ZIOSpecDefault {
       test("We can map a setter") {
         val patch: FieldSetter[PatchedDate] =
           allColumns.asDate.patch
-            .startAt(fakeLocalDate)
+            .startAt(fakeDatetime)
             .map(property => property.copy(start = property.start.plusDays(5)))
 
-        assertTrue(patch.value.start == fakeLocalDate.plusDays(5))
+        assertTrue(patch.value.start == fakeDatetime.plusDays(5))
       },
       test("We can map a transformation") {
         val patch: FieldUpdater[Nothing, PatchedNumber] =

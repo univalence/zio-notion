@@ -4,10 +4,12 @@ import io.circe.{Encoder, Json}
 
 import zio.notion.model.database.query.Sorts.Sorting
 
-final case class Sorts(sort: Seq[Sorting]) {
-  def andThen(other: Sorts): Sorts = copy(sort = sort ++ other.sort)
-
+final case class Sorts(sort: Seq[Sorting]) { self =>
+  def andThen(other: Sorts): Sorts     = copy(sort = sort ++ other.sort)
   def andThen(sorting: Sorting): Sorts = copy(sort = sort :+ sorting)
+
+  def combine(filter: Filter): Query = Query(Some(filter), Some(self))
+  def <>(filter: Filter): Query      = combine(filter)
 }
 
 object Sorts {

@@ -352,80 +352,32 @@ final case class TestNotionClient() extends NotionClient {
                    |  "has_more": true
                    |}""".stripMargin)
 
-  override def queryDatabase(databaseId: String, query: Query): IO[NotionError, NotionResponse] =
-    ZIO.succeed("""
-                  |{
-                  |    "object": "list",
-                  |    "results": [
-                  |        {
-                  |            "object": "page",
-                  |            "id": "b03da2cd-cdbe-4235-b598-b63d1847eaf5",
-                  |            "created_time": "2022-05-03T14:32:00.000Z",
-                  |            "last_edited_time": "2022-05-10T08:39:00.000Z",
-                  |            "created_by": {
-                  |                "object": "user",
-                  |                "id": "99907f33-df93-4a31-91a9-c662d7437cdd"
-                  |            },
-                  |            "last_edited_by": {
-                  |                "object": "user",
-                  |                "id": "99907f33-df93-4a31-91a9-c662d7437cdd"
-                  |            },
-                  |            "cover": null,
-                  |            "icon": null,
-                  |            "parent": {
-                  |                "type": "database_id",
-                  |                "database_id": "678cf788-8470-4798-8336-a285836c9de6"
-                  |            },
-                  |            "archived": false,
-                  |            "properties": {
-                  |                "Date": {
-                  |                    "id": "I%5CC%7D",
-                  |                    "type": "date",
-                  |                    "date": null
-                  |                },
-                  |                "Tags": {
-                  |                    "id": "JLha",
-                  |                    "type": "checkbox",
-                  |                    "checkbox": false
-                  |                },
-                  |                "Related": {
-                  |                    "id": "%7BzeF",
-                  |                    "type": "relation",
-                  |                    "relation": []
-                  |                },
-                  |                "Name": {
-                  |                    "id": "title",
-                  |                    "type": "title",
-                  |                    "title": [
-                  |                        {
-                  |                            "type": "text",
-                  |                            "text": {
-                  |                                "content": "test",
-                  |                                "link": null
-                  |                            },
-                  |                            "annotations": {
-                  |                                "bold": false,
-                  |                                "italic": false,
-                  |                                "strikethrough": false,
-                  |                                "underline": false,
-                  |                                "code": false,
-                  |                                "color": "default"
-                  |                            },
-                  |                            "plain_text": "test",
-                  |                            "href": null
-                  |                        }
-                  |                    ]
-                  |                }
-                  |            },
-                  |            "url": "https://www.notion.so/test-b03da2cdcdbe4235b598b63d1847eaf5"
-                  |        }
-                  |    ],
-                  |    "next_cursor": null,
-                  |    "has_more": false,
-                  |    "type": "page",
-                  |    "page": {}
-                  |}
-                  |""".stripMargin)
+  override def queryDatabase(databaseId: String, query: Query, pagination: Pagination): IO[NotionError, NotionResponse] =
+    ZIO.succeed(
+      pagination.startCursor match {
+        case Some("a") =>
+          s"""{
+             |    "object": "list",
+             |    "results": [${pagePayload(fakeUUID)}],
+             |    "next_cursor": "b",
+             |    "has_more": true
+             |}""".stripMargin
+        case Some("b") =>
+          s"""{
+             |    "object": "list",
+             |    "results": [${pagePayload(fakeUUID)}],
+             |    "next_cursor": null,
+             |    "has_more": false
+             |}""".stripMargin
+        case _ =>
+          s"""{
+             |    "object": "list",
+             |    "results": [${pagePayload(fakeUUID)}],
+             |    "next_cursor": "a",
+             |    "has_more": true
+             |}""".stripMargin
+      }
+    )
 
   override def updatePage(patch: Page.Patch): IO[NotionError, NotionResponse] = retrievePage(patch.page.id)
 

@@ -7,7 +7,7 @@ import zio.notion.model.common.richtext.RichTextData
 import zio.notion.model.magnolia.{NoDiscriminantNoNullEncoderDerivation, PatchedPropertyEncoderDerivation}
 import zio.notion.model.page.property.Link
 
-import java.time.LocalDate
+import java.time.OffsetDateTime
 
 sealed trait PatchedProperty
 
@@ -54,7 +54,7 @@ object PatchedProperty {
       }
   }
 
-  final case class PatchedDate(start: LocalDate, end: Option[LocalDate], timeZone: Option[String]) extends PatchedProperty
+  final case class PatchedDate(start: OffsetDateTime, end: Option[OffsetDateTime], timeZone: Option[String]) extends PatchedProperty
 
   object PatchedDate {
     implicit val encoder: Encoder[PatchedDate] = PatchedPropertyEncoderDerivation.gen[PatchedDate]

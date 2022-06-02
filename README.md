@@ -94,7 +94,7 @@ object UpdatePage extends ZIOAppDefault {
 If you want to get the very last version of this library you can still download it using:
 
 ```scala
-libraryDependencies += "io.univalence" %% "zio-notion" % "0.2.0"
+libraryDependencies += "io.univalence" %% "zio-notion" % "0.2.3"
 ```
 
 ### Snapshots
