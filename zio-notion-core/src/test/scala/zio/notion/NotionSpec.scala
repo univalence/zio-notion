@@ -3,6 +3,7 @@ package zio.notion
 import zio.{Scope, ZIO}
 import zio.notion.Faker._
 import zio.notion.model.database.{Database, DatabaseQuery}
+import zio.notion.model.database.query.Query
 import zio.notion.model.page.Page
 import zio.notion.model.user.{User, Users}
 import zio.test._
@@ -29,7 +30,36 @@ object NotionSpec extends ZIOSpecDefault {
       },
       test("User can retrieve users from Notion") {
         val effect: ZIO[Notion, NotionError, Users] = Notion.retrieveUsers
-        effect.map(users => assertTrue(users.results.length == 2))
+        effect
+          .provide(TestNotionClient.layer, Notion.live)
+          .map(users => assertTrue(users.results.length == 2))
+      },
+      test("User can query a DB") {
+        val effect: ZIO[Notion, NotionError, DatabaseQuery] = Notion.queryDatabase(fakeUUID, Query.empty, Pagination.default)
+        effect
+          .provide(TestNotionClient.layer, Notion.live)
+          .map(res => assertTrue(res.results.length == 1))
+      },
+      test("User can update a page") {
+        val patch                                  = fakePage.patch
+        val effect: ZIO[Notion, NotionError, Page] = Notion.updatePage(patch)
+        effect
+          .provide(TestNotionClient.layer, Notion.live)
+          .map(res => assertTrue(res.id == fakeUUID))
+      },
+      test("User can update a DB") {
+        val patch                                      = fakeDatabase.patch
+        val effect: ZIO[Notion, NotionError, Database] = Notion.updateDatabase(patch)
+        effect
+          .provide(TestNotionClient.layer, Notion.live)
+          .map(res => assertTrue(res.id == fakeUUID))
+      },
+      test("User can create a DB") {
+        val effect: ZIO[Notion, NotionError, Database] =
+          Notion.createDatabase(fakeUUID, fakeDatabase.title, None, None, fakePropertyDefinitions)
+        effect
+          .provide(TestNotionClient.layer, Notion.live)
+          .map(res => assertTrue(res.id == fakeUUID))
       }
     ).provide(TestNotionClient.layer, Notion.live)
 }
