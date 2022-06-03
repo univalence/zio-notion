@@ -66,9 +66,10 @@ object Faker {
       url            = fakeUrl
     )
 
-  val fakePropertyDefinitions: Map[String,PropertySchema.Title.type] = Map("Name" -> PropertySchema.Title)
+  val fakePropertyDefinitions: Map[String, PropertySchema.Title.type] = Map("Name" -> PropertySchema.Title)
 
   object FakeProperty {
+
     val fakeTitle: Title = Title("abc", List(RichTextData.default("test", Annotations.default)))
 
     val fakeDate: Date = Date("abc", None)
