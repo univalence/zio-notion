@@ -3,6 +3,8 @@ package zio.notion.dsl
 import zio.Scope
 import zio.notion.Faker._
 import zio.notion.model.database.query.{Filter, PropertyFilter}
+import zio.notion.model.database.query.Filter.And
+import zio.notion.model.database.query.Filter.One
 import zio.notion.model.database.query.PropertyFilter._
 import zio.test._
 
@@ -30,16 +32,20 @@ object ColumnSpec extends ZIOSpecDefault {
             $"$fakeName".asNumber >= 2 and
             $"$fakeName".asNumber.isNotEmpty
 
-        assertTrue(
-          filter ==
-            Number(fakeName, NumberPropertyFilter.Equals(2))
-              .and(Number(fakeName, NumberPropertyFilter.LessThan(3)))
-              .and(Number(fakeName, NumberPropertyFilter.DoesNotEqual(1)))
-              .and(Number(fakeName, NumberPropertyFilter.GreaterThan(1)))
-              .and(Number(fakeName, NumberPropertyFilter.LessThanOrEqualTo(2)))
-              .and(Number(fakeName, NumberPropertyFilter.GreaterThanOrEqualTo(2)))
-              .and(Number(fakeName, PropertyFilter.IsNotEmpty(true)))
-        )
+        val expected =
+          And(
+            List(
+              One(Number(fakeName, NumberPropertyFilter.Equals(2))),
+              One(Number(fakeName, NumberPropertyFilter.LessThan(3))),
+              One(Number(fakeName, NumberPropertyFilter.DoesNotEqual(1))),
+              One(Number(fakeName, NumberPropertyFilter.GreaterThan(1))),
+              One(Number(fakeName, NumberPropertyFilter.LessThanOrEqualTo(2))),
+              One(Number(fakeName, NumberPropertyFilter.GreaterThanOrEqualTo(2))),
+              One(Number(fakeName, PropertyFilter.IsNotEmpty(true)))
+            )
+          )
+
+        assertTrue(filter == expected)
       },
       test("creates a title filter") {
         val filter =
@@ -51,15 +57,20 @@ object ColumnSpec extends ZIOSpecDefault {
             $"$fakeName".asTitle.doesNotContain("xyz") and
             $"$fakeName".asTitle.isNotEmpty
 
-        assertTrue(
-          filter == Title(fakeName, TextPropertyFilter.StartsWith(fakeName))
-            .and(Title(fakeName, TextPropertyFilter.EndsWith(fakeName)))
-            .and(Title(fakeName, PropertyFilter.Equals(fakeName)))
-            .and(Title(fakeName, PropertyFilter.DoesNotEqual("something else")))
-            .and(Title(fakeName, PropertyFilter.Contains(fakeName)))
-            .and(Title(fakeName, PropertyFilter.DoesNotContain("xyz")))
-            .and(Title(fakeName, PropertyFilter.IsNotEmpty(true)))
-        )
+        val expected =
+          And(
+            List(
+              One(Title(fakeName, TextPropertyFilter.StartsWith(fakeName))),
+              One(Title(fakeName, TextPropertyFilter.EndsWith(fakeName))),
+              One(Title(fakeName, PropertyFilter.Equals(fakeName))),
+              One(Title(fakeName, PropertyFilter.DoesNotEqual("something else"))),
+              One(Title(fakeName, PropertyFilter.Contains(fakeName))),
+              One(Title(fakeName, PropertyFilter.DoesNotContain("xyz"))),
+              One(Title(fakeName, PropertyFilter.IsNotEmpty(true)))
+            )
+          )
+
+        assertTrue(filter == expected)
       },
       test("creates a rich-text filter") {
         val filter =
@@ -71,15 +82,20 @@ object ColumnSpec extends ZIOSpecDefault {
             $"$fakeName".asRichText.doesNotContain("xyz") and
             $"$fakeName".asRichText.isNotEmpty
 
-        assertTrue(
-          filter == RichText(fakeName, TextPropertyFilter.StartsWith(fakeName))
-            .and(RichText(fakeName, TextPropertyFilter.EndsWith(fakeName)))
-            .and(RichText(fakeName, PropertyFilter.Equals(fakeName)))
-            .and(RichText(fakeName, PropertyFilter.DoesNotEqual("something else")))
-            .and(RichText(fakeName, PropertyFilter.Contains(fakeName)))
-            .and(RichText(fakeName, PropertyFilter.DoesNotContain("xyz")))
-            .and(RichText(fakeName, PropertyFilter.IsNotEmpty(true)))
-        )
+        val expected =
+          And(
+            List(
+              One(RichText(fakeName, TextPropertyFilter.StartsWith(fakeName))),
+              One(RichText(fakeName, TextPropertyFilter.EndsWith(fakeName))),
+              One(RichText(fakeName, PropertyFilter.Equals(fakeName))),
+              One(RichText(fakeName, PropertyFilter.DoesNotEqual("something else"))),
+              One(RichText(fakeName, PropertyFilter.Contains(fakeName))),
+              One(RichText(fakeName, PropertyFilter.DoesNotContain("xyz"))),
+              One(RichText(fakeName, PropertyFilter.IsNotEmpty(true)))
+            )
+          )
+
+        assertTrue(filter == expected)
       },
       test("creates a checkbox filter") {
         val filter: Checkbox  = $"$fakeName".asCheckbox.isTrue
@@ -101,40 +117,57 @@ object ColumnSpec extends ZIOSpecDefault {
             $"$fakeName".asDate.nextYear and
             $"$fakeName".asDate.isNotEmpty
 
-        assertTrue(
-          filter == Date(fakeName, DatePropertyFilter.Before(LocalDate.MAX.toString))
-            .and(Date(fakeName, DatePropertyFilter.After(LocalDate.MIN.toString)))
-            .and(Date(fakeName, DatePropertyFilter.OnOrBefore(LocalDate.MAX.toString)))
-            .and(Date(fakeName, DatePropertyFilter.OnOrAfter(LocalDate.MIN.toString)))
-            .and(Date(fakeName, DatePropertyFilter.PastWeek))
-            .and(Date(fakeName, DatePropertyFilter.PastMonth))
-            .and(Date(fakeName, DatePropertyFilter.NextWeek))
-            .and(Date(fakeName, DatePropertyFilter.NextMonth))
-            .and(Date(fakeName, DatePropertyFilter.NextYear))
-            .and(Date(fakeName, PropertyFilter.IsNotEmpty(true)))
-        )
+        val expected =
+          And(
+            List(
+              One(Date(fakeName, DatePropertyFilter.Before(LocalDate.MAX.toString))),
+              One(Date(fakeName, DatePropertyFilter.After(LocalDate.MIN.toString))),
+              One(Date(fakeName, DatePropertyFilter.OnOrBefore(LocalDate.MAX.toString))),
+              One(Date(fakeName, DatePropertyFilter.OnOrAfter(LocalDate.MIN.toString))),
+              One(Date(fakeName, DatePropertyFilter.PastWeek)),
+              One(Date(fakeName, DatePropertyFilter.PastMonth)),
+              One(Date(fakeName, DatePropertyFilter.NextWeek)),
+              One(Date(fakeName, DatePropertyFilter.NextMonth)),
+              One(Date(fakeName, DatePropertyFilter.NextYear)),
+              One(Date(fakeName, PropertyFilter.IsNotEmpty(true)))
+            )
+          )
+
+        assertTrue(filter == expected)
       },
       test("creates a people filter") {
         val filter =
           $"$fakeName".asPeople contains fakeName and
             $"$fakeName".asPeople.doesNotContain("xyz") and
             $"$fakeName".asPeople.isNotEmpty
-        assertTrue(
-          filter == People(fakeName, Contains(fakeName))
-            .and(People(fakeName, PropertyFilter.DoesNotContain("xyz")))
-            .and(People(fakeName, PropertyFilter.IsNotEmpty(true)))
-        )
+
+        val expected =
+          And(
+            List(
+              One(People(fakeName, Contains(fakeName))),
+              One(People(fakeName, PropertyFilter.DoesNotContain("xyz"))),
+              One(People(fakeName, PropertyFilter.IsNotEmpty(true)))
+            )
+          )
+
+        assertTrue(filter == expected)
       },
       test("creates a select filter") {
         val filter =
           $"$fakeName".asSelect equals fakeName and
             $"$fakeName".asSelect.doesNotEqual("xyz") and
             $"$fakeName".asSelect.isNotEmpty
-        assertTrue(
-          filter == Select(fakeName, Equals(fakeName))
-            .and(Select(fakeName, PropertyFilter.DoesNotEqual("xyz")))
-            .and(Select(fakeName, PropertyFilter.IsNotEmpty(true)))
-        )
+
+        val expected =
+          And(
+            List(
+              One(Select(fakeName, Equals(fakeName))),
+              One(Select(fakeName, PropertyFilter.DoesNotEqual("xyz"))),
+              One(Select(fakeName, PropertyFilter.IsNotEmpty(true)))
+            )
+          )
+
+        assertTrue(filter == expected)
       },
       test("creates a multiselect filter") {
         val filter =
@@ -143,13 +176,19 @@ object ColumnSpec extends ZIOSpecDefault {
             $"$fakeName".asMultiSelect.contains(fakeName) and
             $"$fakeName".asMultiSelect.doesNotContain("xyz") and
             $"$fakeName".asMultiSelect.isNotEmpty
-        assertTrue(
-          filter == MultiSelect(fakeName, Equals(fakeName))
-            .and(MultiSelect(fakeName, PropertyFilter.DoesNotEqual("xyz")))
-            .and(MultiSelect(fakeName, PropertyFilter.Contains(fakeName)))
-            .and(MultiSelect(fakeName, PropertyFilter.DoesNotContain("xyz")))
-            .and(MultiSelect(fakeName, PropertyFilter.IsNotEmpty(true)))
-        )
+
+        val expected =
+          And(
+            List(
+              One(MultiSelect(fakeName, Equals(fakeName))),
+              One(MultiSelect(fakeName, PropertyFilter.DoesNotEqual("xyz"))),
+              One(MultiSelect(fakeName, PropertyFilter.Contains(fakeName))),
+              One(MultiSelect(fakeName, PropertyFilter.DoesNotContain("xyz"))),
+              One(MultiSelect(fakeName, PropertyFilter.IsNotEmpty(true)))
+            )
+          )
+
+        assertTrue(filter == expected)
       },
       test("creates a file filter") {
         val filter  = $"$fakeName".asFiles.isEmpty
@@ -164,13 +203,19 @@ object ColumnSpec extends ZIOSpecDefault {
             $"$fakeName".asUrl.contains(fakeName) and
             $"$fakeName".asUrl.doesNotContain("xyz") and
             $"$fakeName".asUrl.isNotEmpty
-        assertTrue(
-          filter == Url(fakeName, Equals(fakeName))
-            .and(Url(fakeName, PropertyFilter.DoesNotEqual("xyz")))
-            .and(Url(fakeName, PropertyFilter.Contains(fakeName)))
-            .and(Url(fakeName, PropertyFilter.DoesNotContain("xyz")))
-            .and(Url(fakeName, PropertyFilter.IsNotEmpty(true)))
-        )
+
+        val expected =
+          And(
+            List(
+              One(Url(fakeName, Equals(fakeName))),
+              One(Url(fakeName, PropertyFilter.DoesNotEqual("xyz"))),
+              One(Url(fakeName, PropertyFilter.Contains(fakeName))),
+              One(Url(fakeName, PropertyFilter.DoesNotContain("xyz"))),
+              One(Url(fakeName, PropertyFilter.IsNotEmpty(true)))
+            )
+          )
+
+        assertTrue(filter == expected)
       },
       test("creates an email filter") {
         val filter =
@@ -179,13 +224,19 @@ object ColumnSpec extends ZIOSpecDefault {
             $"$fakeName".asEmail.contains(fakeName) and
             $"$fakeName".asEmail.doesNotContain("xyz") and
             $"$fakeName".asEmail.isNotEmpty
-        assertTrue(
-          filter == Email(fakeName, Equals(fakeName))
-            .and(Email(fakeName, PropertyFilter.DoesNotEqual("xyz")))
-            .and(Email(fakeName, PropertyFilter.Contains(fakeName)))
-            .and(Email(fakeName, PropertyFilter.DoesNotContain("xyz")))
-            .and(Email(fakeName, PropertyFilter.IsNotEmpty(true)))
-        )
+
+        val expected =
+          And(
+            List(
+              One(Email(fakeName, Equals(fakeName))),
+              One(Email(fakeName, PropertyFilter.DoesNotEqual("xyz"))),
+              One(Email(fakeName, PropertyFilter.Contains(fakeName))),
+              One(Email(fakeName, PropertyFilter.DoesNotContain("xyz"))),
+              One(Email(fakeName, PropertyFilter.IsNotEmpty(true)))
+            )
+          )
+
+        assertTrue(filter == expected)
       },
       test("creates a phn nbr filter") {
         val filter =
@@ -194,13 +245,19 @@ object ColumnSpec extends ZIOSpecDefault {
             $"$fakeName".asPhoneNumber.contains(fakeName) and
             $"$fakeName".asPhoneNumber.doesNotContain("xyz") and
             $"$fakeName".asPhoneNumber.isNotEmpty
-        assertTrue(
-          filter == PhoneNumber(fakeName, Equals(fakeName))
-            .and(PhoneNumber(fakeName, PropertyFilter.DoesNotEqual("xyz")))
-            .and(PhoneNumber(fakeName, PropertyFilter.Contains(fakeName)))
-            .and(PhoneNumber(fakeName, PropertyFilter.DoesNotContain("xyz")))
-            .and(PhoneNumber(fakeName, PropertyFilter.IsNotEmpty(true)))
-        )
+
+        val expected =
+          And(
+            List(
+              One(PhoneNumber(fakeName, Equals(fakeName))),
+              One(PhoneNumber(fakeName, PropertyFilter.DoesNotEqual("xyz"))),
+              One(PhoneNumber(fakeName, PropertyFilter.Contains(fakeName))),
+              One(PhoneNumber(fakeName, PropertyFilter.DoesNotContain("xyz"))),
+              One(PhoneNumber(fakeName, PropertyFilter.IsNotEmpty(true)))
+            )
+          )
+
+        assertTrue(filter == expected)
       },
       test("creates a relation filter") {
         val filter =
@@ -208,33 +265,49 @@ object ColumnSpec extends ZIOSpecDefault {
             $"$fakeName".asRelation.doesNotContain("xyz") and
             $"$fakeName".asRelation.isNotEmpty
 
-        assertTrue(
-          filter == Relation(fakeName, PropertyFilter.Contains(fakeName))
-            .and(Relation(fakeName, PropertyFilter.DoesNotContain("xyz")))
-            .and(Relation(fakeName, PropertyFilter.IsNotEmpty(true)))
-        )
+        val expected =
+          And(
+            List(
+              One(Relation(fakeName, PropertyFilter.Contains(fakeName))),
+              One(Relation(fakeName, PropertyFilter.DoesNotContain("xyz"))),
+              One(Relation(fakeName, PropertyFilter.IsNotEmpty(true)))
+            )
+          )
+
+        assertTrue(filter == expected)
       },
       test("creates a createdby filter") {
         val filter =
           $"$fakeName".asCreatedBy.contains(fakeName) and
             $"$fakeName".asCreatedBy.doesNotContain("xyz") and
             $"$fakeName".asCreatedBy.isNotEmpty
-        assertTrue(
-          filter == CreatedBy(fakeName, PropertyFilter.Contains(fakeName))
-            .and(CreatedBy(fakeName, PropertyFilter.DoesNotContain("xyz")))
-            .and(CreatedBy(fakeName, PropertyFilter.IsNotEmpty(true)))
-        )
+
+        val expected =
+          And(
+            List(
+              One(CreatedBy(fakeName, PropertyFilter.Contains(fakeName))),
+              One(CreatedBy(fakeName, PropertyFilter.DoesNotContain("xyz"))),
+              One(CreatedBy(fakeName, PropertyFilter.IsNotEmpty(true)))
+            )
+          )
+
+        assertTrue(filter == expected)
       },
       test("creates a lastedited by filter") {
         val filter =
           $"$fakeName".asLastEditedBy.contains(fakeName) and
             $"$fakeName".asLastEditedBy.doesNotContain("xyz") and
             $"$fakeName".asLastEditedBy.isNotEmpty
-        assertTrue(
-          filter == LastEditedBy(fakeName, PropertyFilter.Contains(fakeName))
-            .and(LastEditedBy(fakeName, PropertyFilter.DoesNotContain("xyz")))
-            .and(LastEditedBy(fakeName, PropertyFilter.IsNotEmpty(true)))
-        )
+
+        val expected =
+          And(
+            List(
+              One(LastEditedBy(fakeName, PropertyFilter.Contains(fakeName))),
+              One(LastEditedBy(fakeName, PropertyFilter.DoesNotContain("xyz"))),
+              One(LastEditedBy(fakeName, PropertyFilter.IsNotEmpty(true)))
+            )
+          )
+        assertTrue(filter == expected)
       },
       test("creates a createdtime filter") {
         val filter =
@@ -248,18 +321,24 @@ object ColumnSpec extends ZIOSpecDefault {
             $"$fakeName".asCreatedTime.nextMonth and
             $"$fakeName".asCreatedTime.nextYear and
             $"$fakeName".asCreatedTime.isNotEmpty
-        assertTrue(
-          filter == CreatedTime(fakeName, DatePropertyFilter.Before(LocalDate.MAX.toString))
-            .and(CreatedTime(fakeName, DatePropertyFilter.After(LocalDate.MIN.toString)))
-            .and(CreatedTime(fakeName, DatePropertyFilter.OnOrBefore(LocalDate.MAX.toString)))
-            .and(CreatedTime(fakeName, DatePropertyFilter.OnOrAfter(LocalDate.MIN.toString)))
-            .and(CreatedTime(fakeName, DatePropertyFilter.PastWeek))
-            .and(CreatedTime(fakeName, DatePropertyFilter.PastMonth))
-            .and(CreatedTime(fakeName, DatePropertyFilter.NextWeek))
-            .and(CreatedTime(fakeName, DatePropertyFilter.NextMonth))
-            .and(CreatedTime(fakeName, DatePropertyFilter.NextYear))
-            .and(CreatedTime(fakeName, PropertyFilter.IsNotEmpty(true)))
-        )
+
+        val expected =
+          And(
+            List(
+              One(CreatedTime(fakeName, DatePropertyFilter.Before(LocalDate.MAX.toString))),
+              One(CreatedTime(fakeName, DatePropertyFilter.After(LocalDate.MIN.toString))),
+              One(CreatedTime(fakeName, DatePropertyFilter.OnOrBefore(LocalDate.MAX.toString))),
+              One(CreatedTime(fakeName, DatePropertyFilter.OnOrAfter(LocalDate.MIN.toString))),
+              One(CreatedTime(fakeName, DatePropertyFilter.PastWeek)),
+              One(CreatedTime(fakeName, DatePropertyFilter.PastMonth)),
+              One(CreatedTime(fakeName, DatePropertyFilter.NextWeek)),
+              One(CreatedTime(fakeName, DatePropertyFilter.NextMonth)),
+              One(CreatedTime(fakeName, DatePropertyFilter.NextYear)),
+              One(CreatedTime(fakeName, PropertyFilter.IsNotEmpty(true)))
+            )
+          )
+
+        assertTrue(filter == expected)
       },
       test("creates a lasteditedtime filter") {
         val filter =
@@ -273,18 +352,24 @@ object ColumnSpec extends ZIOSpecDefault {
             $"$fakeName".asLastEditedTime.nextMonth and
             $"$fakeName".asLastEditedTime.nextYear and
             $"$fakeName".asLastEditedTime.isNotEmpty
-        assertTrue(
-          filter == LastEditedTime(fakeName, DatePropertyFilter.Before(LocalDate.MAX.toString))
-            .and(LastEditedTime(fakeName, DatePropertyFilter.After(LocalDate.MIN.toString)))
-            .and(LastEditedTime(fakeName, DatePropertyFilter.OnOrBefore(LocalDate.MAX.toString)))
-            .and(LastEditedTime(fakeName, DatePropertyFilter.OnOrAfter(LocalDate.MIN.toString)))
-            .and(LastEditedTime(fakeName, DatePropertyFilter.PastWeek))
-            .and(LastEditedTime(fakeName, DatePropertyFilter.PastMonth))
-            .and(LastEditedTime(fakeName, DatePropertyFilter.NextWeek))
-            .and(LastEditedTime(fakeName, DatePropertyFilter.NextMonth))
-            .and(LastEditedTime(fakeName, DatePropertyFilter.NextYear))
-            .and(LastEditedTime(fakeName, PropertyFilter.IsNotEmpty(true)))
-        )
+
+        val expected =
+          And(
+            List(
+              One(LastEditedTime(fakeName, DatePropertyFilter.Before(LocalDate.MAX.toString))),
+              One(LastEditedTime(fakeName, DatePropertyFilter.After(LocalDate.MIN.toString))),
+              One(LastEditedTime(fakeName, DatePropertyFilter.OnOrBefore(LocalDate.MAX.toString))),
+              One(LastEditedTime(fakeName, DatePropertyFilter.OnOrAfter(LocalDate.MIN.toString))),
+              One(LastEditedTime(fakeName, DatePropertyFilter.PastWeek)),
+              One(LastEditedTime(fakeName, DatePropertyFilter.PastMonth)),
+              One(LastEditedTime(fakeName, DatePropertyFilter.NextWeek)),
+              One(LastEditedTime(fakeName, DatePropertyFilter.NextMonth)),
+              One(LastEditedTime(fakeName, DatePropertyFilter.NextYear)),
+              One(LastEditedTime(fakeName, PropertyFilter.IsNotEmpty(true)))
+            )
+          )
+
+        assertTrue(filter == expected)
       },
       test("I can convert a column into a column definition") {
         val columnDefinition = col("col1").definition
