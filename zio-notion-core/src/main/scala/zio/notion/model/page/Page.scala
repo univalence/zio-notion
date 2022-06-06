@@ -11,6 +11,7 @@ import zio.notion.model.common.{Cover, Icon, Id, Parent}
 import zio.notion.model.magnolia.PatchEncoderDerivation
 import zio.notion.model.page.Page.Patch.{Operations, StatelessOperations}
 import zio.notion.model.page.Page.Patch.Operations.Operation
+import zio.notion.model.page.Page.Patch.Operations.Operation.UpdateProperty.Transform.{Direct, IgnoreEmpty}
 
 import scala.reflect.ClassTag
 
@@ -57,35 +58,6 @@ object Page {
         }
       }
 
-    def updateProperty[PP <: PatchedProperty](
-        patch: Patch,
-        page: Page,
-        name: String,
-        transform: PP => Either[NotionError, PP]
-    )(implicit tag: ClassTag[PP]): Either[NotionError, Patch] =
-      page.properties.get(name) match {
-        case Some(property) if property.relatedTo[PP] =>
-          patch.properties.getOrElse(name, property.toPatchedProperty) match {
-            case Some(initialPatchedProperty: PP) =>
-              transform(initialPatchedProperty)
-                .map(patchedProperty => patch.copy(properties = patch.properties + (name -> Some(patchedProperty))))
-            case None =>
-              Left(PropertyIsEmpty(name))
-          }
-        case Some(property) =>
-          // We can't update the property because it doesn't have the good type
-          Left(
-            PropertyWrongType(
-              propertyName = name,
-              expectedType = tag.runtimeClass.getSimpleName.replace("Patched", ""),
-              foundType    = property.getClass.getSimpleName
-            )
-          )
-        case None =>
-          // We can't update the property because it doesn't exist
-          Left(PropertyNotExist(name, page.id))
-      }
-
     def updateOperations(page: Page)(operations: Operations): Either[NotionError, Patch] = {
       val eitherSelf: Either[NotionError, Patch] = Right(self)
 
@@ -95,7 +67,7 @@ object Page {
             case stateless: Operation.Stateless => Right(patch.setOperations(stateless))
             case stateful: Operation.Stateful =>
               stateful match {
-                case Operation.UpdateProperty(key, transform) => updateProperty(patch, page, key, transform)
+                case up: Operation.UpdateProperty => up.updateProperty(page, patch)
               }
           }
         )
@@ -129,21 +101,77 @@ object Page {
           def ++(operation: Operation): Operations = Operations(List(self, operation))
         }
 
-        case object Archive                                                        extends Stateless
-        case object Unarchive                                                      extends Stateless
-        case object RemoveIcon                                                     extends Stateless
-        case object RemoveCover                                                    extends Stateless
-        final case class SetIcon(icon: Icon)                                       extends Stateless
-        final case class SetCover(cover: Cover)                                    extends Stateless
-        final case class SetProperty[P <: PatchedProperty](name: String, value: P) extends Stateless
-        final case class RemoveProperty(name: String)                              extends Stateless
+        case object Archive                                                extends Stateless
+        case object Unarchive                                              extends Stateless
+        case object RemoveIcon                                             extends Stateless
+        case object RemoveCover                                            extends Stateless
+        final case class SetIcon(icon: Icon)                               extends Stateless
+        final case class SetCover(cover: Cover)                            extends Stateless
+        final case class RemoveProperty(name: String)                      extends Stateless
+        final case class SetProperty(name: String, value: PatchedProperty) extends Stateless
 
-        final case class UpdateProperty[PP <: PatchedProperty](name: String, transform: PP => Either[NotionError, PP]) extends Stateful
+        final case class UpdateProperty(name: String, transform: UpdateProperty.Transform) extends Stateful {
+
+          // Property Vide => todo à gérer dans le transform
+          // Property Not at the right type (PP)
+          // 💪💪💪💪😂💩
+          def updateProperty(page: Page, patch: Patch): Either[NotionError, Patch] = {
+            val patchedProperty: Option[PatchedProperty] =
+              patch.properties.getOrElse(name, page.properties.get(name).flatMap(ToPatchedProperty.apply))
+
+            transform.lift(name)(patchedProperty) match {
+              case Left(value)  => Left(value)
+              case Right(value) => Right(patch.copy(properties = patch.properties + ((name, value)))) // value NO
+            }
+          }
+
+          // val operation = $"col1".asNumber.patch.ceil.ignoreEmpty
+          def ignoreEmpty: UpdateProperty = copy(transform = UpdateProperty.Transform.IgnoreEmpty(transform))
+        }
 
         object UpdateProperty {
 
-          def succeed[PP <: PatchedProperty](name: String, transform: PP => PP): UpdateProperty[PP] =
-            UpdateProperty(name, pp => Right(transform(pp)))
+          sealed trait Transform { self =>
+            def lift(name: String): Option[PatchedProperty] => Either[NotionError, Option[PatchedProperty]]
+
+            def ignoreEmpty: Transform = IgnoreEmpty(self)
+          }
+
+          object Transform {
+
+            case class GenericWithType[PP <: PatchedProperty: ClassTag](transform: Option[PP] => Either[NotionError, Option[PP]])
+                extends Transform {
+
+              override def lift(name: String): Option[PatchedProperty] => Either[NotionError, Option[PatchedProperty]] = {
+                case Some(pp: PP) => transform(Some(pp))
+                case None         => transform(None)
+                case Some(x) =>
+                  Left(NotionError.PropertyWrongType(name, implicitly[ClassTag[PP]].getClass.getSimpleName, x.getClass.getSimpleName))
+              }
+
+            }
+
+            case class Direct[PP <: PatchedProperty: ClassTag](transform: PP => PP) extends Transform {
+
+              override def lift(name: String): Option[PatchedProperty] => Either[NotionError, Option[PatchedProperty]] = {
+                case Some(pp: PP) => Right(Option(transform(pp)))
+                case Some(x) =>
+                  Left(NotionError.PropertyWrongType(name, implicitly[ClassTag[PP]].getClass.getSimpleName, x.getClass.getSimpleName))
+                case None => Left(NotionError.PropertyIsEmpty(name))
+              }
+            }
+
+            case class IgnoreEmpty(transform: Transform) extends Transform {
+
+              override def lift(name: String): Option[PatchedProperty] => Either[NotionError, Option[PatchedProperty]] = {
+                case None => Right(None)
+                case x    => transform.lift(name)(x)
+              }
+            }
+          }
+
+          def succeed[PP <: PatchedProperty: ClassTag](name: String, transform: PP => PP): UpdateProperty =
+            UpdateProperty(name, Direct(transform))
         }
       }
     }
