@@ -380,9 +380,9 @@ final case class TestNotionClient() extends NotionClient {
       }
     )
 
-  override def updatePage(pageId: String)(operations: StatelessOperations): IO[NotionError, NotionResponse] = ???
+  override def updatePage(pageId: String)(operations: StatelessOperations): IO[NotionError, NotionResponse] = retrievePage(pageId)
 
-  override def updatePage(page: Page)(operations: Operations): IO[NotionError, NotionResponse] = ???
+  override def updatePage(page: Page)(operations: Operations): IO[NotionError, NotionResponse] = retrievePage(page.id)
 
   override def updateDatabase(patch: Database.Patch): IO[NotionError, NotionResponse] = retrieveDatabase(patch.database.id)
 

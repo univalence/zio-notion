@@ -11,7 +11,18 @@ object DatabaseUpdateDSLSpec extends ZIOSpecDefault {
     suite("DB update dsl test suite")(
       test("should be able to render colored select options from stringOps") {
         val selectOpts =
-          List("opt1".gray, "opt1".brown, "opt1".orange, "opt1".yellow, "opt1".green, "opt1".blue, "opt1".purple, "opt1".pink, "opt1".red)
+          List(
+            "opt1".gray,
+            "opt1".brown,
+            "opt1".orange,
+            "opt1".yellow,
+            "opt1".green,
+            "opt1".blue,
+            "opt1".purple,
+            "opt1".pink,
+            "opt1".red
+          )
+
         assertTrue(
           selectOpts == List(
             SelectOption("opt1", Some(Color.Gray)),
