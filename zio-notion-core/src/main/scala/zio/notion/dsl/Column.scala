@@ -1,6 +1,5 @@
 package zio.notion.dsl
 
-import zio.notion.PropertyUpdater.ColumnMatcher._
 import zio.notion.dsl.Column._
 import zio.notion.dsl.PatchedColumn._
 import zio.notion.model.database.query.PropertyFilter
@@ -66,7 +65,7 @@ object Column {
     def isEmpty: Title                        = Title(property, IsEmpty(true))
     def isNotEmpty: Title                     = Title(property, IsNotEmpty(true))
 
-    def patch: PatchedColumnTitle = PatchedColumnTitle(One(property))
+    def patch: PatchedColumnTitle = PatchedColumnTitle(property)
   }
 
   final case class RichTextDSLConstructor private (property: String) {
@@ -79,7 +78,7 @@ object Column {
     def isEmpty: RichText                        = RichText(property, IsEmpty(true))
     def isNotEmpty: RichText                     = RichText(property, IsNotEmpty(true))
 
-    def patch: PatchedColumnRichText = PatchedColumnRichText(One(property))
+    def patch: PatchedColumnRichText = PatchedColumnRichText(property)
   }
 
   final case class NumberDSLConstructor private (property: String) {
@@ -99,7 +98,7 @@ object Column {
     def >=(double: Double): Number = greaterThanOrEqualTo(double)
     def <=(double: Double): Number = lessThanOrEqualTo(double)
 
-    def patch: PatchedColumnNumber = PatchedColumnNumber(One(property))
+    def patch: PatchedColumnNumber = PatchedColumnNumber(property)
   }
 
   final case class CheckboxDSLConstructor private (property: String) {
@@ -109,7 +108,7 @@ object Column {
     def isTrue: Checkbox  = equals(true)
     def isFalse: Checkbox = equals(false)
 
-    def patch: PatchedColumnCheckbox = PatchedColumnCheckbox(One(property))
+    def patch: PatchedColumnCheckbox = PatchedColumnCheckbox(property)
   }
 
   final case class SelectDSLConstructor private (property: String) {
@@ -118,7 +117,7 @@ object Column {
     def isEmpty: Select                      = Select(property, IsEmpty(true))
     def isNotEmpty: Select                   = Select(property, IsNotEmpty(true))
 
-    def patch: PatchedColumnSelect = PatchedColumnSelect(One(property))
+    def patch: PatchedColumnSelect = PatchedColumnSelect(property)
   }
 
   final case class MultiSelectDSLConstructor private (property: String) {
@@ -129,7 +128,7 @@ object Column {
     def isEmpty: MultiSelect                        = MultiSelect(property, IsEmpty(true))
     def isNotEmpty: MultiSelect                     = MultiSelect(property, IsNotEmpty(true))
 
-    def patch: PatchedColumnMultiSelect = PatchedColumnMultiSelect(One(property))
+    def patch: PatchedColumnMultiSelect = PatchedColumnMultiSelect(property)
   }
 
   final case class DateDSLConstructor private (property: String) {
@@ -151,7 +150,7 @@ object Column {
     def >=(date: LocalDate): Date = onOrAfter(date)
     def <=(date: LocalDate): Date = onOrBefore(date)
 
-    def patch: PatchedColumnDate = PatchedColumnDate(One(property))
+    def patch: PatchedColumnDate = PatchedColumnDate(property)
   }
 
   final case class PeopleDSLConstructor private (property: String) {
@@ -160,14 +159,14 @@ object Column {
     def isEmpty: People                        = People(property, IsEmpty(true))
     def isNotEmpty: People                     = People(property, IsNotEmpty(true))
 
-    def patch: PatchedColumnPeople = PatchedColumnPeople(One(property))
+    def patch: PatchedColumnPeople = PatchedColumnPeople(property)
   }
 
   final case class FilesDSLConstructor private (property: String) {
     def isEmpty: Files    = Files(property, IsEmpty(true))
     def isNotEmpty: Files = Files(property, IsNotEmpty(true))
 
-    def patch: PatchedColumnFiles = PatchedColumnFiles(One(property))
+    def patch: PatchedColumnFiles = PatchedColumnFiles(property)
   }
 
   final case class UrlDSLConstructor private (property: String) {
@@ -178,7 +177,7 @@ object Column {
     def isEmpty: Url                        = Url(property, IsEmpty(true))
     def isNotEmpty: Url                     = Url(property, IsNotEmpty(true))
 
-    def patch: PatchedColumnUrl = PatchedColumnUrl(One(property))
+    def patch: PatchedColumnUrl = PatchedColumnUrl(property)
   }
 
   final case class EmailDSLConstructor private (property: String) {
@@ -189,7 +188,7 @@ object Column {
     def isEmpty: Email                        = Email(property, IsEmpty(true))
     def isNotEmpty: Email                     = Email(property, IsNotEmpty(true))
 
-    def patch: PatchedColumnEmail = PatchedColumnEmail(One(property))
+    def patch: PatchedColumnEmail = PatchedColumnEmail(property)
   }
 
   final case class PhoneNumberDSLConstructor private (property: String) {
@@ -200,7 +199,7 @@ object Column {
     def isEmpty: PhoneNumber                        = PhoneNumber(property, IsEmpty(true))
     def isNotEmpty: PhoneNumber                     = PhoneNumber(property, IsNotEmpty(true))
 
-    def patch: PatchedColumnPhoneNumber = PatchedColumnPhoneNumber(One(property))
+    def patch: PatchedColumnPhoneNumber = PatchedColumnPhoneNumber(property)
   }
 
   final case class RelationDSLConstructor private (property: String) {

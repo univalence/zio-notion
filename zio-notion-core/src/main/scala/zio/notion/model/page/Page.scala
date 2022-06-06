@@ -3,12 +3,14 @@ package zio.notion.model.page
 import io.circe.Encoder
 import io.circe.generic.extras.ConfiguredJsonCodec
 
-import zio.notion.{NotionError, Patchable, PropertyUpdater, Removable}
+import zio.notion.{NotionError, Removable}
 import zio.notion.NotionError._
-import zio.notion.PropertyUpdater.ColumnMatcher
 import zio.notion.Removable.{Ignore, Keep, Remove}
+import zio.notion.dsl.PageUpdateDSL._
 import zio.notion.model.common.{Cover, Icon, Id, Parent}
 import zio.notion.model.magnolia.PatchEncoderDerivation
+import zio.notion.model.page.Page.Patch.{Operations, StatelessOperations}
+import zio.notion.model.page.Page.Patch.Operations.Operation
 
 import scala.reflect.ClassTag
 
@@ -27,129 +29,124 @@ final case class Page(
     archived:       Boolean,
     properties:     Map[String, Property],
     url:            String
-) { self =>
-  def patch: Page.Patch = Page.Patch(self)
-}
+)
+
+// val patch =
 
 object Page {
 
   final case class Patch(
-      page:       Page,
       properties: Map[String, Option[PatchedProperty]],
       archived:   Option[Boolean],
       icon:       Removable[Icon],
       cover:      Removable[Cover]
-  ) { self =>
+  ) {
+    self =>
 
-    /**
-     * Create a patch to update a property of the page.
-     *
-     * @param updater
-     *   The transformation description for the properties
-     * @param patchable
-     *   The getter from a retrieved property to a patched one
-     * @param tag
-     *   The ClassTag that helps us getting the class name
-     * @param manifest
-     *   The Manifest that helps us getting the instance of a parametric
-     *   subtype
-     * @tparam E
-     *   The error
-     * @tparam I
-     *   The input property
-     * @tparam O
-     *   The output patched property
-     * @return
-     */
-    def updateProperty[E >: NotionError, I <: Property, O <: PatchedProperty](
-        updater: PropertyUpdater[E, O]
-    )(implicit patchable: Patchable[I, O], tag: ClassTag[O], manifest: Manifest[I]): Either[E, Patch] = {
-      val default: Either[E, Patch] = Right(self)
-
-      def updateProperties(
-          predicate: String => Boolean,
-          update: (String, Option[O]) => Either[E, (String, Option[O])]
-      ): Either[E, Patch] = {
-        val maybeProperties: Iterable[Either[E, (String, Option[O])]] =
-          page.properties.collect {
-            case (key, property: I) if predicate(key) && manifest.runtimeClass.isInstance(property) =>
-              update(key, properties.getOrElse(key, patchable.patch(property)).map(_.asInstanceOf[O]))
-          }
-
-        maybeProperties.foldLeft(default)((acc, curr) =>
-          acc.flatMap(patch => curr.map(property => patch.copy(properties = patch.properties + property)))
-        )
+    def setOperations(operations: StatelessOperations): Patch =
+      operations.operations.foldLeft(self) { case (patch, operation) =>
+        operation match {
+          case Operation.Archive                     => patch.copy(archived = Some(true))
+          case Operation.Unarchive                   => patch.copy(archived = Some(false))
+          case Operation.RemoveIcon                  => patch.copy(icon = Remove)
+          case Operation.RemoveCover                 => patch.copy(cover = Remove)
+          case Operation.SetIcon(icon)               => patch.copy(icon = Keep(icon))
+          case Operation.SetCover(cover)             => patch.copy(cover = Keep(cover))
+          case Operation.SetProperty(colName, value) => patch.copy(properties = properties + (colName -> Some(value)))
+          case Operation.RemoveProperty(key)         => patch.copy(properties = properties + (key -> None))
+        }
       }
 
-      def setProperties(predicate: String => Boolean, value: O): Either[E, Patch] =
-        updateProperties(predicate, (key, _) => Right(key -> Some(value)))
-
-      def transformProperties(predicate: String => Boolean, transform: O => Either[E, O]): Either[E, Patch] =
-        updateProperties(
-          predicate,
-          (key, maybeInput) =>
-            maybeInput match {
-              case Some(input) => transform(input).map(key -> Some(_))
-              case None        => Left(PropertyIsEmpty(key))
-            }
-        )
-
-      def updateOneProperty(key: String, update: Option[O] => Either[E, O]): Either[E, Patch] =
-        page.properties.get(key) match {
-          case Some(property: I) if manifest.runtimeClass.isInstance(property) =>
-            update(
-              properties
-                .getOrElse(key, patchable.patch(property))
-                .map(_.asInstanceOf[O])
+    def updateProperty[PP <: PatchedProperty](
+        patch: Patch,
+        page: Page,
+        name: String,
+        transform: PP => Either[NotionError, PP]
+    )(implicit tag: ClassTag[PP]): Either[NotionError, Patch] =
+      page.properties.get(name) match {
+        case Some(property) if property.relatedTo[PP] =>
+          patch.properties.getOrElse(name, property.toPatchedProperty) match {
+            case Some(initialPatchedProperty: PP) =>
+              transform(initialPatchedProperty)
+                .map(patchedProperty => patch.copy(properties = patch.properties + (name -> Some(patchedProperty))))
+            case None =>
+              Left(PropertyIsEmpty(name))
+          }
+        case Some(property) =>
+          // We can't update the property because it doesn't have the good type
+          Left(
+            PropertyWrongType(
+              propertyName = name,
+              expectedType = tag.runtimeClass.getSimpleName.replace("Patched", ""),
+              foundType    = property.getClass.getSimpleName
             )
-              .map(value => copy(properties = properties + (key -> Some(value))))
-          case Some(property) =>
-            // We can't update the property because it doesn't have the good type
-            Left(PropertyWrongType(key, manifest.runtimeClass.getSimpleName, property.getClass.getSimpleName))
-          case None =>
-            // We can't update the property because it doesn't exist
-            Left(PropertyNotExist(key, page.id))
-        }
+          )
+        case None =>
+          // We can't update the property because it doesn't exist
+          Left(PropertyNotExist(name, page.id))
+      }
 
-      updater match {
-        case PropertyUpdater.FieldSetter(matcher, value) =>
-          matcher match {
-            case ColumnMatcher.Predicate(f) => setProperties(f, value)
-            case ColumnMatcher.One(key)     => updateOneProperty(key, _ => Right(value))
+    def updateOperations(page: Page)(operations: Operations): Either[NotionError, Patch] = {
+      val eitherSelf: Either[NotionError, Patch] = Right(self)
+
+      operations.operations.foldLeft(eitherSelf) { case (maybePatch, operation) =>
+        maybePatch.flatMap(patch =>
+          operation match {
+            case stateless: Operation.Stateless => Right(patch.setOperations(stateless))
+            case stateful: Operation.Stateful =>
+              stateful match {
+                case Operation.UpdateProperty(key, transform) => updateProperty(patch, page, key, transform)
+              }
           }
-        case PropertyUpdater.FieldUpdater(matcher, transform) =>
-          matcher match {
-            case ColumnMatcher.Predicate(f) => transformProperties(f, transform)
-            case ColumnMatcher.One(key) =>
-              updateOneProperty(
-                key,
-                {
-                  case Some(input) => transform(input)
-                  // We can't update the property has no value
-                  case None => Left(PropertyIsEmpty(key))
-                }
-              )
-          }
+        )
       }
     }
-
-    def removeProperty(key: String): Patch = copy(properties = properties + (key -> None))
-
-    def archive: Patch = copy(archived = Some(true))
-
-    def unarchive: Patch = copy(archived = Some(false))
-
-    def updateIcon(icon: Icon): Patch = copy(icon = Keep(icon))
-
-    def removeIcon: Patch = copy(icon = Remove)
-
-    def updateCover(cover: Cover): Patch = copy(cover = Keep(cover))
-
-    def removeCover: Patch = copy(cover = Remove)
   }
 
   object Patch {
-    def apply(page: Page): Patch = Patch(page, Map.empty, None, Ignore, Ignore)
+    val empty: Patch = Patch(Map.empty, None, Ignore, Ignore)
+
+    final case class StatelessOperations(operations: List[Operation.Stateless]) {
+      def ++(operation: Operation.Stateless): StatelessOperations = copy(operations = operations :+ operation)
+    }
+
+    final case class Operations(operations: List[Operation]) {
+      def ++(operation: Operation): Operations = copy(operations = operations :+ operation)
+    }
+
+    object Operations {
+
+      sealed trait Operation
+
+      object Operation {
+
+        sealed trait Stateless extends Operation { self =>
+          def ++(operation: Stateless): StatelessOperations = StatelessOperations(List(self, operation))
+          def ++(operation: Stateful): Operations           = Operations(List(self, operation))
+        }
+
+        sealed trait Stateful extends Operation { self =>
+          def ++(operation: Operation): Operations = Operations(List(self, operation))
+        }
+
+        case object Archive                                                        extends Stateless
+        case object Unarchive                                                      extends Stateless
+        case object RemoveIcon                                                     extends Stateless
+        case object RemoveCover                                                    extends Stateless
+        final case class SetIcon(icon: Icon)                                       extends Stateless
+        final case class SetCover(cover: Cover)                                    extends Stateless
+        final case class SetProperty[P <: PatchedProperty](name: String, value: P) extends Stateless
+        final case class RemoveProperty(name: String)                              extends Stateless
+
+        final case class UpdateProperty[PP <: PatchedProperty](name: String, transform: PP => Either[NotionError, PP]) extends Stateful
+
+        object UpdateProperty {
+
+          def succeed[PP <: PatchedProperty](name: String, transform: PP => PP): UpdateProperty[PP] =
+            UpdateProperty(name, pp => Right(transform(pp)))
+        }
+      }
+    }
 
     implicit val encoder: Encoder[Patch] = PatchEncoderDerivation.gen[Patch]
   }

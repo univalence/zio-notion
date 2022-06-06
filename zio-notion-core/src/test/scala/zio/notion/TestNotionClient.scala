@@ -8,6 +8,7 @@ import zio.notion.model.common.richtext.RichTextData
 import zio.notion.model.database.{Database, PatchedPropertyDefinition}
 import zio.notion.model.database.query.Query
 import zio.notion.model.page.Page
+import zio.notion.model.page.Page.Patch.{Operations, StatelessOperations}
 
 /** Notion client mock for test purpose */
 final case class TestNotionClient() extends NotionClient {
@@ -354,7 +355,9 @@ final case class TestNotionClient() extends NotionClient {
 
   override def queryDatabase(databaseId: String, query: Query): IO[NotionError, NotionResponse] = ZIO.succeed("TODO")
 
-  override def updatePage(patch: Page.Patch): IO[NotionError, NotionResponse] = retrievePage(patch.page.id)
+  override def updatePage(pageId: String)(operations: StatelessOperations): IO[NotionError, NotionResponse] = ???
+
+  override def updatePage(page: Page)(operations: Operations): IO[NotionError, NotionResponse] = ???
 
   override def updateDatabase(patch: Database.Patch): IO[NotionError, NotionResponse] = retrieveDatabase(patch.database.id)
 
