@@ -1,6 +1,8 @@
 package zio.notion.dsl
 
 import zio.Scope
+import zio.notion.PropertyUpdater.ColumnMatcher.One
+import zio.notion.model.database.PatchedPropertyDefinition
 import zio.test._
 
 object ColumnDefinitionSpec extends ZIOSpecDefault {
@@ -11,6 +13,11 @@ object ColumnDefinitionSpec extends ZIOSpecDefault {
         val columnDefinition = $$"col1"
 
         assertTrue(columnDefinition == ColumnDefinition("col1"))
+      },
+      test("I can generate a column definition patch") {
+        val patch = $$"col1".patch
+
+        assertTrue(patch == PatchedColumnDefinition(One("col1"), PatchedPropertyDefinition.unit))
       },
       test("I can generate a column definition using colDefinition function") {
         val columnDefinition = colDefinition("col1")

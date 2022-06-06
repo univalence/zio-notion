@@ -353,7 +353,32 @@ final case class TestNotionClient() extends NotionClient {
                    |  "has_more": true
                    |}""".stripMargin)
 
-  override def queryDatabase(databaseId: String, query: Query): IO[NotionError, NotionResponse] = ZIO.succeed("TODO")
+  override def queryDatabase(databaseId: String, query: Query, pagination: Pagination): IO[NotionError, NotionResponse] =
+    ZIO.succeed(
+      pagination.startCursor match {
+        case Some("a") =>
+          s"""{
+             |    "object": "list",
+             |    "results": [${pagePayload(fakeUUID)}],
+             |    "next_cursor": "b",
+             |    "has_more": true
+             |}""".stripMargin
+        case Some("b") =>
+          s"""{
+             |    "object": "list",
+             |    "results": [${pagePayload(fakeUUID)}],
+             |    "next_cursor": null,
+             |    "has_more": false
+             |}""".stripMargin
+        case _ =>
+          s"""{
+             |    "object": "list",
+             |    "results": [${pagePayload(fakeUUID)}],
+             |    "next_cursor": "a",
+             |    "has_more": true
+             |}""".stripMargin
+      }
+    )
 
   override def updatePage(pageId: String)(operations: StatelessOperations): IO[NotionError, NotionResponse] = ???
 

@@ -5,4 +5,4 @@ import io.circe.generic.extras.ConfiguredJsonCodec
 import zio.notion.model.page.Page
 
 @ConfiguredJsonCodec
-final case class DatabaseQuery(nextCursor: Option[String], hasMore: Boolean, results: List[Page])
+final case class DatabaseQuery(nextCursor: Option[String], results: List[Page])

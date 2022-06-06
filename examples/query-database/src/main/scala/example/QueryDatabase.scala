@@ -18,9 +18,10 @@ object QueryDatabase extends ZIOAppDefault {
     val sorts  = $"col1".descending andThen byCreatedTime
 
     for {
-      database <- Notion.queryDatabase("6A074793-D735-4BF6-9159-24351D239BBC", filter, sorts) // Insert your own page ID
+      database <- Notion.queryAllDatabase("6A074793-D735-4BF6-9159-24351D239BBC", filter combine sorts)
+      pages = database.results
       _ <-
-        database.results.headOption match {
+        pages.headOption match {
           case Some(page) => Console.printLine(s"The first page is ${page.id}").orDie
           case None       => Console.printLine("There is no page corresponding to the query").orDie
         }
