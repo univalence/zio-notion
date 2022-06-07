@@ -38,7 +38,7 @@ object NotionSpec extends ZIOSpecDefault {
 
         effect.map(users => assertTrue(users.results.length == 2))
       },
-      test("User can query a DB") {
+      test("User can query a database") {
         val effect: ZIO[Notion, NotionError, DatabaseQuery] = Notion.queryDatabase(fakeUUID, Query.empty, Pagination.default)
 
         effect.map(res => assertTrue(res.results.length == 1))
@@ -48,13 +48,13 @@ object NotionSpec extends ZIOSpecDefault {
 
         effect.map(res => assertTrue(res.id == fakeUUID))
       },
-      test("User can update a DB") {
+      test("User can update a database") {
         val patch                                      = fakeDatabase.patch
         val effect: ZIO[Notion, NotionError, Database] = Notion.updateDatabase(patch)
 
         effect.map(res => assertTrue(res.id == fakeUUID))
       },
-      test("User can create a DB") {
+      test("User can create a database") {
         val effect: ZIO[Notion, NotionError, Database] =
           Notion.createDatabase(fakeUUID, fakeDatabase.title, None, None, fakePropertyDefinitions)
 
