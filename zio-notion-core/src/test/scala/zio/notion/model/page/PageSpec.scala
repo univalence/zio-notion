@@ -174,7 +174,7 @@ object PageSpec extends ZIOSpecDefault {
     suite("Page update suite")(
       test("We should be able to update one property") {
         val operations = $"Checkbox".asCheckbox.patch.check
-        val patch      = Patch.empty.setOperations(operations)
+        val patch      = Patch.empty.setOperation(operations)
 
         val expected =
           """{
@@ -189,7 +189,7 @@ object PageSpec extends ZIOSpecDefault {
       },
       test("We should be able to remove one property") {
         val operations = removeProperty("Checkbox")
-        val patch      = Patch.empty.setOperations(operations)
+        val patch      = Patch.empty.setOperation(operations)
 
         val expected =
           """{
@@ -202,7 +202,7 @@ object PageSpec extends ZIOSpecDefault {
       },
       test("We should be able to remove an icon") {
         val operations = removeIcon
-        val patch      = Patch.empty.setOperations(operations)
+        val patch      = Patch.empty.setOperation(operations)
 
         val expected =
           """{
@@ -213,7 +213,7 @@ object PageSpec extends ZIOSpecDefault {
       },
       test("We should be able to update an icon") {
         val operations = setIcon(Emoji(fakeEmoji))
-        val patch      = Patch.empty.setOperations(operations)
+        val patch      = Patch.empty.setOperation(operations)
 
         val expected =
           s"""{
@@ -227,7 +227,7 @@ object PageSpec extends ZIOSpecDefault {
       },
       test("We should be able to remove a cover") {
         val operations = removeCover
-        val patch      = Patch.empty.setOperations(operations)
+        val patch      = Patch.empty.setOperation(operations)
 
         val expected =
           """{
@@ -238,7 +238,7 @@ object PageSpec extends ZIOSpecDefault {
       },
       test("We should be able to update a cover") {
         val operations = setCover(Cover.External(Url(fakeUrl)))
-        val patch      = Patch.empty.setOperations(operations)
+        val patch      = Patch.empty.setOperation(operations)
 
         val expected =
           s"""{
@@ -254,7 +254,7 @@ object PageSpec extends ZIOSpecDefault {
       },
       test("We should be able to archive a page") {
         val operations = unarchive
-        val patch      = Patch.empty.setOperations(operations)
+        val patch      = Patch.empty.setOperation(operations)
 
         val expected =
           """{
@@ -277,7 +277,7 @@ object PageSpec extends ZIOSpecDefault {
       },
       test("Updating a property twice should apply the second update on the first one") {
         val operations  = $"Checkbox".asCheckbox.patch.check ++ $"Checkbox".asCheckbox.patch.reverse
-        val eitherPatch = Patch.empty.updateOperations(fakePage)(operations)
+        val eitherPatch = Patch.empty.updateOperations(fakePage, operations)
 
         val expected =
           """{
@@ -291,20 +291,20 @@ object PageSpec extends ZIOSpecDefault {
         assertTrue(eitherPatch.map(patch => printer.print(patch.asJson)) == Right(expected))
       },
       test("Updating a property with a wrong type should return an error") {
-        val operations  = $"Checkbox".asNumber.patch.ceil
-        val eitherPatch = Patch.empty.updateOperations(fakePage)(operations)
+        val operation   = $"Checkbox".asNumber.patch.ceil
+        val eitherPatch = Patch.empty.updateOperation(fakePage, operation)
 
         assertTrue(eitherPatch.map(patch => printer.print(patch.asJson)) == Left(PropertyWrongType("Checkbox", "Number", "Checkbox")))
       },
       test("Updating a missing property should return an error") {
-        val operations  = $"Unknown".asCheckbox.patch.reverse
-        val eitherPatch = Patch.empty.updateOperations(fakePage)(operations)
+        val operation   = $"Unknown".asCheckbox.patch.reverse
+        val eitherPatch = Patch.empty.updateOperation(fakePage, operation)
 
         assertTrue(eitherPatch.map(patch => printer.print(patch.asJson)) == Left(PropertyIsEmpty("Unknown")))
       },
       test("Updating a missing property should be ignored if we specify the ignore flag") {
-        val operations  = $"Unknown".asCheckbox.patch.reverse.ignoreEmpty
-        val eitherPatch = Patch.empty.updateOperations(fakePage)(operations)
+        val operation   = $"Unknown".asCheckbox.patch.reverse.ignoreEmpty
+        val eitherPatch = Patch.empty.updateOperation(fakePage, operation)
 
         val expected =
           """{

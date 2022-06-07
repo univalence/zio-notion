@@ -5,9 +5,11 @@ import io.circe.generic.extras.ConfiguredJsonCodec
 
 import zio.notion.NotionError
 import zio.notion.NotionError.PropertyNotExist
-import zio.notion.dsl.PatchedColumnDefinition
 import zio.notion.model.common.{Cover, Icon, Id, Parent}
-import zio.notion.model.common.richtext.{Annotations, RichTextData}
+import zio.notion.model.common.richtext.RichTextData
+import zio.notion.model.database.Database.Patch.{Operations, StatelessOperations}
+import zio.notion.model.database.Database.Patch.Operations.Operation
+import zio.notion.model.database.PatchedPropertyDefinition.PropertySchema
 import zio.notion.model.magnolia.PatchEncoderDerivation
 
 import java.time.OffsetDateTime
@@ -26,50 +28,90 @@ final case class Database(
     archived:       Boolean,
     properties:     Map[String, PropertyDefinition],
     url:            String
-) { self =>
-  def patch: Database.Patch = Database.Patch(self)
-}
+)
 
 object Database {
 
   final case class Patch(
-      database:   Database,
       title:      Option[Seq[RichTextData]],
       properties: Map[String, Option[PatchedPropertyDefinition]]
   ) { self =>
 
-    def updateProperty(patchedColumnDefinition: PatchedColumnDefinition): Patch = {
-      val name  = patchedColumnDefinition.columnName
-      val patch = patchedColumnDefinition.patch
+    def setOperation(operation: Operation.Stateless): Patch =
+      operation match {
+        case Operation.RemoveColumn(name) => copy(properties = properties + (name -> None))
+        case Operation.SetTitle(title)    => copy(title = Some(title))
+        case Operation.CreateColumn(name, schema) =>
+          val propertyDefinition = PatchedPropertyDefinition(None, Some(schema))
+          copy(properties = properties + (name -> Some(propertyDefinition)))
+      }
 
-      database.properties.get(name) match {
-        // Update an existing property
-        case Some(_) => copy(properties = properties + (name -> Some(patch)))
-        // Create a new property
-        case None =>
-          val newName: String                          = patch.name.getOrElse(name)
-          val value: Option[PatchedPropertyDefinition] = Some(patch.copy(name = None))
+    def setOperations(operations: StatelessOperations): Patch =
+      operations.operations.foldLeft(self)((patch, operation) => patch.setOperation(operation))
 
-          copy(properties = properties + (newName -> value))
+    def updateOperation(database: Database, operation: Operation): Either[NotionError, Patch] =
+      operation match {
+        case stateless: Operation.Stateless => Right(setOperations(StatelessOperations(List(stateless))))
+        case stateful: Operation.Stateful =>
+          stateful match {
+            case Operation.UpdateTitle(f) =>
+              val oldTitle: Seq[RichTextData] = title.getOrElse(database.title)
+              Right(copy(title = Some(f(oldTitle))))
+            case Operation.UpdateColumn(name, update) =>
+              database.properties.get(name) match {
+                case Some(_) => Right(copy(properties = properties + (name -> Some(update))))
+                case None    => Left(PropertyNotExist(name, database.id))
+              }
+          }
+      }
+
+    def updateOperations(database: Database, operations: Operations): Either[NotionError, Patch] = {
+      val eitherSelf: Either[NotionError, Patch] = Right(self)
+
+      operations.operations.foldLeft(eitherSelf) { (maybePatch, operation) =>
+        maybePatch.flatMap(patch => patch.updateOperation(database, operation))
       }
     }
-
-    def removeProperty(key: String): Either[NotionError, Patch] =
-      database.properties.get(key) match {
-        case Some(_) => Right(copy(properties = properties + (key -> None)))
-        case None    => Left(PropertyNotExist(key, database.id))
-      }
-
-    def updateTitle(f: Seq[RichTextData] => Seq[RichTextData]): Patch = copy(title = Some(f(title.getOrElse(database.title))))
-
-    def rename(text: Seq[RichTextData.Text]): Patch = updateTitle(_ => text)
-
-    def rename(text: String): Patch = rename(Seq(RichTextData.default(text, Annotations.default)))
   }
 
   object Patch {
-    def apply(database: Database): Patch = Patch(database, None, Map.empty)
+    val empty: Patch = Patch(None, Map.empty)
 
     implicit val encoder: Encoder[Patch] = PatchEncoderDerivation.gen[Patch]
+
+    final case class StatelessOperations(operations: List[Operation.Stateless]) {
+      def ++(operation: Operation.Stateless): StatelessOperations = copy(operations = operations :+ operation)
+    }
+
+    final case class Operations(operations: List[Operation]) {
+      def ++(operation: Operation): Operations = copy(operations = operations :+ operation)
+    }
+
+    object Operations {
+      sealed trait Operation
+
+      object Operation {
+
+        sealed trait Stateless extends Operation { self =>
+          def ++(operation: Stateless): StatelessOperations = StatelessOperations(List(self, operation))
+          def ++(operation: Stateful): Operations           = Operations(List(self, operation))
+        }
+
+        sealed trait Stateful extends Operation { self =>
+          def ++(operation: Operation): Operations = Operations(List(self, operation))
+        }
+        final case class RemoveColumn(name: String)                         extends Stateless
+        final case class SetTitle(title: Seq[RichTextData])                 extends Stateless
+        final case class CreateColumn(name: String, schema: PropertySchema) extends Stateless
+
+        final case class UpdateTitle(f: Seq[RichTextData] => Seq[RichTextData]) extends Stateful
+
+        final case class UpdateColumn(name: String, update: PatchedPropertyDefinition) extends Stateful {
+          def rename(name: String): UpdateColumn = copy(update = update.copy(name = Some(name)))
+
+          def as(propertySchema: PropertySchema): UpdateColumn = copy(update = update.copy(propertySchema = Some(propertySchema)))
+        }
+      }
+    }
   }
 }

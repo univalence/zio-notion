@@ -1,16 +1,10 @@
 package zio.notion.dsl
 
 import zio.notion.model.common.{Cover, Icon}
-import zio.notion.model.page.Page.Patch.{Operations, StatelessOperations}
 import zio.notion.model.page.Page.Patch.Operations.Operation
 import zio.notion.model.page.Page.Patch.Operations.Operation._
 
 trait PageUpdateDSL {
-  implicit def statefulToOperations(operation: Operation.Stateful): Operations   = Operations(List(operation))
-  implicit def statelessToOperations(operation: Operation.Stateless): Operations = Operations(List(operation))
-
-  implicit def statelessToStatelessOperations(operation: Operation.Stateless): StatelessOperations = StatelessOperations(List(operation))
-
   val archive: Operation.Stateless                              = Archive
   val unarchive: Operation.Stateless                            = Unarchive
   val removeIcon: Operation.Stateless                           = RemoveIcon

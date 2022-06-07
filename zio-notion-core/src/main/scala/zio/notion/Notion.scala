@@ -14,7 +14,6 @@ import zio.notion.model.database.{Database, DatabaseQuery}
 import zio.notion.model.database.PatchedPropertyDefinition.PropertySchema
 import zio.notion.model.database.query.Query
 import zio.notion.model.page.Page
-import zio.notion.model.page.Page.Patch.{Operations, StatelessOperations}
 import zio.notion.model.user.{User, Users}
 
 sealed trait Notion {
@@ -32,10 +31,11 @@ sealed trait Notion {
 
   def queryDatabase(databaseId: String, query: Query, pagination: Pagination): IO[NotionError, DatabaseQuery]
 
-  def updatePage(pageId: String)(operations: StatelessOperations): IO[NotionError, Page]
-  def updatePage(page: Page)(operations: Operations): IO[NotionError, Page]
+  def updatePage(pageId: String, operations: Page.Patch.StatelessOperations): IO[NotionError, Page]
+  def updatePage(page: Page, operations: Page.Patch.Operations): IO[NotionError, Page]
 
-  def updateDatabase(patch: Database.Patch): IO[NotionError, Database]
+  def updateDatabase(databaseId: String, operations: Database.Patch.StatelessOperations): IO[NotionError, Database]
+  def updateDatabase(database: Database, operations: Database.Patch.Operations): IO[NotionError, Database]
 
   def createDatabase(
       pageId: String,
@@ -115,15 +115,31 @@ object Notion {
     } yield DatabaseQuery(None, allPages)
   }
 
-  def updatePage(pageId: String)(operations: StatelessOperations): ZIO[Notion, NotionError, Page] =
-    ZIO.service[Notion].flatMap(_.updatePage(pageId)(operations))
+  def updatePage(pageId: String, operations: Page.Patch.StatelessOperations): ZIO[Notion, NotionError, Page] =
+    ZIO.service[Notion].flatMap(_.updatePage(pageId, operations))
 
-  def updatePage(page: Page)(operations: Operations): ZIO[Notion, NotionError, Page] =
-    ZIO.service[Notion].flatMap(_.updatePage(page)(operations))
+  def updatePage(page: Page, operations: Page.Patch.Operations): ZIO[Notion, NotionError, Page] =
+    ZIO.service[Notion].flatMap(_.updatePage(page, operations))
 
-  def updateDatabase(patch: Database.Patch): ZIO[Notion, NotionError, Database] = ZIO.service[Notion].flatMap(_.updateDatabase(patch))
+  def updatePage(pageId: String, operation: Page.Patch.Operations.Operation.Stateless): ZIO[Notion, NotionError, Page] =
+    updatePage(pageId, Page.Patch.StatelessOperations(List(operation)))
 
-  def deletePage(pageId: String): ZIO[Notion, NotionError, Unit] = Notion.updatePage(pageId)(archive).unit
+  def updatePage(page: Page, operation: Page.Patch.Operations.Operation): ZIO[Notion, NotionError, Page] =
+    updatePage(page, Page.Patch.Operations(List(operation)))
+
+  def updateDatabase(databaseId: String, operations: Database.Patch.StatelessOperations): ZIO[Notion, NotionError, Database] =
+    ZIO.service[Notion].flatMap(_.updateDatabase(databaseId, operations))
+
+  def updateDatabase(database: Database, operations: Database.Patch.Operations): ZIO[Notion, NotionError, Database] =
+    ZIO.service[Notion].flatMap(_.updateDatabase(database, operations))
+
+  def updateDatabase(databaseId: String, operation: Database.Patch.Operations.Operation.Stateless): ZIO[Notion, NotionError, Database] =
+    updateDatabase(databaseId, Database.Patch.StatelessOperations(List(operation)))
+
+  def updateDatabase(database: Database, operation: Database.Patch.Operations.Operation): ZIO[Notion, NotionError, Database] =
+    updateDatabase(database, Database.Patch.Operations(List(operation)))
+
+  def deletePage(pageId: String): ZIO[Notion, NotionError, Unit] = Notion.updatePage(pageId, archive).unit
 
   def createDatabase(
       pageId: String,
@@ -152,14 +168,17 @@ object Notion {
     override def queryDatabase(databaseId: String, query: Query, pagination: Pagination): IO[NotionError, DatabaseQuery] =
       decodeResponse[DatabaseQuery](notionClient.queryDatabase(databaseId, query, pagination))
 
-    override def updatePage(pageId: String)(operations: StatelessOperations): IO[NotionError, Page] =
-      decodeResponse[Page](notionClient.updatePage(pageId)(operations))
+    override def updatePage(pageId: String, operations: Page.Patch.StatelessOperations): IO[NotionError, Page] =
+      decodeResponse[Page](notionClient.updatePage(pageId, operations))
 
-    override def updatePage(page: Page)(operations: Operations): IO[NotionError, Page] =
-      decodeResponse[Page](notionClient.updatePage(page)(operations))
+    override def updatePage(page: Page, operations: Page.Patch.Operations): IO[NotionError, Page] =
+      decodeResponse[Page](notionClient.updatePage(page, operations))
 
-    override def updateDatabase(patch: Database.Patch): IO[NotionError, Database] =
-      decodeResponse[Database](notionClient.updateDatabase(patch))
+    override def updateDatabase(databaseId: String, operations: Database.Patch.StatelessOperations): IO[NotionError, Database] =
+      decodeResponse[Database](notionClient.updateDatabase(databaseId, operations))
+
+    override def updateDatabase(database: Database, operations: Database.Patch.Operations): IO[NotionError, Database] =
+      decodeResponse[Database](notionClient.updateDatabase(database, operations))
 
     override def createDatabase(
         pageId: String,

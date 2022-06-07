@@ -19,7 +19,7 @@ object UpdatePage extends ZIOAppDefault {
 
     for {
       page <- Notion.retrievePage("6A074793-D735-4BF6-9159-24351D239BBC") // Insert your own page ID
-      _    <- Notion.updatePage(page)(operations)
+      _    <- Notion.updatePage(page, operations)
     } yield ()
   }
 
