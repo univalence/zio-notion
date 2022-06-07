@@ -19,12 +19,14 @@ There is two types of operations :
   operation is `UpdateProperty`. It indeed requires the current page property to update it.
 
 We explicitly differentiate the operations because stateless operations does not require a page to work. It means that
-we don't have to retrieve the page first to update it. That is why the **Notion** interface provides two update 
-methods :
+we don't have to retrieve the page first to update it. That is why the **Notion** interface provides several
+update methods :
 
 ```scala
-def updatePage(pageId: String)(operations: StatelessOperations): IO[NotionError, Page]
-def updatePage(page: Page)(operations: Operations): IO[NotionError, Page]
+def updatePage(pageId: String, operations: StatelessOperations): IO[NotionError, Page]
+def updatePage(page: Page, operations: Operations): IO[NotionError, Page]
+def updatePage(pageId: String, operations: Operation.Stateless): IO[NotionError, Page]
+def updatePage(page: Page, operations: Operation): IO[NotionError, Page]
 ```
 
 We provide several kind of operations that can compose:

@@ -17,8 +17,6 @@ import zio.notion.model.database.Database
 import zio.notion.model.database.PatchedPropertyDefinition.PropertySchema
 import zio.notion.model.database.query.Query
 import zio.notion.model.page.Page
-import zio.notion.model.page.Page.Patch
-import zio.notion.model.page.Page.Patch.{Operations, StatelessOperations}
 import zio.notion.model.printer
 
 trait NotionClient {
@@ -29,10 +27,11 @@ trait NotionClient {
 
   def queryDatabase(databaseId: String, query: Query, pagination: Pagination): IO[NotionError, NotionResponse]
 
-  def updatePage(pageId: String)(operations: StatelessOperations): IO[NotionError, NotionResponse]
-  def updatePage(page: Page)(operations: Operations): IO[NotionError, NotionResponse]
+  def updatePage(pageId: String, operations: Page.Patch.StatelessOperations): IO[NotionError, NotionResponse]
+  def updatePage(page: Page, operations: Page.Patch.Operations): IO[NotionError, NotionResponse]
 
-  def updateDatabase(patch: Database.Patch): IO[NotionError, NotionResponse]
+  def updateDatabase(databaseId: String, operations: Database.Patch.StatelessOperations): IO[NotionError, NotionResponse]
+  def updateDatabase(database: Database, operations: Database.Patch.Operations): IO[NotionError, NotionResponse]
 
   def createDatabase(
       pageId: String,
@@ -57,14 +56,17 @@ object NotionClient {
   def queryDatabase(databaseId: String, query: Query, pagination: Pagination): ZIO[NotionClient, NotionError, NotionResponse] =
     ZIO.service[NotionClient].flatMap(_.queryDatabase(databaseId, query, pagination))
 
-  def updatePage(pageId: String)(operations: StatelessOperations): ZIO[NotionClient, NotionError, NotionResponse] =
-    ZIO.service[NotionClient].flatMap(_.updatePage(pageId)(operations))
+  def updatePage(pageId: String, operations: Page.Patch.StatelessOperations): ZIO[NotionClient, NotionError, NotionResponse] =
+    ZIO.service[NotionClient].flatMap(_.updatePage(pageId, operations))
 
-  def updatePage(page: Page)(operations: Operations): ZIO[NotionClient, NotionError, NotionResponse] =
-    ZIO.service[NotionClient].flatMap(_.updatePage(page)(operations))
+  def updatePage(page: Page, operations: Page.Patch.Operations): ZIO[NotionClient, NotionError, NotionResponse] =
+    ZIO.service[NotionClient].flatMap(_.updatePage(page, operations))
 
-  def updateDatabase(patch: Database.Patch): ZIO[NotionClient, NotionError, NotionResponse] =
-    ZIO.service[NotionClient].flatMap(_.updateDatabase(patch))
+  def updateDatabase(databaseId: String, operations: Database.Patch.StatelessOperations): ZIO[NotionClient, NotionError, NotionResponse] =
+    ZIO.service[NotionClient].flatMap(_.updateDatabase(databaseId, operations))
+
+  def updateDatabase(database: Database, operations: Database.Patch.Operations): ZIO[NotionClient, NotionError, NotionResponse] =
+    ZIO.service[NotionClient].flatMap(_.updateDatabase(database, operations))
 
   type NotionResponse = String
 
@@ -142,8 +144,8 @@ object NotionClient {
         .body(printer.print(query.asJson deepMerge pagination.asJson))
         .handle
 
-    override def updatePage(pageId: String)(operations: StatelessOperations): IO[NotionError, NotionResponse] = {
-      val patch = Patch.empty.setOperations(operations)
+    override def updatePage(pageId: String, operations: Page.Patch.StatelessOperations): IO[NotionError, NotionResponse] = {
+      val patch = Page.Patch.empty.setOperations(operations)
 
       defaultRequest
         .patch(uri"$endpoint/pages/$pageId")
@@ -151,9 +153,9 @@ object NotionClient {
         .handle
     }
 
-    override def updatePage(page: Page)(operations: Operations): IO[NotionError, NotionResponse] =
+    override def updatePage(page: Page, operations: Page.Patch.Operations): IO[NotionError, NotionResponse] =
       for {
-        patch <- ZIO.fromEither(Patch.empty.updateOperations(page)(operations))
+        patch <- ZIO.fromEither(Page.Patch.empty.updateOperations(page, operations))
         response <-
           defaultRequest
             .patch(uri"$endpoint/pages/${page.id}")
@@ -161,17 +163,24 @@ object NotionClient {
             .handle
       } yield response
 
-    //    override def updatePage(patch: Page.Patch): IO[NotionError, NotionResponse] =
-//      defaultRequest
-//        .patch(uri"$endpoint/pages/${patch.page.id}")
-//        .body(printer.print(patch.asJson))
-//        .handle
+    override def updateDatabase(databaseId: String, operations: Database.Patch.StatelessOperations): IO[NotionError, NotionResponse] = {
+      val patch = Database.Patch.empty.setOperations(operations)
 
-    override def updateDatabase(patch: Database.Patch): IO[NotionError, NotionResponse] =
       defaultRequest
-        .patch(uri"$endpoint/databases/${patch.database.id}")
+        .patch(uri"$endpoint/databases/$databaseId")
         .body(printer.print(patch.asJson))
         .handle
+    }
+
+    override def updateDatabase(database: Database, operations: Database.Patch.Operations): IO[NotionError, NotionResponse] =
+      for {
+        patch <- ZIO.fromEither(Database.Patch.empty.updateOperations(database, operations))
+        response <-
+          defaultRequest
+            .patch(uri"$endpoint/databases/${database.id}")
+            .body(printer.print(patch.asJson))
+            .handle
+      } yield response
 
     override def createDatabase(
         pageId: String,

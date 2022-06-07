@@ -4,9 +4,9 @@ import io.circe.parser.decode
 import io.circe.syntax.EncoderOps
 
 import zio.Scope
-import zio.notion.Faker.{fakeDatabase, fakeUUID}
-import zio.notion.NotionError.PropertyNotExist
+import zio.notion.Faker.fakeDatabase
 import zio.notion.dsl._
+import zio.notion.model.database.Database.Patch
 import zio.notion.model.printer
 import zio.test.{assert, assertTrue, Spec, TestEnvironment, ZIOSpecDefault}
 import zio.test.Assertion.isRight
@@ -237,7 +237,8 @@ object DatabaseSpec extends ZIOSpecDefault {
   def patchSpec: Spec[TestEnvironment with Scope, Any] =
     suite("Database update suite")(
       test("We should be able to update one property") {
-        val patch = fakeDatabase.patch.updateProperty($$"Test".patch.as(date).rename("Date"))
+        val operation = $$"Test".patch.as(date).rename("Date")
+        val patch     = Patch.empty.updateOperation(fakeDatabase, operation)
 
         val expected =
           """{
@@ -251,10 +252,11 @@ object DatabaseSpec extends ZIOSpecDefault {
             |  }
             |}""".stripMargin
 
-        assertTrue(printer.print(patch.asJson) == expected)
+        assertTrue(patch.map(_.asJson).map(printer.print) == Right(expected))
       },
       test("We should be able to create a new property description") {
-        val patch = fakeDatabase.patch.updateProperty($$"New field".patch.as(date))
+        val operation = $$"New field".create.as(date)
+        val patch     = Patch.empty.setOperation(operation)
 
         val expected =
           """{
@@ -269,24 +271,9 @@ object DatabaseSpec extends ZIOSpecDefault {
 
         assertTrue(printer.print(patch.asJson) == expected)
       },
-      test("We should be able to rename a newly created property description (if we rename on create, we have to use the rename value)") {
-        val patch = fakeDatabase.patch.updateProperty($$"New field".patch.as(date).rename("Date"))
-
-        val expected =
-          """{
-            |  "properties" : {
-            |    "Date" : {
-            |      "date" : {
-            |        
-            |      }
-            |    }
-            |  }
-            |}""".stripMargin
-
-        assertTrue(printer.print(patch.asJson) == expected)
-      },
       test("We should be able to remove one existing property") {
-        val maybePatch = fakeDatabase.patch.removeProperty("Test")
+        val operation = $$"Test".remove
+        val patch     = Patch.empty.setOperation(operation)
 
         val expected =
           """{
@@ -295,15 +282,11 @@ object DatabaseSpec extends ZIOSpecDefault {
             |  }
             |}""".stripMargin
 
-        assertTrue(maybePatch.map(patch => printer.print(patch.asJson)) == Right(expected))
+        assertTrue(printer.print(patch.asJson) == expected)
       },
-      test("We should return an error when we remove one non existing property") {
-        val maybePatch = fakeDatabase.patch.removeProperty("Void")
-
-        assertTrue(maybePatch.map(patch => printer.print(patch.asJson)) == Left(PropertyNotExist("Void", fakeUUID)))
-      },
-      test("We should be able to update the title") {
-        val patch = fakeDatabase.patch.rename("My database")
+      test("We should be able to set a title") {
+        val operation = setDatabaseTitle("My database")
+        val patch     = Patch.empty.setOperation(operation)
 
         val expected =
           """{
@@ -326,6 +309,24 @@ object DatabaseSpec extends ZIOSpecDefault {
             |      "type" : "text"
             |    }
             |  ]
+            |}""".stripMargin
+
+        assertTrue(printer.print(patch.asJson) == expected)
+      },
+      test("We should be able to combine operations") {
+        val operations = $$"New field".create.as(date) ++ $$"Test".remove
+        val patch      = Patch.empty.setOperations(operations)
+
+        val expected =
+          """{
+            |  "properties" : {
+            |    "New field" : {
+            |      "date" : {
+            |        
+            |      }
+            |    },
+            |    "Test" : null
+            |  }
             |}""".stripMargin
 
         assertTrue(printer.print(patch.asJson) == expected)

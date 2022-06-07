@@ -5,7 +5,6 @@ import io.circe.generic.extras.ConfiguredJsonCodec
 
 import zio.notion.{NotionError, Removable}
 import zio.notion.Removable.{Ignore, Keep, Remove}
-import zio.notion.dsl.PageUpdateDSL._
 import zio.notion.model.common.{Cover, Icon, Id, Parent}
 import zio.notion.model.magnolia.PatchEncoderDerivation
 import zio.notion.model.page.Page.Patch.{Operations, StatelessOperations}
@@ -31,8 +30,6 @@ final case class Page(
     url:            String
 )
 
-// val patch =
-
 object Page {
 
   final case class Patch(
@@ -43,33 +40,35 @@ object Page {
   ) {
     self =>
 
-    def setOperations(operations: StatelessOperations): Patch =
-      operations.operations.foldLeft(self) { case (patch, operation) =>
-        operation match {
-          case Operation.Archive                     => patch.copy(archived = Some(true))
-          case Operation.Unarchive                   => patch.copy(archived = Some(false))
-          case Operation.RemoveIcon                  => patch.copy(icon = Remove)
-          case Operation.RemoveCover                 => patch.copy(cover = Remove)
-          case Operation.SetIcon(icon)               => patch.copy(icon = Keep(icon))
-          case Operation.SetCover(cover)             => patch.copy(cover = Keep(cover))
-          case Operation.SetProperty(colName, value) => patch.copy(properties = properties + (colName -> Some(value)))
-          case Operation.RemoveProperty(key)         => patch.copy(properties = properties + (key -> None))
-        }
+    def setOperation(operation: Operation.Stateless): Patch =
+      operation match {
+        case Operation.Archive                     => copy(archived = Some(true))
+        case Operation.Unarchive                   => copy(archived = Some(false))
+        case Operation.RemoveIcon                  => copy(icon = Remove)
+        case Operation.RemoveCover                 => copy(cover = Remove)
+        case Operation.SetIcon(icon)               => copy(icon = Keep(icon))
+        case Operation.SetCover(cover)             => copy(cover = Keep(cover))
+        case Operation.SetProperty(colName, value) => copy(properties = properties + (colName -> Some(value)))
+        case Operation.RemoveProperty(key)         => copy(properties = properties + (key -> None))
       }
 
-    def updateOperations(page: Page)(operations: Operations): Either[NotionError, Patch] = {
+    def setOperations(operations: StatelessOperations): Patch =
+      operations.operations.foldLeft(self) { case (patch, operation) => patch.setOperation(operation) }
+
+    def updateOperation(page: Page, operation: Operation): Either[NotionError, Patch] =
+      operation match {
+        case stateless: Operation.Stateless => Right(setOperation(stateless))
+        case stateful: Operation.Stateful =>
+          stateful match {
+            case op: Operation.UpdateProperty => op.updatePatch(page, self)
+          }
+      }
+
+    def updateOperations(page: Page, operations: Operations): Either[NotionError, Patch] = {
       val eitherSelf: Either[NotionError, Patch] = Right(self)
 
       operations.operations.foldLeft(eitherSelf) { case (maybePatch, operation) =>
-        maybePatch.flatMap(patch =>
-          operation match {
-            case stateless: Operation.Stateless => Right(patch.setOperations(stateless))
-            case stateful: Operation.Stateful =>
-              stateful match {
-                case op: Operation.UpdateProperty => op.updatePatch(page, patch)
-              }
-          }
-        )
+        maybePatch.flatMap(patch => patch.updateOperation(page, operation))
       }
     }
   }

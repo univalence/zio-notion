@@ -44,13 +44,12 @@ object NotionSpec extends ZIOSpecDefault {
         effect.map(res => assertTrue(res.results.length == 1))
       },
       test("User can update a page") {
-        val effect: ZIO[Notion, NotionError, Page] = Notion.updatePage(fakePage.id)(removeIcon)
+        val effect: ZIO[Notion, NotionError, Page] = Notion.updatePage(fakePage.id, removeIcon)
 
         effect.map(res => assertTrue(res.id == fakeUUID))
       },
       test("User can update a database") {
-        val patch                                      = fakeDatabase.patch
-        val effect: ZIO[Notion, NotionError, Database] = Notion.updateDatabase(patch)
+        val effect: ZIO[Notion, NotionError, Database] = Notion.updateDatabase(fakeDatabase.id, setDatabaseTitle("Test"))
 
         effect.map(res => assertTrue(res.id == fakeUUID))
       },

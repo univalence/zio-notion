@@ -8,7 +8,6 @@ import zio.notion.model.common.richtext.RichTextData
 import zio.notion.model.database.{Database, PatchedPropertyDefinition}
 import zio.notion.model.database.query.Query
 import zio.notion.model.page.Page
-import zio.notion.model.page.Page.Patch.{Operations, StatelessOperations}
 
 /** Notion client mock for test purpose */
 final case class TestNotionClient() extends NotionClient {
@@ -380,11 +379,16 @@ final case class TestNotionClient() extends NotionClient {
       }
     )
 
-  override def updatePage(pageId: String)(operations: StatelessOperations): IO[NotionError, NotionResponse] = retrievePage(pageId)
+  override def updatePage(pageId: String, operations: Page.Patch.StatelessOperations): IO[NotionError, NotionResponse] =
+    retrievePage(pageId)
 
-  override def updatePage(page: Page)(operations: Operations): IO[NotionError, NotionResponse] = retrievePage(page.id)
+  override def updatePage(page: Page, operations: Page.Patch.Operations): IO[NotionError, NotionResponse] = retrievePage(page.id)
 
-  override def updateDatabase(patch: Database.Patch): IO[NotionError, NotionResponse] = retrieveDatabase(patch.database.id)
+  override def updateDatabase(databaseId: String, operations: Database.Patch.StatelessOperations): IO[NotionError, NotionResponse] =
+    retrieveDatabase(databaseId)
+
+  override def updateDatabase(database: Database, operations: Database.Patch.Operations): IO[NotionError, NotionResponse] =
+    retrieveDatabase(database.id)
 
   override def createDatabase(
       pageId: String,
