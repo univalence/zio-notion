@@ -6,55 +6,40 @@ Notion allows you to update:
 
 For more information, you can check the [notion documentation](https://developers.notion.com/reference/update-a-database).
 
-Strictly speaking, you have to provide a patch that contains the list of changes from the current page to the expected
-one.
+Strictly speaking, you have to provide a list of operations describing the list of changes from the current database to 
+the expected one.
 
-A patch is described by the following data structure:
+There is two types of operations :
+- Stateless operations are operations that does not require the current state of the database to generate a patch. As an
+  example, `setDatabaseTitle` is a stateless operation because we don't need to explicitly know if the database already 
+  has a title or not.
+- Stateful operations are operations that does require the current state of the database. As an example,
+  `renameDatabase` requires the current database name to update it.
 
-```scala
-final case class Patch(
-      database:   Database,
-      title:      Option[Seq[RichTextData]],
-      properties: Map[String, Option[PatchPlan]]
-)
-```
-
-PatchPlan describe the way to patch a property schema.
-
-Using patch plan, you can:
-- Update the name of the property schema
-- Update the type of the property schema (cast the property from one type to another)
-
-We provide several helper functions to update a patch with ease.
-
-Here is an example:
+We explicitly differentiate the operations because stateless operations does not require a database to work. It means 
+that we don't have to retrieve the database first to update it. That is why the **Notion** interface provides several 
+update methods :
 
 ```scala
-import zio._
-import zio.notion._
-import zio.notion.dsl._
-import zio.notion.model.database.Database
-
-object UpdateDatabase extends ZIOAppDefault {
-  def example: ZIO[Notion, NotionError, Unit] =
-    for {
-      database <- Notion.retrieveDatabase("6A074793-D735-4BF6-9159-24351D239BBC") // Insert your own database ID
-      patch =
-        database.patch
-          .updateProperty($$"col1".patch.rename("Column 1"))
-          .updateProperty($$"col2".patch.as(euro))
-          .rename("My database")
-      _ <- Notion.updateDatabase(patch)
-    } yield ()
-
-  override def run: ZIO[Any with ZIOAppArgs with Scope, Any, Any] =
-    example.provide(Notion.layerWith("6A074793-D735-4BF6-9159-24351D239BBC")) // Insert your own bearer
-}
+def updateDatabase(databaseId: String, operations: StatelessOperations): IO[NotionError, Database]
+def updateDatabase(database: Database, operations: Operations): IO[NotionError, Database]
+def updateDatabase(databaseId: String, operation: Operation.Stateless): IO[NotionError, Database]
+def updateDatabase(database: Database, operation: Operation): IO[NotionError, Database]
 ```
 
-`$$"col1"` is an alias for `$"col1".definition`.
+We provide several kind of operations that can compose:
 
-In this example, we apply three different patches to the notion database:
-- We rename the property schema "col1" to "Column 1"
-- We cast the property "col2" to be a number with the **euro** unit
-- We rename the database as "My database"
+```scala
+import zio.notion.dsl._ // We advise you to import the dsl
+
+val operations = $$"col1".remove ++ $$"col2".patch.as(euro)
+```
+
+Here is a non-exhaustive list of operation:
+
+```scala
+val operation = setDatabaseTitle("Database title") // Set the database title (Stateless)
+val operation = $$"col1".remove                    // Remove the col1 if it exists (Stateless)
+val operation = $$"col1".create(euro)              // Create a new col1 with a number type in euro (Stateless)
+val operation = $$"col1".patch.rename("col2")      // Rename the col1 to col2  (Stateful)
+```
