@@ -4,7 +4,6 @@ import io.circe.Encoder
 import io.circe.generic.extras.ConfiguredJsonCodec
 
 import zio.notion.{NotionError, Removable}
-import zio.notion.NotionError._
 import zio.notion.Removable.{Ignore, Keep, Remove}
 import zio.notion.dsl.PageUpdateDSL._
 import zio.notion.model.common.{Cover, Icon, Id, Parent}
@@ -139,7 +138,7 @@ object Page {
 
           object Transform {
 
-            case class GenericWithType[PP <: PatchedProperty: ClassTag](transform: Option[PP] => Either[NotionError, Option[PP]])
+            final case class GenericWithType[PP <: PatchedProperty: ClassTag](transform: Option[PP] => Either[NotionError, Option[PP]])
                 extends Transform {
 
               override def lift(name: String): Option[PatchedProperty] => Either[NotionError, Option[PatchedProperty]] = {
@@ -151,7 +150,7 @@ object Page {
 
             }
 
-            case class Direct[PP <: PatchedProperty: ClassTag](transform: PP => PP) extends Transform {
+            final case class Direct[PP <: PatchedProperty: ClassTag](transform: PP => PP) extends Transform {
 
               override def lift(name: String): Option[PatchedProperty] => Either[NotionError, Option[PatchedProperty]] = {
                 case Some(pp: PP) => Right(Option(transform(pp)))
@@ -161,7 +160,7 @@ object Page {
               }
             }
 
-            case class IgnoreEmpty(transform: Transform) extends Transform {
+            final case class IgnoreEmpty(transform: Transform) extends Transform {
 
               override def lift(name: String): Option[PatchedProperty] => Either[NotionError, Option[PatchedProperty]] = {
                 case None => Right(None)
