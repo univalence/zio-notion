@@ -5,6 +5,7 @@ import io.circe.syntax.EncoderOps
 
 import zio.Scope
 import zio.notion.Faker._
+import zio.notion.NotionError.{PropertyIsEmpty, PropertyWrongType}
 import zio.notion.dsl._
 import zio.notion.model.common._
 import zio.notion.model.common.Icon.Emoji
@@ -285,6 +286,29 @@ object PageSpec extends ZIOSpecDefault {
             |      "checkbox" : false
             |    }
             |  }
+            |}""".stripMargin
+
+        assertTrue(eitherPatch.map(patch => printer.print(patch.asJson)) == Right(expected))
+      },
+      test("Updating a property with a wrong type should return an error") {
+        val operations  = $"Checkbox".asNumber.patch.ceil
+        val eitherPatch = Patch.empty.updateOperations(fakePage)(operations)
+
+        assertTrue(eitherPatch.map(patch => printer.print(patch.asJson)) == Left(PropertyWrongType("Checkbox", "Number", "Checkbox")))
+      },
+      test("Updating a missing property should return an error") {
+        val operations  = $"Unknown".asCheckbox.patch.reverse
+        val eitherPatch = Patch.empty.updateOperations(fakePage)(operations)
+
+        assertTrue(eitherPatch.map(patch => printer.print(patch.asJson)) == Left(PropertyIsEmpty("Unknown")))
+      },
+      test("Updating a missing property should be ignored if we specify the ignore flag") {
+        val operations  = $"Unknown".asCheckbox.patch.reverse.ignoreEmpty
+        val eitherPatch = Patch.empty.updateOperations(fakePage)(operations)
+
+        val expected =
+          """{
+            |  
             |}""".stripMargin
 
         assertTrue(eitherPatch.map(patch => printer.print(patch.asJson)) == Right(expected))

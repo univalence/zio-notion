@@ -55,19 +55,12 @@ object PatchedColumn {
 
   final case class PatchedColumnNumber(columnName: String) {
     def set(number: Double): SetProperty            = SetProperty(columnName, PatchedNumber(number))
-    def update(f: Double => Double): UpdateProperty = maybeUpdate(p => Right(f(p)))
+    def update(f: Double => Double): UpdateProperty = attemptUpdate(p => Right(f(p)))
 
-    def maybeUpdate(f: Double => Either[NotionError, Double]): UpdateProperty =
-      UpdateProperty(
-        columnName,
-        UpdateProperty.Transform.GenericWithType[PatchedNumber] {
-          case Some(property) => f(property.number).map(number => Some(property.copy(number = number)))
-          case None           => ???
-        }
-      )
-    // UpdateProperty(columnName, property => f(property.number).map(number => property.copy(number = number)))
+    def attemptUpdate(f: Double => Either[NotionError, Double]): UpdateProperty =
+      UpdateProperty.attempt[PatchedNumber](columnName, property => f(property.number).map(number => property.copy(number = number)))
 
-    def divide(number: Double): UpdateProperty = update(_ / number) // TODO: Transform to maybe update
+    def divide(number: Double): UpdateProperty = update(_ / number) // TODO: Transform to attempt update
     def add(number: Double): UpdateProperty    = update(_ + number)
     def minus(number: Double): UpdateProperty  = update(_ - number)
     def times(number: Double): UpdateProperty  = update(_ * number)
