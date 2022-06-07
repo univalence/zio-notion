@@ -5,9 +5,11 @@ import io.circe.syntax.EncoderOps
 
 import zio.Scope
 import zio.notion.Faker._
+import zio.notion.NotionError.{PropertyIsEmpty, PropertyWrongType}
 import zio.notion.dsl._
 import zio.notion.model.common._
 import zio.notion.model.common.Icon.Emoji
+import zio.notion.model.page.Page.Patch
 import zio.notion.model.printer
 import zio.test._
 import zio.test.Assertion.isRight
@@ -157,7 +159,7 @@ object PageSpec extends ZIOSpecDefault {
         assert(decode[Page](json))(isRight)
       },
       test("We should be able to encode an empty page patch") {
-        val patch = Page.Patch(fakePage)
+        val patch = Page.Patch.empty
 
         val expected =
           """{
@@ -171,7 +173,8 @@ object PageSpec extends ZIOSpecDefault {
   def patchSpec: Spec[TestEnvironment with Scope, Any] =
     suite("Page update suite")(
       test("We should be able to update one property") {
-        val maybePatch = fakePage.patch.updateProperty($"Checkbox".asCheckbox.patch.check)
+        val operations = $"Checkbox".asCheckbox.patch.check
+        val patch      = Patch.empty.setOperations(operations)
 
         val expected =
           """{
@@ -182,10 +185,11 @@ object PageSpec extends ZIOSpecDefault {
             |  }
             |}""".stripMargin
 
-        assertTrue(maybePatch.map(patch => printer.print(patch.asJson)) == Right(expected))
+        assertTrue(printer.print(patch.asJson) == expected)
       },
       test("We should be able to remove one property") {
-        val patch = fakePage.patch.removeProperty("Checkbox")
+        val operations = removeProperty("Checkbox")
+        val patch      = Patch.empty.setOperations(operations)
 
         val expected =
           """{
@@ -197,7 +201,8 @@ object PageSpec extends ZIOSpecDefault {
         assertTrue(printer.print(patch.asJson) == expected)
       },
       test("We should be able to remove an icon") {
-        val patch = fakePage.patch.removeIcon
+        val operations = removeIcon
+        val patch      = Patch.empty.setOperations(operations)
 
         val expected =
           """{
@@ -207,7 +212,8 @@ object PageSpec extends ZIOSpecDefault {
         assertTrue(printer.print(patch.asJson) == expected)
       },
       test("We should be able to update an icon") {
-        val patch = fakePage.patch.updateIcon(Emoji(fakeEmoji))
+        val operations = setIcon(Emoji(fakeEmoji))
+        val patch      = Patch.empty.setOperations(operations)
 
         val expected =
           s"""{
@@ -220,7 +226,8 @@ object PageSpec extends ZIOSpecDefault {
         assertTrue(printer.print(patch.asJson) == expected)
       },
       test("We should be able to remove a cover") {
-        val patch = fakePage.patch.removeCover
+        val operations = removeCover
+        val patch      = Patch.empty.setOperations(operations)
 
         val expected =
           """{
@@ -230,7 +237,8 @@ object PageSpec extends ZIOSpecDefault {
         assertTrue(printer.print(patch.asJson) == expected)
       },
       test("We should be able to update a cover") {
-        val patch = fakePage.patch.updateCover(Cover.External(Url(fakeUrl)))
+        val operations = setCover(Cover.External(Url(fakeUrl)))
+        val patch      = Patch.empty.setOperations(operations)
 
         val expected =
           s"""{
@@ -245,7 +253,8 @@ object PageSpec extends ZIOSpecDefault {
         assertTrue(printer.print(patch.asJson) == expected)
       },
       test("We should be able to archive a page") {
-        val patch = fakePage.patch.unarchive
+        val operations = unarchive
+        val patch      = Patch.empty.setOperations(operations)
 
         val expected =
           """{
@@ -255,7 +264,8 @@ object PageSpec extends ZIOSpecDefault {
         assertTrue(printer.print(patch.asJson) == expected)
       },
       test("We should be able to chain patches") {
-        val patch = fakePage.patch.unarchive.removeIcon
+        val operations = unarchive ++ removeIcon
+        val patch      = Patch.empty.setOperations(operations)
 
         val expected =
           """{
@@ -266,11 +276,8 @@ object PageSpec extends ZIOSpecDefault {
         assertTrue(printer.print(patch.asJson) == expected)
       },
       test("Updating a property twice should apply the second update on the first one") {
-        val maybePatch =
-          for {
-            p1 <- fakePage.patch.updateProperty($"Checkbox".asCheckbox.patch.check)
-            p2 <- p1.updateProperty(allColumns.asCheckbox.patch.reverse)
-          } yield p2
+        val operations  = $"Checkbox".asCheckbox.patch.check ++ $"Checkbox".asCheckbox.patch.reverse
+        val eitherPatch = Patch.empty.updateOperations(fakePage)(operations)
 
         val expected =
           """{
@@ -281,7 +288,30 @@ object PageSpec extends ZIOSpecDefault {
             |  }
             |}""".stripMargin
 
-        assertTrue(maybePatch.map(patch => printer.print(patch.asJson)) == Right(expected))
+        assertTrue(eitherPatch.map(patch => printer.print(patch.asJson)) == Right(expected))
+      },
+      test("Updating a property with a wrong type should return an error") {
+        val operations  = $"Checkbox".asNumber.patch.ceil
+        val eitherPatch = Patch.empty.updateOperations(fakePage)(operations)
+
+        assertTrue(eitherPatch.map(patch => printer.print(patch.asJson)) == Left(PropertyWrongType("Checkbox", "Number", "Checkbox")))
+      },
+      test("Updating a missing property should return an error") {
+        val operations  = $"Unknown".asCheckbox.patch.reverse
+        val eitherPatch = Patch.empty.updateOperations(fakePage)(operations)
+
+        assertTrue(eitherPatch.map(patch => printer.print(patch.asJson)) == Left(PropertyIsEmpty("Unknown")))
+      },
+      test("Updating a missing property should be ignored if we specify the ignore flag") {
+        val operations  = $"Unknown".asCheckbox.patch.reverse.ignoreEmpty
+        val eitherPatch = Patch.empty.updateOperations(fakePage)(operations)
+
+        val expected =
+          """{
+            |  
+            |}""".stripMargin
+
+        assertTrue(eitherPatch.map(patch => printer.print(patch.asJson)) == Right(expected))
       }
     )
 }

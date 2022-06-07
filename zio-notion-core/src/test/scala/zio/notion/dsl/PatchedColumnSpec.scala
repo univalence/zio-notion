@@ -4,10 +4,11 @@ import io.circe.syntax.EncoderOps
 
 import zio.{Scope, UIO}
 import zio.notion.Faker._
-import zio.notion.PropertyUpdater.{FieldSetter, FieldUpdater, UFieldUpdater}
 import zio.notion.model.common.{richtext, Id, Url}
 import zio.notion.model.common.enumeration.Color
 import zio.notion.model.common.richtext.RichTextData
+import zio.notion.model.page.Page.Patch.Operations.Operation._
+import zio.notion.model.page.PatchedProperty
 import zio.notion.model.page.PatchedProperty.{
   PatchedCheckbox,
   PatchedDate,
@@ -46,48 +47,83 @@ object PatchedColumnSpec extends ZIOSpecDefault {
       specPatchedPeople
     ) + specEncoding
 
+  implicit class PatchedPropertyOps(patchedProperty: PatchedProperty) {
+
+    def number: Double = patchedProperty.asInstanceOf[PatchedNumber].number
+
+    def url: String = patchedProperty.asInstanceOf[PatchedUrl].url
+
+    def name: Option[String] = patchedProperty.asInstanceOf[PatchedSelect].name
+
+    def id: Option[String] = patchedProperty.asInstanceOf[PatchedSelect].id
+
+    def multiSelect: List[PatchedSelect] = patchedProperty.asInstanceOf[PatchedMultiSelect].multiSelect
+
+    def start: OffsetDateTime = patchedProperty.asInstanceOf[PatchedDate].start
+
+    def end: Option[OffsetDateTime] = patchedProperty.asInstanceOf[PatchedDate].end
+
+    def email: String = patchedProperty.asInstanceOf[PatchedEmail].email
+
+    def phoneNumber: String = patchedProperty.asInstanceOf[PatchedPhoneNumber].phoneNumber
+
+    def checkbox: Boolean = patchedProperty.asInstanceOf[PatchedCheckbox].checkbox
+
+    def files: Seq[Link] = patchedProperty.asInstanceOf[PatchedFiles].files
+
+    def title: Seq[RichTextData] = patchedProperty.asInstanceOf[PatchedTitle].title
+
+    def richText: Seq[RichTextData] = patchedProperty.asInstanceOf[PatchedRichText].richText
+
+    def people: Seq[Id] = patchedProperty.asInstanceOf[PatchedPeople].people
+  }
+
+  implicit class TransformTestOps(updateProperty: UpdateProperty) {
+    def test(value: PatchedProperty): Option[PatchedProperty] = updateProperty.transform.lift("")(Some(value)).toOption.flatten
+  }
+
   def specPatchedNumber: Spec[TestEnvironment with Scope, Any] = {
-    def assertUpdate[E](updater: FieldUpdater[Nothing, PatchedNumber], initial: Double, excepted: Double): TestResult =
-      assertTrue(updater.f(PatchedNumber(initial)).map(_.number) == Right(excepted))
+    def assertUpdate[E](patch: UpdateProperty, initial: Double, excepted: Double): TestResult =
+      assertTrue(patch.transform.lift("")(Some(PatchedNumber(initial))).toOption.flatten.map(_.number) == Option(excepted))
 
     suite("Test patching numbers")(
       test("We can set a new number") {
-        val patch: FieldSetter[PatchedNumber] = allColumns.asNumber.patch.set(10)
+        val patch: SetProperty = $"col".asNumber.patch.set(10)
 
         assertTrue(patch.value.number == 10)
       },
       test("We can add by a number") {
-        val patch: FieldUpdater[Nothing, PatchedNumber] = allColumns.asNumber.patch.add(10)
+        val patch: UpdateProperty = $"col".asNumber.patch.add(10)
 
         assertUpdate(patch, 20, 30)
       },
       test("We can subtract by a number") {
-        val patch: FieldUpdater[Nothing, PatchedNumber] = allColumns.asNumber.patch.minus(10)
+        val patch: UpdateProperty = $"col".asNumber.patch.minus(10)
 
         assertUpdate(patch, 20, 10)
       },
       test("We can multiply by a number") {
-        val patch: FieldUpdater[Nothing, PatchedNumber] = allColumns.asNumber.patch.times(2)
+        val patch: UpdateProperty = $"col".asNumber.patch.times(2)
 
         assertUpdate(patch, 5, 10)
       },
       test("We can divide by a number") {
-        val patch: FieldUpdater[Nothing, PatchedNumber] = allColumns.asNumber.patch.divide(2)
+        val patch: UpdateProperty = $"col".asNumber.patch.divide(2)
 
         assertUpdate(patch, 5, 2.5)
       },
       test("We can pow by a number") {
-        val patch: FieldUpdater[Nothing, PatchedNumber] = allColumns.asNumber.patch.pow(2)
+        val patch: UpdateProperty = $"col".asNumber.patch.pow(2)
 
         assertUpdate(patch, 5, 25)
       },
       test("We can ceil a number") {
-        val patch: FieldUpdater[Nothing, PatchedNumber] = allColumns.asNumber.patch.ceil
+        val patch: UpdateProperty = $"col".asNumber.patch.ceil
 
         assertUpdate(patch, 5.4, 6)
       },
       test("We can floor a number") {
-        val patch: FieldUpdater[Nothing, PatchedNumber] = allColumns.asNumber.patch.floor
+        val patch: UpdateProperty = $"col".asNumber.patch.floor
 
         assertUpdate(patch, 5.4, 5)
       }
@@ -97,7 +133,7 @@ object PatchedColumnSpec extends ZIOSpecDefault {
   def specPatchedUrl: Spec[TestEnvironment with Scope, Any] =
     suite("Test patching urls")(
       test("We can set a new url") {
-        val patch: FieldSetter[PatchedUrl] = allColumns.asUrl.patch.set(fakeUrl)
+        val patch: SetProperty = $"col".asUrl.patch.set(fakeUrl)
 
         assertTrue(patch.value.url == fakeUrl)
       }
@@ -106,12 +142,12 @@ object PatchedColumnSpec extends ZIOSpecDefault {
   def specPatchedSelect: Spec[TestEnvironment with Scope, Any] =
     suite("Test patching selects")(
       test("We can set a new select using its name") {
-        val patch: FieldSetter[PatchedSelect] = allColumns.asSelect.patch.setUsingName("name")
+        val patch: SetProperty = $"col".asSelect.patch.setUsingName("name")
 
         assertTrue(patch.value.name.contains("name") && patch.value.id.isEmpty)
       },
       test("We can set a new select using its id") {
-        val patch: FieldSetter[PatchedSelect] = allColumns.asSelect.patch.setUsingId("id")
+        val patch: SetProperty = $"col".asSelect.patch.setUsingId("id")
 
         assertTrue(patch.value.id.contains("id") && patch.value.name.isEmpty)
       }
@@ -119,40 +155,40 @@ object PatchedColumnSpec extends ZIOSpecDefault {
 
   def specPatchedMultiSelect: Spec[TestEnvironment with Scope, Any] = {
     def assertUpdate[E](
-        updater: FieldUpdater[Nothing, PatchedMultiSelect],
+        patch: UpdateProperty,
         initial: List[PatchedSelect],
         expected: List[PatchedSelect]
-    ): TestResult = assertTrue(updater.f(PatchedMultiSelect(initial)).map(_.multiSelect) == Right(expected))
+    ): TestResult = assertTrue(patch.test(PatchedMultiSelect(initial)).map(_.multiSelect) == Option(expected))
 
     suite("Test patching multi selects")(
       test("We can set a new multi select") {
         val multiSelect: List[PatchedSelect] = List(PatchedSelect(None, Some("name")))
 
-        val patch: FieldSetter[PatchedMultiSelect] = allColumns.asMultiSelect.patch.set(multiSelect)
+        val patch: SetProperty = $"col".asMultiSelect.patch.set(multiSelect)
 
         assertTrue(patch.value.multiSelect == multiSelect)
       },
       test("We can remove a select using the name") {
         val multiSelect: List[PatchedSelect] = List(PatchedSelect(None, Some("name")), PatchedSelect(None, Some("other")))
 
-        val patch: FieldUpdater[Nothing, PatchedMultiSelect] = allColumns.asMultiSelect.patch.removeUsingNameIfExists("name")
+        val patch: UpdateProperty = $"col".asMultiSelect.patch.removeUsingNameIfExists("name")
 
         assertUpdate(patch, multiSelect, List(PatchedSelect(None, Some("other"))))
       },
       test("We can remove a select using the id") {
         val multiSelect: List[PatchedSelect] = List(PatchedSelect(Some("id"), None), PatchedSelect(Some("other"), None))
 
-        val patch: FieldUpdater[Nothing, PatchedMultiSelect] = allColumns.asMultiSelect.patch.removeUsingIdIfExists("id")
+        val patch: UpdateProperty = $"col".asMultiSelect.patch.removeUsingIdIfExists("id")
 
         assertUpdate(patch, multiSelect, List(PatchedSelect(Some("other"), None)))
       },
       test("We can add a select using the name") {
-        val patch: FieldUpdater[Nothing, PatchedMultiSelect] = allColumns.asMultiSelect.patch.addUsingName("name")
+        val patch: UpdateProperty = $"col".asMultiSelect.patch.addUsingName("name")
 
         assertUpdate(patch, List.empty, List(PatchedSelect(None, Some("name"))))
       },
       test("We can add a select using the id") {
-        val patch: FieldUpdater[Nothing, PatchedMultiSelect] = allColumns.asMultiSelect.patch.addUsingId("id")
+        val patch: UpdateProperty = $"col".asMultiSelect.patch.addUsingId("id")
 
         assertUpdate(patch, List.empty, List(PatchedSelect(Some("id"), None)))
       }
@@ -162,22 +198,22 @@ object PatchedColumnSpec extends ZIOSpecDefault {
   def specPatchedDate: Spec[TestEnvironment with Scope, Any] =
     suite("Test patching dates")(
       test("We can set a start date") {
-        val patch: FieldSetter[PatchedDate] = allColumns.asDate.patch.startAt(fakeDatetime)
+        val patch: SetProperty = $"col".asDate.patch.startAt(fakeDatetime)
 
         assertTrue(patch.value.start == fakeDatetime)
       },
       test("We can add an end date") {
-        val patch: FieldUpdater[Nothing, PatchedDate] = allColumns.asDate.patch.endAt(fakeDatetime.plusDays(2))
+        val patch: UpdateProperty = $"col".asDate.patch.endAt(fakeDatetime.plusDays(2))
 
-        assertTrue(patch.f(PatchedDate(fakeDatetime, None, None)).map(_.end) == Right(Some(fakeDatetime.plusDays(2))))
+        assertTrue(patch.test(PatchedDate(fakeDatetime, None, None)).map(_.end).contains(Some(fakeDatetime.plusDays(2))))
       },
       test("We can set a date between two dates") {
-        val patch: FieldSetter[PatchedDate] = allColumns.asDate.patch.between(fakeDatetime, fakeDatetime.plusDays(2))
+        val patch: SetProperty = $"col".asDate.patch.between(fakeDatetime, fakeDatetime.plusDays(2))
 
         assertTrue(patch.value.start == fakeDatetime && patch.value.end.contains(fakeDatetime.plusDays(2)))
       },
       test("We can set a start date to today") {
-        val patch: UIO[FieldSetter[PatchedDate]] = allColumns.asDate.patch.today
+        val patch: UIO[SetProperty] = $"col".asDate.patch.today
 
         patch.map(p => assertTrue(p.value.start == OffsetDateTime.of(1970, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC)))
       }
@@ -186,7 +222,7 @@ object PatchedColumnSpec extends ZIOSpecDefault {
   def specPatchedEmail: Spec[TestEnvironment with Scope, Any] =
     suite("Test patching emails")(
       test("We can set a new email") {
-        val patch: FieldSetter[PatchedEmail] = allColumns.asEmail.patch.set(fakeEmail)
+        val patch: SetProperty = $"col".asEmail.patch.set(fakeEmail)
 
         assertTrue(patch.value.email == fakeEmail)
       }
@@ -195,7 +231,7 @@ object PatchedColumnSpec extends ZIOSpecDefault {
   def specPatchedPhoneNumber: Spec[TestEnvironment with Scope, Any] =
     suite("Test patching phone numbers")(
       test("We can set a new phone number") {
-        val patch: FieldSetter[PatchedPhoneNumber] = allColumns.asPhoneNumber.patch.set(fakePhoneNumber)
+        val patch: SetProperty = $"col".asPhoneNumber.patch.set(fakePhoneNumber)
 
         assertTrue(patch.value.phoneNumber == fakePhoneNumber)
       }
@@ -204,19 +240,19 @@ object PatchedColumnSpec extends ZIOSpecDefault {
   def specPatchedCheckbox: Spec[TestEnvironment with Scope, Any] =
     suite("Test patching checkbox")(
       test("We can check a checkbox") {
-        val patch: FieldSetter[PatchedCheckbox] = allColumns.asCheckbox.patch.check
+        val patch: SetProperty = $"col".asCheckbox.patch.check
 
         assertTrue(patch.value.checkbox)
       },
       test("We can uncheck a checkbox") {
-        val patch: FieldSetter[PatchedCheckbox] = allColumns.asCheckbox.patch.uncheck
+        val patch: SetProperty = $"col".asCheckbox.patch.uncheck
 
         assertTrue(!patch.value.checkbox)
       },
       test("We can reverse a checkbox") {
-        val patch: FieldUpdater[Nothing, PatchedCheckbox] = allColumns.asCheckbox.patch.reverse
+        val patch: UpdateProperty = $"col".asCheckbox.patch.reverse
 
-        assertTrue(patch.f(PatchedCheckbox(false)).map(_.checkbox) == Right(true))
+        assertTrue(patch.transform.lift("")(Some(PatchedCheckbox(false))).toOption.flatten.map(_.checkbox) == Option(true))
       }
     )
 
@@ -225,46 +261,50 @@ object PatchedColumnSpec extends ZIOSpecDefault {
       test("We can set a list of files") {
         val files: List[Link] = List(External("name", Url(fakeUrl)))
 
-        val patch: FieldSetter[PatchedFiles] = allColumns.asFiles.patch.set(files)
+        val patch: SetProperty = $"col".asFiles.patch.set(files)
 
         assertTrue(patch.value.files == files)
       },
       test("We can set a new file") {
-        val patch: FieldUpdater[Nothing, PatchedFiles] = allColumns.asFiles.patch.add(External("name", Url(fakeUrl)))
+        val patch: UpdateProperty = $"col".asFiles.patch.add(External("name", Url(fakeUrl)))
 
-        assertTrue(patch.f(PatchedFiles(Seq.empty)).map(_.files) == Right(Seq(External("name", Url(fakeUrl)))))
+        assertTrue(
+          patch.transform.lift("")(Some(PatchedFiles(Seq.empty))).toOption.flatten.map(_.files) == Option(
+            Seq(External("name", Url(fakeUrl)))
+          )
+        )
       },
       test("We can filter files") {
         val files: List[Link] = List(External("name", Url(fakeUrl)))
 
-        val patch: FieldUpdater[Nothing, PatchedFiles] =
-          allColumns.asFiles.patch.filter {
+        val patch: UpdateProperty =
+          $"col".asFiles.patch.filter {
             case Link.File(name, _) => name != "name"
             case External(name, _)  => name != "name"
           }
 
-        assertTrue(patch.f(PatchedFiles(files)).map(_.files) == Right(Seq.empty))
+        assertTrue(patch.test(PatchedFiles(files)).map(_.files) == Option(Seq.empty))
       }
     )
 
   def specPatchedTitle: Spec[TestEnvironment with Scope, Any] =
     suite("Test patching title")(
       test("We can set a new title") {
-        val patch: FieldSetter[PatchedTitle] = allColumns.asTitle.patch.set("Title")
+        val patch: SetProperty = $"col".asTitle.patch.set("Title")
 
         assertTrue(patch.value.title.head.asInstanceOf[RichTextData.Text].plainText == "Title")
       },
       test("We can capitalize a title") {
-        val patch: FieldUpdater[Nothing, PatchedTitle] = allColumns.asTitle.patch.capitalize
+        val patch: UpdateProperty = $"col".asTitle.patch.capitalize
 
         val source = PatchedTitle(List(RichTextData.default("title", richtext.Annotations.default)))
 
-        assertTrue(patch.f(source).map(_.title.head.asInstanceOf[RichTextData.Text].plainText) == Right("Title"))
+        assertTrue(patch.test(source).map(_.title.head.asInstanceOf[RichTextData.Text].plainText) == Option("Title"))
       }
     )
 
   def specPatchedRichText: Spec[TestEnvironment with Scope, Any] = {
-    def testAnnotation(name: String, patch: UFieldUpdater[PatchedRichText], expected: richtext.Annotations => Boolean) =
+    def testAnnotation(name: String, patch: UpdateProperty, expected: richtext.Annotations => Boolean) =
       test(s"We can use $name on a every rich text") {
         val default: PatchedRichText =
           PatchedRichText(
@@ -279,23 +319,23 @@ object PatchedColumnSpec extends ZIOSpecDefault {
           )
 
         assertTrue(
-          patch.f(default).map(_.richText.map(_.asInstanceOf[RichTextData.Text].annotations).forall(expected)) == Right(true)
+          patch.test(default).map(_.richText.map(_.asInstanceOf[RichTextData.Text].annotations).forall(expected)) == Option(true)
         )
       }
 
     suite("Test patching rich text")(
       test("We can write a new rich text") {
-        val patch: FieldSetter[PatchedRichText] = allColumns.asRichText.patch.write("A new content")
+        val patch: SetProperty = $"col".asRichText.patch.write("A new content")
 
         assertTrue(patch.value.richText.headOption.map(_.asInstanceOf[RichTextData.Text].plainText).contains("A new content"))
       },
-      testAnnotation("reset", allColumns.asRichText.patch.reset, _ == richtext.Annotations.default),
-      testAnnotation("bold", allColumns.asRichText.patch.bold, _.bold),
-      testAnnotation("italic", allColumns.asRichText.patch.italic, _.italic),
-      testAnnotation("strikethrough", allColumns.asRichText.patch.strikethrough, _.strikethrough),
-      testAnnotation("underline", allColumns.asRichText.patch.underline, _.underline),
-      testAnnotation("code", allColumns.asRichText.patch.code, _.code),
-      testAnnotation("color", allColumns.asRichText.patch.color(Color.BlueBackground), _.color == Color.BlueBackground)
+      testAnnotation("reset", $"col".asRichText.patch.reset, _ == richtext.Annotations.default),
+      testAnnotation("bold", $"col".asRichText.patch.bold, _.bold),
+      testAnnotation("italic", $"col".asRichText.patch.italic, _.italic),
+      testAnnotation("strikethrough", $"col".asRichText.patch.strikethrough, _.strikethrough),
+      testAnnotation("underline", $"col".asRichText.patch.underline, _.underline),
+      testAnnotation("code", $"col".asRichText.patch.code, _.code),
+      testAnnotation("color", $"col".asRichText.patch.color(Color.BlueBackground), _.color == Color.BlueBackground)
     )
   }
 
@@ -304,14 +344,14 @@ object PatchedColumnSpec extends ZIOSpecDefault {
       test("We can set a list of people") {
         val people: List[Id] = List(Id(fakeUUID))
 
-        val patch: FieldSetter[PatchedPeople] = allColumns.asPeople.patch.set(people)
+        val patch: SetProperty = $"col".asPeople.patch.set(people)
 
         assertTrue(patch.value.people == people)
       },
       test("We can set a new person") {
-        val patch: FieldUpdater[Nothing, PatchedPeople] = allColumns.asPeople.patch.add(Id(fakeUUID))
+        val patch: UpdateProperty = $"col".asPeople.patch.add(Id(fakeUUID))
 
-        assertTrue(patch.f(PatchedPeople(Seq.empty)).map(_.people) == Right(Seq(Id(fakeUUID))))
+        assertTrue(patch.test(PatchedPeople(Seq.empty)).map(_.people) == Option(Seq(Id(fakeUUID))))
       }
     )
 

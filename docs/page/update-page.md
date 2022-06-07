@@ -8,63 +8,51 @@ Notion allows you to update:
 
 For more information, you can check the [notion documentation](https://developers.notion.com/reference/patch-page).
 
-Strictly speaking, you have to provide a patch that contains the list of changes from the current page to the expected 
-one.
+Strictly speaking, you have to provide a list of operations describing the list of changes from the current page to the 
+expected one.
 
-A patch is described by the following data structure: 
+There is two types of operations :
+- Stateless operations are operations that does not require the current state of the page to generate a patch. As an
+  example, `removeIcon` is a stateless operation because we don't need to explicitly know if the page already has an
+  icon or not.
+- Stateful operations are operations that does require the current state of the page. The only current stateful 
+  operation is `UpdateProperty`. It indeed requires the current page property to update it.
 
-```scala
-final case class Patch(
-  page:       Page,
-  properties: Map[String, Option[PatchedProperty]],
-  archived:   Option[Boolean],
-  icon:       Removable[Icon],
-  cover:      Removable[Cover]
-)
-```
-
-There is two foreign concepts here, **PatchedProperty** and **Removable** traits:
-- A **Removable** is like an Option with one more possibility, indeed a **Removable[Icon]** means that we can set a new
-  icon, we can remove the current one, or we can just ignore this property. A property is ignored by default.
-- A **PatchedProperty** is the new value to apply to a specific property. There is a PatchedProperty for every 
-  properties of a page. For the moment, you can't set a patched property if the property doesn't exist.
-
-We provide several helper functions to update a patch with ease.
-
-Here is an example:
+We explicitly differentiate the operations because stateless operations does not require a page to work. It means that
+we don't have to retrieve the page first to update it. That is why the **Notion** interface provides two update 
+methods :
 
 ```scala
-import zio._
-import zio.notion._
-import zio.notion.dsl._
-import zio.notion.model.page.Page
-
-import java.time.LocalDate
-
-object UpdatePage extends ZIOAppDefault {
-  def buildPatch(page: Page): Either[NotionError, Page.Patch] = {
-    val date = LocalDate.of(2022, 2, 2)
-
-    for {
-      patch0 <- Right(page.patch)
-      patch1 <- patch0.updateProperty($"col1".asNumber.patch.ceil)
-      patch2 <- patch1.updateProperty($"col2".asDate.patch.between(date, date.plusDays(14)))
-    } yield patch2.archive
-  }
-
-  def example: ZIO[Notion, NotionError, Unit] =
-    for {
-      page  <- Notion.retrievePage("6A074793-D735-4BF6-9159-24351D239BBC") // Insert your own page ID
-      patch <- ZIO.fromEither(buildPatch(page))
-      _     <- Notion.updatePage(patch)
-    } yield ()
-
-  override def run: ZIO[Any with ZIOAppArgs with Scope, Any, Any] =
-    example.provide(Notion.layerWith("6A074793-D735-4BF6-9159-24351D239BBC")) // Insert your own bearer
-}
+def updatePage(pageId: String)(operations: StatelessOperations): IO[NotionError, Page]
+def updatePage(page: Page)(operations: Operations): IO[NotionError, Page]
 ```
 
-In this example, we apply three different patches to the notion page:
-- We update the property "col1" applying the *ceil* function to the already existing number
-- We set the property "col2" with a start date and an end date 14 days later
-- We archive the page
+We provide several kind of operations that can compose:
+
+```scala
+import zio.notion.dsl._ // We advise you to import the dsl
+
+val operations = $"col1".asCheckbox.patch.check ++ removeIcon
+```
+
+Here is a non-exhaustive list of operation:
+
+```scala
+val operation = archive                        // Archive the page (Stateless)
+val operation = unarchive                      // Unarchive the page (Stateless)
+val operation = removeIcon                     // Remove the current icon of the page (Stateless)
+val operation = removeCover                    // Remove the current cover of the page (Stateless)
+val operation = setIcon(newIcon)               // Set a new icon to the page (Stateless)
+val operation = setCover(newCover)             // Set a new cover to the page (Stateless)
+val operation = removeProperty(propertyName)   // Remove the propertyName property of the page (Stateless)
+val operation = $"col1".asCheckbox.patch.check // Check the col1 checkbox property (Stateless)
+val operation = $"col1".asNumber.patch.ceil    // Apply a transformation to the col1 number property (Stateful)
+```
+
+We advise you to check autocompletion for `$"col1".as`, we provide operations for all notion types.
+
+You also can create your own, as an example, if I want to multiply a number by itself:
+
+```scala
+val operation = $"col1".asNumber.patch.update(n => n * n) // It is an update (Stateful)
+```
