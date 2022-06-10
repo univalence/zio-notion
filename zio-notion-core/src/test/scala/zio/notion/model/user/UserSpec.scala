@@ -10,6 +10,17 @@ object UserSpec extends ZIOSpecDefault {
 
   override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("User serde suite")(
+      test("We should be able to parse a hidden user payload as json") {
+        val json: String =
+          s"""{
+             |    "object": "user",
+             |    "id": "$fakeUUID"
+             |}""".stripMargin
+
+        val expected: User = User.Hidden(fakeUUID)
+
+        assertTrue(decode[User](json) == Right(expected))
+      },
       test("We should be able to parse a user payload as json") {
         val json: String =
           s"""{
