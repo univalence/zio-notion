@@ -2,12 +2,12 @@ package zio.notion.dsl
 
 import zio.Clock
 import zio.notion.NotionError
-import zio.notion.model.common.Id
 import zio.notion.model.common.enumeration.Color
 import zio.notion.model.common.richtext.{Annotations, RichTextData}
 import zio.notion.model.page.Page.Patch.Operations.Operation._
 import zio.notion.model.page.PatchedProperty._
 import zio.notion.model.page.property.Link
+import zio.notion.model.user.User
 
 import java.time.{LocalDate, LocalDateTime, OffsetDateTime, ZoneOffset}
 
@@ -123,13 +123,13 @@ object PatchedColumn {
   }
 
   final case class PatchedColumnPeople(columnName: String) {
-    def set(people: Seq[Id]): SetProperty = SetProperty(columnName, PatchedPeople(people))
+    def set(people: Seq[User]): SetProperty = SetProperty(columnName, PatchedPeople(people))
 
-    def update(f: Seq[Id] => Seq[Id]): UpdateProperty =
+    def update(f: Seq[User] => Seq[User]): UpdateProperty =
       UpdateProperty.succeed[PatchedPeople](columnName, property => property.copy(people = f(property.people)))
 
-    def add(people: Seq[Id]): UpdateProperty = update(_ ++ people)
-    def add(people: Id): UpdateProperty      = add(List(people))
+    def add(people: Seq[User]): UpdateProperty = update(_ ++ people)
+    def add(people: User): UpdateProperty      = add(List(people))
   }
 
   final case class PatchedColumnFiles(columnName: String) {

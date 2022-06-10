@@ -7,6 +7,7 @@ import zio.notion.model.common.richtext.RichTextData
 import zio.notion.model.page.PatchedProperty._
 import zio.notion.model.page.property.Link
 import zio.notion.model.page.property.data.{DateData, FormulaData, RollupData, SelectData}
+import zio.notion.model.user.User
 
 //sealed trait ToPatchedProperty[P <: Property] {
 //  type Out <: PatchedProperty
@@ -53,7 +54,7 @@ object Property {
   final case class Files(id: String, files: Seq[Link])                    extends Property
   final case class Title(id: String, title: Seq[RichTextData])            extends Property
   final case class RichText(id: String, richText: Seq[RichTextData])      extends Property
-  final case class People(id: String, people: Seq[Id])                    extends Property
+  final case class People(id: String, people: Seq[User])                  extends Property
   final case class Relation(id: String, relation: Seq[Id])                extends Property
   final case class CreatedBy(id: String, createdBy: Id)                   extends Property
   final case class CreatedTime(id: String, createdTime: String)           extends Property

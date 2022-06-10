@@ -4,7 +4,7 @@ import io.circe.syntax.EncoderOps
 
 import zio.{Scope, UIO}
 import zio.notion.Faker._
-import zio.notion.model.common.{richtext, Id, Url}
+import zio.notion.model.common.{richtext, Url}
 import zio.notion.model.common.enumeration.Color
 import zio.notion.model.common.richtext.RichTextData
 import zio.notion.model.page.Page.Patch.Operations.Operation._
@@ -26,6 +26,8 @@ import zio.notion.model.page.PatchedProperty.{
 import zio.notion.model.page.property.Link
 import zio.notion.model.page.property.Link.External
 import zio.notion.model.printer
+import zio.notion.model.user.User
+import zio.notion.model.user.User.Hidden
 import zio.test.{assertTrue, Spec, TestEnvironment, TestResult, ZIOSpecDefault}
 
 import java.time.{OffsetDateTime, ZoneOffset}
@@ -75,7 +77,7 @@ object PatchedColumnSpec extends ZIOSpecDefault {
 
     def richText: Seq[RichTextData] = patchedProperty.asInstanceOf[PatchedRichText].richText
 
-    def people: Seq[Id] = patchedProperty.asInstanceOf[PatchedPeople].people
+    def people: Seq[User] = patchedProperty.asInstanceOf[PatchedPeople].people
   }
 
   implicit class TransformTestOps(updateProperty: UpdateProperty) {
@@ -342,16 +344,16 @@ object PatchedColumnSpec extends ZIOSpecDefault {
   def specPatchedPeople: Spec[TestEnvironment with Scope, Any] =
     suite("Test patching people")(
       test("We can set a list of people") {
-        val people: List[Id] = List(Id(fakeUUID))
+        val people: List[User] = List(Hidden(fakeUUID))
 
         val patch: SetProperty = $"col".asPeople.patch.set(people)
 
         assertTrue(patch.value.people == people)
       },
       test("We can set a new person") {
-        val patch: UpdateProperty = $"col".asPeople.patch.add(Id(fakeUUID))
+        val patch: UpdateProperty = $"col".asPeople.patch.add(Hidden(fakeUUID))
 
-        assertTrue(patch.test(PatchedPeople(Seq.empty)).map(_.people) == Option(Seq(Id(fakeUUID))))
+        assertTrue(patch.test(PatchedPeople(Seq.empty)).map(_.people) == Option(Seq(Hidden(fakeUUID))))
       }
     )
 
@@ -535,7 +537,7 @@ object PatchedColumnSpec extends ZIOSpecDefault {
         assertTrue(printer.print(property.asJson) == expected)
       },
       test("PatchedPeople encoding") {
-        val property: PatchedPeople = PatchedPeople(List(Id(fakeUUID)))
+        val property: PatchedPeople = PatchedPeople(List(Hidden(fakeUUID)))
 
         val expected: String =
           s"""{
