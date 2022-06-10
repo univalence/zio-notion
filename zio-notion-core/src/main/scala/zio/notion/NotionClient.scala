@@ -11,14 +11,13 @@ import sttp.model.Uri
 import zio._
 import zio.notion.NotionClient.NotionResponse
 import zio.notion.NotionError._
-import zio.notion.model.common.{Cover, Icon, Parent}
+import zio.notion.model.common.{Cover, Icon}
 import zio.notion.model.common.Parent.{DatabaseId, PageId}
 import zio.notion.model.common.richtext.RichTextData
 import zio.notion.model.database.Database
 import zio.notion.model.database.PatchedPropertyDefinition.PropertySchema
 import zio.notion.model.database.query.Query
 import zio.notion.model.page.{Page, PatchedProperty}
-import zio.notion.model.page.PatchedProperty.PatchedTitle
 import zio.notion.model.printer
 
 trait NotionClient {
