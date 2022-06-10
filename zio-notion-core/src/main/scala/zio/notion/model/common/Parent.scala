@@ -2,7 +2,15 @@ package zio.notion.model.common
 
 import io.circe.generic.extras._
 
-@ConfiguredJsonCodec sealed trait Parent
+import zio.notion.model.common.Parent.{DatabaseId, PageId}
+
+@ConfiguredJsonCodec sealed trait Parent {
+
+  implicit class StringOps(string: String) {
+    def asParentPage: PageId   = PageId(string)
+    def asParentDB: DatabaseId = DatabaseId(string)
+  }
+}
 
 object Parent {
   final case class PageId(pageId: String)         extends Parent

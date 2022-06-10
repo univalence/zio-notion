@@ -2,7 +2,9 @@ package zio.notion
 
 import zio.{Scope, ZIO}
 import zio.notion.Faker._
+import zio.notion.Faker.FakePatchedProperty.{fakePatchedNumber, fakePatchedTitle}
 import zio.notion.dsl._
+import zio.notion.model.common.Parent.Workspace.StringOps
 import zio.notion.model.database.{Database, DatabaseQuery}
 import zio.notion.model.database.query.Query
 import zio.notion.model.page.Page
@@ -56,6 +58,12 @@ object NotionSpec extends ZIOSpecDefault {
       test("User can create a database") {
         val effect: ZIO[Notion, NotionError, Database] =
           Notion.createDatabase(fakeUUID, fakeDatabase.title, None, None, fakePropertyDefinitions)
+
+        effect.map(res => assertTrue(res.id == fakeUUID))
+      },
+      test("User can create an empty page") {
+        val effect: ZIO[Notion, NotionError, Page] =
+          Notion.createPage(fakeUUID.asParentPage, Map("Price" -> fakePatchedNumber, "Name" -> fakePatchedTitle), None, None)
 
         effect.map(res => assertTrue(res.id == fakeUUID))
       }

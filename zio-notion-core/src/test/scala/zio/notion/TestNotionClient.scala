@@ -3,11 +3,11 @@ package zio.notion
 import zio._
 import zio.notion.Faker._
 import zio.notion.NotionClient.NotionResponse
-import zio.notion.model.common.{Cover, Icon}
+import zio.notion.model.common.{Cover, Icon, Parent}
 import zio.notion.model.common.richtext.RichTextData
 import zio.notion.model.database.{Database, PatchedPropertyDefinition}
 import zio.notion.model.database.query.Query
-import zio.notion.model.page.Page
+import zio.notion.model.page.{Page, PatchedProperty}
 
 /** Notion client mock for test purpose */
 final case class TestNotionClient() extends NotionClient {
@@ -397,6 +397,119 @@ final case class TestNotionClient() extends NotionClient {
       cover: Option[Cover],
       properties: Map[String, PatchedPropertyDefinition.PropertySchema]
   ): IO[NotionError, NotionResponse] = retrieveDatabase(fakeUUID)
+
+  override def createPage(
+      parent: Parent,
+      properties: Map[String, PatchedProperty],
+      icon: Option[Icon],
+      cover: Option[Cover]
+  ): IO[NotionError, NotionResponse] =
+    parent match {
+      case Parent.PageId(pageId) => ZIO.succeed(s"""
+                                                   |{
+                                                   |    "object": "page",
+                                                   |    "id": "94e3ce7a-d7ad-444e-84be-2ead3c76eea7",
+                                                   |    "created_time": "2022-06-10T08:23:00.000Z",
+                                                   |    "last_edited_time": "2022-06-10T08:23:00.000Z",
+                                                   |    "created_by": {
+                                                   |        "object": "user",
+                                                   |        "id": "755f50d3-d9ad-46b9-a69d-cd5048e8a436"
+                                                   |    },
+                                                   |    "last_edited_by": {
+                                                   |        "object": "user",
+                                                   |        "id": "755f50d3-d9ad-46b9-a69d-cd5048e8a436"
+                                                   |    },
+                                                   |    "cover": null,
+                                                   |    "icon": null,
+                                                   |    "parent": {
+                                                   |        "type": "page_id",
+                                                   |        "page_id": "$pageId"
+                                                   |    },
+                                                   |    "archived": false,
+                                                   |    "properties": {
+                                                   |        "title": {
+                                                   |            "id": "title",
+                                                   |            "type": "title",
+                                                   |            "title": [
+                                                   |                {
+                                                   |                    "type": "text",
+                                                   |                    "text": {
+                                                   |                        "content": "hello",
+                                                   |                        "link": null
+                                                   |                    },
+                                                   |                    "annotations": {
+                                                   |                        "bold": false,
+                                                   |                        "italic": false,
+                                                   |                        "strikethrough": false,
+                                                   |                        "underline": false,
+                                                   |                        "code": false,
+                                                   |                        "color": "default"
+                                                   |                    },
+                                                   |                    "plain_text": "hello",
+                                                   |                    "href": null
+                                                   |                }
+                                                   |            ]
+                                                   |        }
+                                                   |    },
+                                                   |    "url": "https://www.notion.so/hello-94e3ce7ad7ad444e84be2ead3c76eea7"
+                                                   |}
+                                                   |""".stripMargin)
+      case Parent.DatabaseId(databaseId) => ZIO.succeed(s"""
+                                                           |{
+                                                           |    "object": "page",
+                                                           |    "id": "$databaseId",
+                                                           |    "created_time": "2022-06-10T09:53:00.000Z",
+                                                           |    "last_edited_time": "2022-06-10T09:53:00.000Z",
+                                                           |    "created_by": {
+                                                           |        "object": "user",
+                                                           |        "id": "755f50d3-d9ad-46b9-a69d-cd5048e8a436"
+                                                           |    },
+                                                           |    "last_edited_by": {
+                                                           |        "object": "user",
+                                                           |        "id": "755f50d3-d9ad-46b9-a69d-cd5048e8a436"
+                                                           |    },
+                                                           |    "cover": null,
+                                                           |    "icon": null,
+                                                           |    "parent": {
+                                                           |        "type": "database_id",
+                                                           |        "database_id": "678cf788-8470-4798-8336-a285836c9de6"
+                                                           |    },
+                                                           |    "archived": false,
+                                                           |    "properties": {
+                                                           |        "Price": {
+                                                           |            "id": "JLha",
+                                                           |            "type": "number",
+                                                           |            "number": 2.5
+                                                           |        },
+                                                           |        "Name": {
+                                                           |            "id": "title",
+                                                           |            "type": "title",
+                                                           |            "title": [
+                                                           |                {
+                                                           |                    "type": "text",
+                                                           |                    "text": {
+                                                           |                        "content": "helloNotion",
+                                                           |                        "link": null
+                                                           |                    },
+                                                           |                    "annotations": {
+                                                           |                        "bold": false,
+                                                           |                        "italic": false,
+                                                           |                        "strikethrough": false,
+                                                           |                        "underline": false,
+                                                           |                        "code": false,
+                                                           |                        "color": "default"
+                                                           |                    },
+                                                           |                    "plain_text": "helloNotion",
+                                                           |                    "href": null
+                                                           |                }
+                                                           |            ]
+                                                           |        }
+                                                           |    },
+                                                           |    "url": "https://www.notion.so/helloNotion-7dba62a154bb4481b3f0de767ed534d4"
+                                                           |}
+                                                           |""".stripMargin)
+      case _ => ZIO.succeed("")
+    }
 }
 
 object TestNotionClient {

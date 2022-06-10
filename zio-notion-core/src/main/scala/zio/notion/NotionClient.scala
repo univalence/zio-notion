@@ -11,12 +11,13 @@ import sttp.model.Uri
 import zio._
 import zio.notion.NotionClient.NotionResponse
 import zio.notion.NotionError._
-import zio.notion.model.common.{Cover, Icon}
+import zio.notion.model.common.{Cover, Icon, Parent}
 import zio.notion.model.common.richtext.RichTextData
 import zio.notion.model.database.Database
 import zio.notion.model.database.PatchedPropertyDefinition.PropertySchema
 import zio.notion.model.database.query.Query
-import zio.notion.model.page.Page
+import zio.notion.model.page.{Page, PatchedProperty}
+import zio.notion.model.page.PatchedProperty.PatchedTitle
 import zio.notion.model.printer
 
 trait NotionClient {
@@ -39,6 +40,13 @@ trait NotionClient {
       icon: Option[Icon],
       cover: Option[Cover],
       properties: Map[String, PropertySchema]
+  ): IO[NotionError, NotionResponse]
+
+  def createPage(
+      parent: Parent,
+      properties: Map[String, PatchedProperty],
+      icon: Option[Icon],
+      cover: Option[Cover]
   ): IO[NotionError, NotionResponse]
 }
 
@@ -203,6 +211,36 @@ object NotionClient {
 
       defaultRequest
         .post(uri"$endpoint/databases/")
+        .body(printer.print(json))
+        .handle
+    }
+
+    override def createPage(
+        parent: Parent,
+        properties: Map[String, PatchedProperty],
+        icon: Option[Icon],
+        cover: Option[Cover]
+    ): IO[NotionError, NotionResponse] = {
+      val json =
+        Json.obj(
+          "parent" -> parent.asJson,
+          parent match {
+            case Parent.DatabaseId(_) => "properties" -> properties.asJson
+            case _ =>
+              "properties" -> properties
+                .collect(prop =>
+                  prop._2 match {
+                    case PatchedTitle(_) => prop
+                  }
+                )
+                .asJson
+          },
+          "icon"  -> icon.asJson,
+          "cover" -> cover.asJson
+        )
+
+      defaultRequest
+        .post(uri"$endpoint/pages/")
         .body(printer.print(json))
         .handle
     }

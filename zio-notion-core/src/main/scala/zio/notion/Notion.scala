@@ -8,12 +8,12 @@ import zio._
 import zio.notion.NotionClient.NotionResponse
 import zio.notion.NotionError.JsonError
 import zio.notion.dsl._
-import zio.notion.model.common.{Cover, Icon}
+import zio.notion.model.common.{Cover, Icon, Parent}
 import zio.notion.model.common.richtext.RichTextData
 import zio.notion.model.database.{Database, DatabaseQuery}
 import zio.notion.model.database.PatchedPropertyDefinition.PropertySchema
 import zio.notion.model.database.query.Query
-import zio.notion.model.page.Page
+import zio.notion.model.page.{Page, PatchedProperty}
 import zio.notion.model.user.{User, Users}
 
 sealed trait Notion {
@@ -44,6 +44,13 @@ sealed trait Notion {
       cover: Option[Cover],
       properties: Map[String, PropertySchema]
   ): IO[NotionError, Database]
+
+  def createPage(
+      parent: Parent,
+      properties: Map[String, PatchedProperty],
+      icon: Option[Icon],
+      cover: Option[Cover]
+  ): IO[NotionError, Page]
 }
 
 object Notion {
@@ -149,6 +156,13 @@ object Notion {
       properties: Map[String, PropertySchema]
   ): ZIO[Notion, NotionError, Database] = ZIO.service[Notion].flatMap(_.createDatabase(pageId, title, icon, cover, properties))
 
+  def createPage(
+      parent: Parent,
+      properties: Map[String, PatchedProperty],
+      icon: Option[Icon],
+      cover: Option[Cover]
+  ): ZIO[Notion, NotionError, Page] = ZIO.service[Notion].flatMap(_.createPage(parent, properties, icon, cover))
+
   val live: URLayer[NotionClient, Notion] = ZLayer(ZIO.service[NotionClient].map(LiveNotion))
 
   def layerWith(bearer: String): Layer[Throwable, Notion] =
@@ -187,5 +201,12 @@ object Notion {
         cover: Option[Cover],
         properties: Map[String, PropertySchema]
     ): IO[NotionError, Database] = decodeResponse[Database](notionClient.createDatabase(pageId, title, icon, cover, properties))
+
+    override def createPage(
+        parent: Parent,
+        properties: Map[String, PatchedProperty],
+        icon: Option[Icon],
+        cover: Option[Cover]
+    ): IO[NotionError, Page] = decodeResponse[Page](notionClient.createPage(parent, properties, icon, cover))
   }
 }
