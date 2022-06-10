@@ -9,7 +9,7 @@ import zio.notion.model.page.PatchedProperty._
 import zio.notion.model.page.property.Link
 import zio.notion.model.user.User
 
-import java.time.{LocalDate, LocalDateTime, OffsetDateTime, ZoneOffset}
+import java.time.{LocalDate, OffsetDateTime}
 
 object PatchedColumn {
 
@@ -100,26 +100,40 @@ object PatchedColumn {
   }
 
   final case class PatchedColumnDate(columnName: String) {
-    private val utc = ZoneOffset.UTC
+
+    def set(start: LocalDate, end: Option[LocalDate]): SetProperty = SetProperty(columnName, PatchedDate(start, end))
+
+    def startAt(date: LocalDate): SetProperty = set(date, None)
+
+    // Set an end date depending the actual start date
+    def endAt(f: LocalDate => LocalDate): UpdateProperty =
+      UpdateProperty.succeed[PatchedDate](columnName, property => property.copy(end = Some(f(property.start))))
+
+    // Set an end date ignoring the actual start date
+    def endAt(date: LocalDate): UpdateProperty = endAt(_ => date)
+
+    def between(start: LocalDate, end: LocalDate): SetProperty = set(start, Some(end))
+
+    def today: zio.UIO[SetProperty] = Clock.localDateTime.map(_.toLocalDate).map(startAt)
+  }
+
+  final case class PatchedColumnDateTime(columnName: String) {
 
     def set(start: OffsetDateTime, end: Option[OffsetDateTime], timeZone: Option[String]): SetProperty =
-      SetProperty(columnName, PatchedDate(start, end, timeZone))
+      SetProperty(columnName, PatchedDateTime(start, end, timeZone))
 
     def startAt(date: OffsetDateTime): SetProperty = set(date, None, None)
-    def startAt(date: LocalDateTime): SetProperty  = startAt(date.atOffset(utc))
-    def startAt(date: LocalDate): SetProperty      = startAt(date.atStartOfDay())
 
+    // Set an end date depending the actual start date
     def endAt(f: OffsetDateTime => OffsetDateTime): UpdateProperty =
-      UpdateProperty.succeed[PatchedDate](columnName, property => property.copy(end = Some(f(property.start))))
+      UpdateProperty.succeed[PatchedDateTime](columnName, property => property.copy(end = Some(f(property.start))))
+
+    // Set an end date ignoring the actual start date
     def endAt(date: OffsetDateTime): UpdateProperty = endAt(_ => date)
-    def endAt(date: LocalDateTime): UpdateProperty  = endAt(date.atOffset(utc))
-    def endAt(date: LocalDate): UpdateProperty      = endAt(date.atStartOfDay())
 
     def between(start: OffsetDateTime, end: OffsetDateTime): SetProperty = set(start, Some(end), None)
-    def between(start: LocalDateTime, end: LocalDateTime): SetProperty   = between(start.atOffset(utc), end.atOffset(utc))
-    def between(start: LocalDate, end: LocalDate): SetProperty           = between(start.atStartOfDay(), end.atStartOfDay())
 
-    def today: zio.UIO[SetProperty] = Clock.currentDateTime.map(startAt)
+    def now: zio.UIO[SetProperty] = Clock.currentDateTime.map(startAt)
   }
 
   final case class PatchedColumnPeople(columnName: String) {

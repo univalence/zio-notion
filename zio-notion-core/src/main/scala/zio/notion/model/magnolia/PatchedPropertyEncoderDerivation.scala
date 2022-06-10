@@ -43,7 +43,11 @@ object PatchedPropertyEncoderDerivation extends EncoderDerivation {
           val parameter = ctx.parameters.head
           Json.obj(snakeCaseTransformation(parameter.label) -> parameter.typeclass.apply(parameter.dereference(value)))
         case _ =>
-          val name = snakeCaseTransformation(ctx.typeName.short.replace("Patched", ""))
+          val classNameTransformed: String =
+            ctx.typeName.short
+              .replace("Patched", "")
+              .replace("DateTime", "Date")
+          val propertyType: String = snakeCaseTransformation(classNameTransformed)
 
           val properties =
             ctx.parameters
@@ -52,6 +56,6 @@ object PatchedPropertyEncoderDerivation extends EncoderDerivation {
               )
               .filter { case (_, json) => !json.isNull }
 
-          Json.obj(name -> Json.obj(properties: _*))
+          Json.obj(propertyType -> Json.obj(properties: _*))
       }
 }

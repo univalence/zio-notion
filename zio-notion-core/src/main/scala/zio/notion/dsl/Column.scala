@@ -20,7 +20,7 @@ import zio.notion.model.database.query.PropertyFilter.TextPropertyFilter.{EndsWi
 import zio.notion.model.database.query.Sorts.Sorting
 import zio.notion.model.database.query.Sorts.Sorting.Property
 
-import java.time.LocalDate
+import java.time.{LocalDate, OffsetDateTime}
 
 final case class Column(colName: String) {
   def definition: ColumnDefinition = colDefinition(colName)
@@ -37,6 +37,7 @@ final case class Column(colName: String) {
   def asSelect: SelectDSLConstructor                 = SelectDSLConstructor(colName)
   def asMultiSelect: MultiSelectDSLConstructor       = MultiSelectDSLConstructor(colName)
   def asDate: DateDSLConstructor                     = DateDSLConstructor(colName)
+  def asDateTime: DateTimeDSLConstructor             = DateTimeDSLConstructor(colName)
   def asPeople: PeopleDSLConstructor                 = PeopleDSLConstructor(colName)
   def asFiles: FilesDSLConstructor                   = FilesDSLConstructor(colName)
   def asUrl: UrlDSLConstructor                       = UrlDSLConstructor(colName)
@@ -151,6 +152,28 @@ object Column {
     def <=(date: LocalDate): Date = onOrBefore(date)
 
     def patch: PatchedColumnDate = PatchedColumnDate(property)
+  }
+
+  final case class DateTimeDSLConstructor private (property: String) {
+    def equals(date: OffsetDateTime): Date     = Date(property, Equals(date.toString))
+    def before(date: OffsetDateTime): Date     = Date(property, Before(date.toString))
+    def after(date: OffsetDateTime): Date      = Date(property, After(date.toString))
+    def onOrBefore(date: OffsetDateTime): Date = Date(property, OnOrBefore(date.toString))
+    def onOrAfter(date: OffsetDateTime): Date  = Date(property, OnOrAfter(date.toString))
+    def pastWeek: Date                         = Date(property, PastWeek)
+    def pastMonth: Date                        = Date(property, PastMonth)
+    def nextWeek: Date                         = Date(property, NextWeek)
+    def nextMonth: Date                        = Date(property, NextMonth)
+    def nextYear: Date                         = Date(property, NextYear)
+    def isEmpty: Date                          = Date(property, IsEmpty(true))
+    def isNotEmpty: Date                       = Date(property, IsNotEmpty(true))
+
+    def >(date: OffsetDateTime): Date  = after(date)
+    def <(date: OffsetDateTime): Date  = before(date)
+    def >=(date: OffsetDateTime): Date = onOrAfter(date)
+    def <=(date: OffsetDateTime): Date = onOrBefore(date)
+
+    def patch: PatchedColumnDateTime = PatchedColumnDateTime(property)
   }
 
   final case class PeopleDSLConstructor private (property: String) {

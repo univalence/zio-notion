@@ -65,9 +65,9 @@ object PropertySpec extends ZIOSpecDefault {
              |}""".stripMargin
 
         val expected =
-          Date(
+          DateTime(
             id   = fakeUUID,
-            date = Some(DateData(fakeDatetime.withOffsetSameInstant(ZoneOffset.ofHours(2)), None, None))
+            date = Some(DateTime.Data(fakeDatetime.withOffsetSameInstant(ZoneOffset.ofHours(2)), None, None))
           )
 
         assert(decode[Property](json))(isRight(equalTo(expected)))
