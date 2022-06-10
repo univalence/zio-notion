@@ -8,12 +8,14 @@ import zio._
 import zio.notion.NotionClient.NotionResponse
 import zio.notion.NotionError.JsonError
 import zio.notion.dsl._
-import zio.notion.model.common.{Cover, Icon, Parent}
+import zio.notion.model.common.{Cover, Icon}
+import zio.notion.model.common.Parent.{DatabaseId, PageId}
 import zio.notion.model.common.richtext.RichTextData
 import zio.notion.model.database.{Database, DatabaseQuery}
 import zio.notion.model.database.PatchedPropertyDefinition.PropertySchema
 import zio.notion.model.database.query.Query
 import zio.notion.model.page.{Page, PatchedProperty}
+import zio.notion.model.page.PatchedProperty.PatchedTitle
 import zio.notion.model.user.{User, Users}
 
 sealed trait Notion {
@@ -46,11 +48,19 @@ sealed trait Notion {
   ): IO[NotionError, Database]
 
   def createPage(
-      parent: Parent,
+      parent: PageId,
+      title: Option[PatchedProperty],
+      icon: Option[Icon],
+      cover: Option[Cover]
+  ): IO[NotionError, Page]
+
+  def createPageInDatabase(
+      parent: DatabaseId,
       properties: Map[String, PatchedProperty],
       icon: Option[Icon],
       cover: Option[Cover]
   ): IO[NotionError, Page]
+
 }
 
 object Notion {
@@ -157,11 +167,18 @@ object Notion {
   ): ZIO[Notion, NotionError, Database] = ZIO.service[Notion].flatMap(_.createDatabase(pageId, title, icon, cover, properties))
 
   def createPage(
-      parent: Parent,
+      parent: PageId,
+      title: Option[PatchedTitle],
+      icon: Option[Icon],
+      cover: Option[Cover]
+  ): ZIO[Notion, NotionError, Page] = ZIO.service[Notion].flatMap(_.createPage(parent, title, icon, cover))
+
+  def createPageInDatabase(
+      parent: DatabaseId,
       properties: Map[String, PatchedProperty],
       icon: Option[Icon],
       cover: Option[Cover]
-  ): ZIO[Notion, NotionError, Page] = ZIO.service[Notion].flatMap(_.createPage(parent, properties, icon, cover))
+  ): ZIO[Notion, NotionError, Page] = ZIO.service[Notion].flatMap(_.createPageInDatabase(parent, properties, icon, cover))
 
   val live: URLayer[NotionClient, Notion] = ZLayer(ZIO.service[NotionClient].map(LiveNotion))
 
@@ -203,10 +220,17 @@ object Notion {
     ): IO[NotionError, Database] = decodeResponse[Database](notionClient.createDatabase(pageId, title, icon, cover, properties))
 
     override def createPage(
-        parent: Parent,
+        parent: PageId,
+        title: Option[PatchedProperty],
+        icon: Option[Icon],
+        cover: Option[Cover]
+    ): IO[NotionError, Page] = decodeResponse[Page](notionClient.createPage(parent, title, icon, cover))
+
+    override def createPageInDatabase(
+        parent: DatabaseId,
         properties: Map[String, PatchedProperty],
         icon: Option[Icon],
         cover: Option[Cover]
-    ): IO[NotionError, Page] = decodeResponse[Page](notionClient.createPage(parent, properties, icon, cover))
+    ): IO[NotionError, Page] = decodeResponse[Page](notionClient.createPageInDatabase(parent, properties, icon, cover))
   }
 }

@@ -12,6 +12,7 @@ import zio._
 import zio.notion.NotionClient.NotionResponse
 import zio.notion.NotionError._
 import zio.notion.model.common.{Cover, Icon, Parent}
+import zio.notion.model.common.Parent.{DatabaseId, PageId}
 import zio.notion.model.common.richtext.RichTextData
 import zio.notion.model.database.Database
 import zio.notion.model.database.PatchedPropertyDefinition.PropertySchema
@@ -43,7 +44,14 @@ trait NotionClient {
   ): IO[NotionError, NotionResponse]
 
   def createPage(
-      parent: Parent,
+      parent: PageId,
+      title: Option[PatchedProperty],
+      icon: Option[Icon],
+      cover: Option[Cover]
+  ): IO[NotionError, NotionResponse]
+
+  def createPageInDatabase(
+      parent: DatabaseId,
       properties: Map[String, PatchedProperty],
       icon: Option[Icon],
       cover: Option[Cover]
@@ -215,28 +223,38 @@ object NotionClient {
         .handle
     }
 
-    override def createPage(
-        parent: Parent,
+    override def createPageInDatabase(
+        parent: DatabaseId,
         properties: Map[String, PatchedProperty],
         icon: Option[Icon],
         cover: Option[Cover]
     ): IO[NotionError, NotionResponse] = {
       val json =
         Json.obj(
-          "parent" -> parent.asJson,
-          parent match {
-            case Parent.DatabaseId(_) => "properties" -> properties.asJson
-            case _ =>
-              "properties" -> properties
-                .collect(prop =>
-                  (prop._1, prop._2) match {
-                    case (title, PatchedTitle(_)) if title == "title" => prop
-                  }
-                )
-                .asJson
-          },
-          "icon"  -> icon.asJson,
-          "cover" -> cover.asJson
+          "parent"     -> parent.asJson,
+          "properties" -> properties.asJson,
+          "icon"       -> icon.asJson,
+          "cover"      -> cover.asJson
+        )
+
+      defaultRequest
+        .post(uri"$endpoint/pages/")
+        .body(printer.print(json))
+        .handle
+    }
+
+    override def createPage(
+        parent: PageId,
+        title: Option[PatchedProperty],
+        icon: Option[Icon],
+        cover: Option[Cover]
+    ): IO[NotionError, NotionResponse] = {
+      val json =
+        Json.obj(
+          "parent"     -> parent.asJson,
+          "properties" -> Json.obj("title" -> title.asJson),
+          "icon"       -> icon.asJson,
+          "cover"      -> cover.asJson
         )
 
       defaultRequest
