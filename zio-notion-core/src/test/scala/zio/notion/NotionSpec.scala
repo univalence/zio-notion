@@ -65,7 +65,7 @@ object NotionSpec extends ZIOSpecDefault {
         val effect: ZIO[Notion, NotionError, Page] =
           Notion.createPage(fakeUUID.asParentPage, Map("Price" -> fakePatchedNumber, "Name" -> fakePatchedTitle), None, None)
 
-        effect.map(res => assertTrue(res.id == fakeUUID))
+        effect.map(res => assertTrue(res.parent == fakeUUID.asParentPage))
       }
     ).provide(TestNotionClient.layer, Notion.live)
 }
