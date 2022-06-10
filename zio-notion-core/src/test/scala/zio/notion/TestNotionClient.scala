@@ -412,7 +412,7 @@ final case class TestNotionClient() extends NotionClient {
       properties: Map[String, PatchedPropertyDefinition.PropertySchema]
   ): IO[NotionError, NotionResponse] = retrieveDatabase(fakeUUID)
 
-  override def createPage(
+  override def createPageInPage(
       parent: PageId,
       title: Option[PatchedProperty],
       icon: Option[Icon],

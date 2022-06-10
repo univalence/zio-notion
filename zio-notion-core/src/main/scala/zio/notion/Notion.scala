@@ -47,7 +47,7 @@ sealed trait Notion {
       properties: Map[String, PropertySchema]
   ): IO[NotionError, Database]
 
-  def createPage(
+  def createPageInPage(
       parent: PageId,
       title: Option[PatchedProperty],
       icon: Option[Icon],
@@ -208,12 +208,12 @@ object Notion {
       properties: Map[String, PropertySchema]
   ): ZIO[Notion, NotionError, Database] = ZIO.service[Notion].flatMap(_.createDatabase(pageId, title, icon, cover, properties))
 
-  def createPage(
+  def createPageInPage(
       parent: PageId,
       title: Option[PatchedTitle],
       icon: Option[Icon],
       cover: Option[Cover]
-  ): ZIO[Notion, NotionError, Page] = ZIO.service[Notion].flatMap(_.createPage(parent, title, icon, cover))
+  ): ZIO[Notion, NotionError, Page] = ZIO.service[Notion].flatMap(_.createPageInPage(parent, title, icon, cover))
 
   def createPageInDatabase(
       parent: DatabaseId,
@@ -263,12 +263,12 @@ object Notion {
         properties: Map[String, PropertySchema]
     ): IO[NotionError, Database] = decodeResponse[Database](notionClient.createDatabase(pageId, title, icon, cover, properties))
 
-    override def createPage(
+    override def createPageInPage(
         parent: PageId,
         title: Option[PatchedProperty],
         icon: Option[Icon],
         cover: Option[Cover]
-    ): IO[NotionError, Page] = decodeResponse[Page](notionClient.createPage(parent, title, icon, cover))
+    ): IO[NotionError, Page] = decodeResponse[Page](notionClient.createPageInPage(parent, title, icon, cover))
 
     override def createPageInDatabase(
         parent: DatabaseId,

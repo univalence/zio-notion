@@ -8,7 +8,7 @@ import sttp.client3._
 import sttp.client3.asynchttpclient.zio.SttpClient
 import sttp.model.Uri
 
-import zio._
+import zio.{IO, _}
 import zio.notion.NotionClient.NotionResponse
 import zio.notion.NotionError._
 import zio.notion.model.common.{Cover, Icon}
@@ -42,7 +42,7 @@ trait NotionClient {
       properties: Map[String, PropertySchema]
   ): IO[NotionError, NotionResponse]
 
-  def createPage(
+  def createPageInPage(
       parent: PageId,
       title: Option[PatchedProperty],
       icon: Option[Icon],
@@ -239,14 +239,13 @@ object NotionClient {
           "icon"       -> icon.asJson,
           "cover"      -> cover.asJson
         )
-
       defaultRequest
         .post(uri"$endpoint/pages/")
         .body(printer.print(json))
         .handle
     }
 
-    override def createPage(
+    override def createPageInPage(
         parent: PageId,
         title: Option[PatchedProperty],
         icon: Option[Icon],
@@ -265,6 +264,5 @@ object NotionClient {
         .body(printer.print(json))
         .handle
     }
-
   }
 }
