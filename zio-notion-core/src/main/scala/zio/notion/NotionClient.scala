@@ -229,8 +229,8 @@ object NotionClient {
             case _ =>
               "properties" -> properties
                 .collect(prop =>
-                  prop._2 match {
-                    case PatchedTitle(_) => prop
+                  (prop._1, prop._2) match {
+                    case (title, PatchedTitle(_)) if title == "title" => prop
                   }
                 )
                 .asJson
