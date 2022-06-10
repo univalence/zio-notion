@@ -6,6 +6,7 @@ import zio.notion.model.common.richtext.{Annotations, RichTextData}
 import zio.notion.model.database.{Database, PropertyDefinition}
 import zio.notion.model.database.PatchedPropertyDefinition.PropertySchema
 import zio.notion.model.page.Page
+import zio.notion.model.page.PatchedProperty.{PatchedNumber, PatchedTitle}
 import zio.notion.model.page.Property.{Checkbox, Date, Title}
 
 import java.time.{OffsetDateTime, ZoneOffset}
@@ -75,5 +76,12 @@ object Faker {
     val fakeDate: Date = Date("abc", None)
 
     val fakeCheckbox: Checkbox = Checkbox("def", Some(false))
+  }
+
+  object FakePatchedProperty {
+
+    val fakePatchedTitle: PatchedTitle   = PatchedTitle(List(RichTextData.default("test", Annotations.default)))
+    val fakePatchedNumber: PatchedNumber = PatchedNumber(85)
+
   }
 }

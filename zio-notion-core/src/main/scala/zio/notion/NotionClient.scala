@@ -8,15 +8,16 @@ import sttp.client3._
 import sttp.client3.asynchttpclient.zio.SttpClient
 import sttp.model.Uri
 
-import zio._
+import zio.{IO, _}
 import zio.notion.NotionClient.NotionResponse
 import zio.notion.NotionError._
 import zio.notion.model.common.{Cover, Icon}
+import zio.notion.model.common.Parent.{DatabaseId, PageId}
 import zio.notion.model.common.richtext.RichTextData
 import zio.notion.model.database.Database
 import zio.notion.model.database.PatchedPropertyDefinition.PropertySchema
 import zio.notion.model.database.query.Query
-import zio.notion.model.page.Page
+import zio.notion.model.page.{Page, PatchedProperty}
 import zio.notion.model.printer
 
 trait NotionClient {
@@ -39,6 +40,20 @@ trait NotionClient {
       icon: Option[Icon],
       cover: Option[Cover],
       properties: Map[String, PropertySchema]
+  ): IO[NotionError, NotionResponse]
+
+  def createPageInPage(
+      parent: PageId,
+      title: Option[PatchedProperty],
+      icon: Option[Icon],
+      cover: Option[Cover]
+  ): IO[NotionError, NotionResponse]
+
+  def createPageInDatabase(
+      parent: DatabaseId,
+      properties: Map[String, PatchedProperty],
+      icon: Option[Icon],
+      cover: Option[Cover]
   ): IO[NotionError, NotionResponse]
 }
 
@@ -211,5 +226,43 @@ object NotionClient {
         .handle
     }
 
+    override def createPageInDatabase(
+        parent: DatabaseId,
+        properties: Map[String, PatchedProperty],
+        icon: Option[Icon],
+        cover: Option[Cover]
+    ): IO[NotionError, NotionResponse] = {
+      val json =
+        Json.obj(
+          "parent"     -> parent.asJson,
+          "properties" -> properties.asJson,
+          "icon"       -> icon.asJson,
+          "cover"      -> cover.asJson
+        )
+      defaultRequest
+        .post(uri"$endpoint/pages/")
+        .body(printer.print(json))
+        .handle
+    }
+
+    override def createPageInPage(
+        parent: PageId,
+        title: Option[PatchedProperty],
+        icon: Option[Icon],
+        cover: Option[Cover]
+    ): IO[NotionError, NotionResponse] = {
+      val json =
+        Json.obj(
+          "parent"     -> parent.asJson,
+          "properties" -> Json.obj("title" -> title.asJson),
+          "icon"       -> icon.asJson,
+          "cover"      -> cover.asJson
+        )
+
+      defaultRequest
+        .post(uri"$endpoint/pages/")
+        .body(printer.print(json))
+        .handle
+    }
   }
 }

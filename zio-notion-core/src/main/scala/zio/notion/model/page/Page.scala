@@ -15,7 +15,7 @@ import scala.reflect.ClassTag
 
 import java.time.OffsetDateTime
 
-@ConfiguredJsonCodec
+@ConfiguredJsonCodec(decodeOnly = true)
 final case class Page(
     createdTime:    OffsetDateTime,
     lastEditedTime: OffsetDateTime,

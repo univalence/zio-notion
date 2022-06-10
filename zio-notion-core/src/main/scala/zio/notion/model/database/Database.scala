@@ -14,7 +14,7 @@ import zio.notion.model.magnolia.PatchEncoderDerivation
 
 import java.time.OffsetDateTime
 
-@ConfiguredJsonCodec
+@ConfiguredJsonCodec(decodeOnly = true)
 final case class Database(
     createdTime:    OffsetDateTime,
     lastEditedTime: OffsetDateTime,
