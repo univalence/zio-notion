@@ -27,7 +27,7 @@ sealed trait Notion {
   def retrievePage(pageId: String): IO[NotionError, Page]
   def retrieveDatabase(databaseId: String): IO[NotionError, Database]
   def retrieveUser(userId: String): IO[NotionError, User]
-  def retrieveUsers: IO[NotionError, Users]
+  def retrieveUsers(pagination: Pagination): IO[NotionError, Users]
 
   def queryDatabase(databaseId: String, query: Query, pagination: Pagination): IO[NotionError, DatabaseQuery]
 
@@ -50,7 +50,49 @@ object Notion {
   def retrievePage(pageId: String): ZIO[Notion, NotionError, Page]             = ZIO.service[Notion].flatMap(_.retrievePage(pageId))
   def retrieveDatabase(databaseId: String): ZIO[Notion, NotionError, Database] = ZIO.service[Notion].flatMap(_.retrieveDatabase(databaseId))
   def retrieveUser(userId: String): ZIO[Notion, NotionError, User]             = ZIO.service[Notion].flatMap(_.retrieveUser(userId))
-  def retrieveUsers: ZIO[Notion, NotionError, Users]                           = ZIO.service[Notion].flatMap(_.retrieveUsers)
+
+  /**
+   * Query a batch of users.
+   *
+   * By default, this query may not retrieve all the users of a database
+   * but only a small set of them defined by the Pagination. You still
+   * can use [[retrieveAllUsers]] to handle the pagination
+   * automatically.
+   *
+   * @param pagination
+   *   The pagination information necessary to the Notion API
+   * @return
+   *   The result of the query
+   */
+  def retrieveUsers(pagination: Pagination): ZIO[Notion, NotionError, Users] = ZIO.service[Notion].flatMap(_.retrieveUsers(pagination))
+
+  /**
+   * Query all users handling pagination itself.
+   *
+   * @return
+   *   The result of the concatenated queries
+   */
+  def retrieveAllUsers: ZIO[Notion, NotionError, Users] = {
+    val USERS_FETCHED_PER_BATCH = 100
+
+    def retrieveUsersOnceMore(
+        maybeStartCursor: Option[String],
+        users: Seq[User]
+    ): ZIO[Notion, NotionError, Seq[User]] =
+      maybeStartCursor match {
+        case Some(startCursor) =>
+          for {
+            result <- retrieveUsers(Pagination(USERS_FETCHED_PER_BATCH, Some(startCursor)))
+            users  <- retrieveUsersOnceMore(result.nextCursor, users ++ result.results)
+          } yield users
+        case None => ZIO.succeed(users)
+      }
+
+    for {
+      firstQuery <- retrieveUsers(Pagination.start(USERS_FETCHED_PER_BATCH))
+      allUsers   <- retrieveUsersOnceMore(firstQuery.nextCursor, firstQuery.results)
+    } yield Users(allUsers, None)
+  }
 
   /**
    * Query a batch of pages of a database base on a query.
@@ -59,7 +101,7 @@ object Notion {
    * specify either a Sorts or a Query or combine both using the combine
    * operator available on both sorts or filter set.
    *
-   * By default, this query won't retrieve all the pages of a database
+   * By default, this query may not retrieve all the pages of a database
    * but only a small set of them defined by the Pagination. You still
    * can use [[queryAllDatabase]] to handle the pagination
    * automatically.
@@ -98,8 +140,8 @@ object Notion {
     def queryDatabaseOnceMore(
         query: Query,
         maybeStartCursor: Option[String],
-        pages: List[Page]
-    ): ZIO[Notion, NotionError, List[Page]] =
+        pages: Seq[Page]
+    ): ZIO[Notion, NotionError, Seq[Page]] =
       maybeStartCursor match {
         case Some(startCursor) =>
           for {
@@ -112,7 +154,7 @@ object Notion {
     for {
       firstQuery <- queryDatabase(databaseId, query, Pagination.start(PAGES_FETCHED_PER_BATCH))
       allPages   <- queryDatabaseOnceMore(query, firstQuery.nextCursor, firstQuery.results)
-    } yield DatabaseQuery(None, allPages)
+    } yield DatabaseQuery(allPages, None)
   }
 
   def updatePage(pageId: String, operations: Page.Patch.StatelessOperations): ZIO[Notion, NotionError, Page] =
@@ -163,7 +205,9 @@ object Notion {
       decodeResponse[Database](notionClient.retrieveDatabase(databaseId))
 
     override def retrieveUser(userId: String): IO[NotionError, User] = decodeResponse[User](notionClient.retrieveUser(userId))
-    override def retrieveUsers: IO[NotionError, Users]               = decodeResponse[Users](notionClient.retrieveUsers)
+
+    override def retrieveUsers(pagination: Pagination): IO[NotionError, Users] =
+      decodeResponse[Users](notionClient.retrieveUsers(pagination))
 
     override def queryDatabase(databaseId: String, query: Query, pagination: Pagination): IO[NotionError, DatabaseQuery] =
       decodeResponse[DatabaseQuery](notionClient.queryDatabase(databaseId, query, pagination))
