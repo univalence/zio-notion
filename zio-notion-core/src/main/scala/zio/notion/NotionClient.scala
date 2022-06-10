@@ -25,7 +25,7 @@ trait NotionClient {
   def retrievePage(pageId: String): IO[NotionError, NotionResponse]
   def retrieveDatabase(databaseId: String): IO[NotionError, NotionResponse]
   def retrieveUser(userId: String): IO[NotionError, NotionResponse]
-  def retrieveUsers: IO[NotionError, NotionResponse]
+  def retrieveUsers(pagination: Pagination): IO[NotionError, NotionResponse]
 
   def queryDatabase(databaseId: String, query: Query, pagination: Pagination): IO[NotionError, NotionResponse]
 
@@ -68,6 +68,9 @@ object NotionClient {
 
   def retrieveUser(userId: String): ZIO[NotionClient, NotionError, NotionResponse] =
     ZIO.service[NotionClient].flatMap(_.retrieveUser(userId))
+
+  def retrieveUsers(pagination: Pagination): ZIO[NotionClient, NotionError, NotionResponse] =
+    ZIO.service[NotionClient].flatMap(_.retrieveUsers(pagination))
 
   def queryDatabase(databaseId: String, query: Query, pagination: Pagination): ZIO[NotionClient, NotionError, NotionResponse] =
     ZIO.service[NotionClient].flatMap(_.queryDatabase(databaseId, query, pagination))
@@ -149,9 +152,10 @@ object NotionClient {
         .get(uri"$endpoint/users/$userId")
         .handle
 
-    override def retrieveUsers: IO[NotionError, NotionResponse] =
+    override def retrieveUsers(pagination: Pagination): IO[NotionError, NotionResponse] =
       defaultRequest
         .get(uri"$endpoint/users")
+        .body(printer.print(pagination.asJson))
         .handle
 
     override def queryDatabase(databaseId: String, query: Query, pagination: Pagination): IO[NotionError, NotionResponse] =

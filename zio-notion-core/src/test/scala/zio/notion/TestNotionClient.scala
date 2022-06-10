@@ -327,31 +327,44 @@ final case class TestNotionClient() extends NotionClient {
                    |    }
                    |}""".stripMargin)
 
-  override def retrieveUsers: IO[NotionError, NotionResponse] =
-    ZIO.succeed(s"""{
-                   |  "results": [
-                   |    {
-                   |      "object": "user",
-                   |      "id": "d40e767c-d7af-4b18-a86d-55c61f1e39a4",
-                   |      "type": "person",
-                   |      "person": {
-                   |        "email": "avo@example.org"
-                   |      },
-                   |      "name": "Avocado Lovelace",
-                   |      "avatar_url": "https://secure.notion-static.com/e6a352a8-8381-44d0-a1dc-9ed80e62b53d.jpg"
-                   |    },
-                   |    {
-                   |      "object": "user",
-                   |      "id": "9a3b5ae0-c6e6-482d-b0e1-ed315ee6dc57",
-                   |      "type": "bot",
-                   |      "bot": {},
-                   |      "name": "Doug Engelbot",
-                   |      "avatar_url": "https://secure.notion-static.com/6720d746-3402-4171-8ebb-28d15144923c.jpg"
-                   |    }
-                   |  ],
-                   |  "next_cursor": "fe2cc560-036c-44cd-90e8-294d5a74cebc",
-                   |  "has_more": true
-                   |}""".stripMargin)
+  override def retrieveUsers(pagination: Pagination): IO[NotionError, NotionResponse] =
+    ZIO.succeed(
+      pagination.startCursor match {
+        case Some("a") =>
+          s"""{
+             |  "results": [
+             |    {
+             |      "object": "user",
+             |      "id": "9a3b5ae0-c6e6-482d-b0e1-ed315ee6dc57",
+             |      "type": "bot",
+             |      "bot": {},
+             |      "name": "Doug Engelbot",
+             |      "avatar_url": "https://secure.notion-static.com/6720d746-3402-4171-8ebb-28d15144923c.jpg"
+             |    }
+             |  ],
+             |  "next_cursor": null,
+             |  "has_more": true
+             |}""".stripMargin
+        case None =>
+          s"""{
+             |  "results": [
+             |    {
+             |      "object": "user",
+             |      "id": "d40e767c-d7af-4b18-a86d-55c61f1e39a4",
+             |      "type": "person",
+             |      "person": {
+             |        "email": "avo@example.org"
+             |      },
+             |      "name": "Avocado Lovelace",
+             |      "avatar_url": "https://secure.notion-static.com/e6a352a8-8381-44d0-a1dc-9ed80e62b53d.jpg"
+             |    }
+             |  ],
+             |  "next_cursor": "a",
+             |  "has_more": true
+             |}""".stripMargin
+
+      }
+    )
 
   override def queryDatabase(databaseId: String, query: Query, pagination: Pagination): IO[NotionError, NotionResponse] =
     ZIO.succeed(

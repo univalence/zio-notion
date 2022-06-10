@@ -1,6 +1,7 @@
 .bsp/
 .idea/
 target/
+Main.scala
 
 # Docusaurus
 .cache-loader

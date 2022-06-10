@@ -8,11 +8,6 @@ import java.time.LocalDate
 
 object UpdatePage extends ZIOAppDefault {
 
-  val notionConfiguration: NotionConfiguration =
-    NotionConfiguration(
-      bearer = "6A074793-D735-4BF6-9159-24351D239BBC" // Insert your own bearer
-    )
-
   def example: ZIO[Notion, NotionError, Unit] = {
     val date       = LocalDate.of(2022, 2, 2)
     val operations = $"col1".asNumber.patch.ceil ++ $"col2".asDate.patch.between(date, date.plusDays(14)) ++ archive

@@ -36,7 +36,7 @@ object NotionSpec extends ZIOSpecDefault {
         effect.map(user => assertTrue(user.isInstanceOf[User.Person]))
       },
       test("User can retrieve users from Notion") {
-        val effect: ZIO[Notion, NotionError, Users] = Notion.retrieveUsers
+        val effect: ZIO[Notion, NotionError, Users] = Notion.retrieveAllUsers
 
         effect.map(users => assertTrue(users.results.length == 2))
       },
