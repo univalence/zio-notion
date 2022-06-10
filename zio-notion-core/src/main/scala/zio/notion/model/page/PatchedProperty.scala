@@ -6,6 +6,7 @@ import zio.notion.model.common.Id
 import zio.notion.model.common.richtext.RichTextData
 import zio.notion.model.magnolia.{NoDiscriminantNoNullEncoderDerivation, PatchedPropertyEncoderDerivation}
 import zio.notion.model.page.property.Link
+import zio.notion.model.user.User
 
 import java.time.OffsetDateTime
 
@@ -20,7 +21,7 @@ object PatchedProperty {
   final case class PatchedSelect(id: Option[String], name: Option[String])                                   extends PatchedProperty
   final case class PatchedMultiSelect(multiSelect: List[PatchedSelect])                                      extends PatchedProperty
   final case class PatchedDate(start: OffsetDateTime, end: Option[OffsetDateTime], timeZone: Option[String]) extends PatchedProperty
-  final case class PatchedPeople(people: Seq[Id])                                                            extends PatchedProperty
+  final case class PatchedPeople(people: Seq[User])                                                          extends PatchedProperty
   final case class PatchedRelation(relation: Seq[Id])                                                        extends PatchedProperty
   final case class PatchedFiles(files: Seq[Link])                                                            extends PatchedProperty
   final case class PatchedUrl(url: String)                                                                   extends PatchedProperty
