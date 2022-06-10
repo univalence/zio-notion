@@ -46,7 +46,7 @@ ThisBuild / semanticdbVersion          := scalafixSemanticdb.revision
 ThisBuild / scalafixDependencies ++= Seq("com.github.vovapolu" %% "scaluzzi" % "0.1.21")
 
 // SCoverage configuration
-val excludedPackages: Seq[String] = Seq.empty
+val excludedPackages: Seq[String] = Seq("example")
 
 ThisBuild / coverageFailOnMinimum           := false
 ThisBuild / coverageMinimumStmtTotal        := 80
