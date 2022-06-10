@@ -4,7 +4,8 @@ import io.circe.parser.decode
 
 import zio.Scope
 import zio.notion.Faker.fakeDatetime
-import zio.notion.model.page.property.data.FormulaData.{Date, Number}
+import zio.notion.model.page.Property
+import zio.notion.model.page.property.data.FormulaData.Number
 import zio.test._
 import zio.test.Assertion._
 
@@ -34,9 +35,9 @@ object FormulaDataSpec extends ZIOSpecDefault {
              |    }
              |}""".stripMargin
 
-        val expected: Date = Date(date = Some(DateData(start = fakeDatetime, None, None)))
+        val expected: FormulaData.DateTime = FormulaData.DateTime(date = Some(Property.DateTime.Data(start = fakeDatetime, None, None)))
 
-        assert(decode[FormulaData](json))(isRight(equalTo(expected)))
+        assertTrue(decode[FormulaData](json) == Right(expected))
       },
       test("We should be able to parse a number formula as json") {
         val json: String =

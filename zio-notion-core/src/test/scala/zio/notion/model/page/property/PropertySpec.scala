@@ -10,7 +10,7 @@ import zio.notion.model.common.richtext.RichTextData
 import zio.notion.model.common.richtext.RichTextData.Mention.MentionData
 import zio.notion.model.page.Property
 import zio.notion.model.page.Property._
-import zio.notion.model.page.property.data.{DateData, RollupData}
+import zio.notion.model.page.property.data.RollupData
 import zio.test._
 import zio.test.Assertion._
 
@@ -49,6 +49,26 @@ object PropertySpec extends ZIOSpecDefault {
              |}""".stripMargin
 
         val expected = Relation(id = fakeUUID, relation = List(Id(fakeUUID)))
+
+        assert(decode[Property](json))(isRight(equalTo(expected)))
+      },
+      test("We should be able to parse a date object as json containing date") {
+        val json: String =
+          s"""{
+             |    "id": "$fakeUUID",
+             |    "type": "date",
+             |    "date": {
+             |        "start": "2022-12-24",
+             |        "end": null,
+             |        "time_zone": null
+             |    }
+             |}""".stripMargin
+
+        val expected =
+          Date(
+            id   = fakeUUID,
+            date = Some(Date.Data(fakeDate, None))
+          )
 
         assert(decode[Property](json))(isRight(equalTo(expected)))
       },
@@ -108,7 +128,7 @@ object PropertySpec extends ZIOSpecDefault {
             title =
               List(
                 RichTextData.Mention(
-                  mention     = MentionData.Date(DateData(fakeDatetime, None, None)),
+                  mention     = MentionData.DateTime(DateTime.Data(fakeDatetime, None, None)),
                   annotations = richtext.Annotations.default,
                   plainText   = "Untitled",
                   href        = Some("https://www.notion.so/46cec14b98f44f2bb3135fe3a1a40a88")
