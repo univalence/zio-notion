@@ -5,7 +5,9 @@ import io.circe.Decoder.Result
 import io.circe.generic.extras.ConfiguredJsonCodec
 import io.circe.syntax.EncoderOps
 
-sealed trait User
+sealed trait User {
+  def id: String
+}
 
 object User {
 
