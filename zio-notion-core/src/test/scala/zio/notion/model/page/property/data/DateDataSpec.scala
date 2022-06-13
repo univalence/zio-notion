@@ -20,9 +20,9 @@ object DateDataSpec extends ZIOSpecDefault {
              |    "time_zone": null
              |}""".stripMargin
 
-        val expected: DateTime.Data = DateTime.Data(start = fakeDatetime, end = None, timeZone = None)
+        val expected: DateTimeData = DateTimeData(start = fakeDatetime, end = None, timeZone = None)
 
-        assert(decode[DateTime.Data](json))(isRight(equalTo(expected)))
+        assert(decode[DateTimeData](json))(isRight(equalTo(expected)))
       }
     )
 }

@@ -5,16 +5,14 @@ import io.circe.Decoder.Result
 import io.circe.generic.extras.ConfiguredJsonCodec
 import io.circe.syntax.EncoderOps
 
-import zio.notion.model.page.Property
-
 sealed trait FormulaData
 
 object FormulaData {
-  @ConfiguredJsonCodec final case class String(string: Option[Predef.String])          extends FormulaData
-  @ConfiguredJsonCodec final case class Date(date: Option[Property.Date.Data])         extends FormulaData
-  @ConfiguredJsonCodec final case class DateTime(date: Option[Property.DateTime.Data]) extends FormulaData
-  @ConfiguredJsonCodec final case class Number(number: Option[Double])                 extends FormulaData
-  @ConfiguredJsonCodec final case class Boolean(boolean: Option[scala.Boolean])        extends FormulaData
+  @ConfiguredJsonCodec final case class String(string: Option[Predef.String])   extends FormulaData
+  @ConfiguredJsonCodec final case class Date(date: Option[DateData])            extends FormulaData
+  @ConfiguredJsonCodec final case class DateTime(date: Option[DateTimeData])    extends FormulaData
+  @ConfiguredJsonCodec final case class Number(number: Option[Double])          extends FormulaData
+  @ConfiguredJsonCodec final case class Boolean(boolean: Option[scala.Boolean]) extends FormulaData
 
   implicit val formulaCodec: Codec[FormulaData] =
     new Codec[FormulaData] {

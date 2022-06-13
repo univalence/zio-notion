@@ -1,12 +1,12 @@
 package zio.notion.model.common.richtext
 
-import io.circe.{Codec, Decoder, DecodingFailure, HCursor, Json}
+import io.circe._
 import io.circe.Decoder.Result
 import io.circe.generic.extras._
 import io.circe.syntax.EncoderOps
 
 import zio.notion.model.common.{Id, Url}
-import zio.notion.model.page.Property
+import zio.notion.model.page.property.data.{DateData, DateTimeData}
 
 @ConfiguredJsonCodec sealed trait RichTextData
 
@@ -38,8 +38,8 @@ object RichTextData {
       @ConfiguredJsonCodec final case class LinkPreview(linkPreview: Url)                          extends MentionData
       @ConfiguredJsonCodec final case class Page(page: Id)                                         extends MentionData
       @ConfiguredJsonCodec final case class Database(database: Id)                                 extends MentionData
-      @ConfiguredJsonCodec final case class Date(date: Property.Date.Data)                         extends MentionData
-      @ConfiguredJsonCodec final case class DateTime(date: Property.DateTime.Data)                 extends MentionData
+      @ConfiguredJsonCodec final case class Date(date: DateData)                                   extends MentionData
+      @ConfiguredJsonCodec final case class DateTime(date: DateTimeData)                           extends MentionData
       @ConfiguredJsonCodec final case class TemplateMention(templateMention: TemplateMention.Data) extends MentionData
 
       object TemplateMention {

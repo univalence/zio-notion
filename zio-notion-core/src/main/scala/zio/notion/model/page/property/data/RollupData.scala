@@ -6,15 +6,14 @@ import io.circe.generic.extras._
 import io.circe.syntax.EncoderOps
 
 import zio.notion.model.common.enumeration.RollupFunction
-import zio.notion.model.page.Property
 
 sealed trait RollupData
 
 object RollupData {
-  @ConfiguredJsonCodec final case class Number(number: Option[Double], function: RollupFunction)                 extends RollupData
-  @ConfiguredJsonCodec final case class Date(date: Option[Property.Date.Data], function: RollupFunction)         extends RollupData
-  @ConfiguredJsonCodec final case class DateTime(date: Option[Property.DateTime.Data], function: RollupFunction) extends RollupData
-  @ConfiguredJsonCodec final case class Array(array: List[RollupArrayDataType], function: RollupFunction)        extends RollupData
+  @ConfiguredJsonCodec final case class Number(number: Option[Double], function: RollupFunction)          extends RollupData
+  @ConfiguredJsonCodec final case class Date(date: Option[DateData], function: RollupFunction)            extends RollupData
+  @ConfiguredJsonCodec final case class DateTime(date: Option[DateTimeData], function: RollupFunction)    extends RollupData
+  @ConfiguredJsonCodec final case class Array(array: List[RollupArrayDataType], function: RollupFunction) extends RollupData
 
   implicit val formulaCodec: Codec[RollupData] =
     new Codec[RollupData] {

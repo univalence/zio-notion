@@ -7,10 +7,8 @@ import zio.notion.model.common.Id
 import zio.notion.model.common.richtext.RichTextData
 import zio.notion.model.page.PatchedProperty._
 import zio.notion.model.page.property.Link
-import zio.notion.model.page.property.data.{FormulaData, RollupData, SelectData}
+import zio.notion.model.page.property.data.{DateData, DateTimeData, FormulaData, RollupData, SelectData}
 import zio.notion.model.user.User
-
-import java.time.{LocalDate, OffsetDateTime}
 
 object ToPatchedProperty {
 
@@ -45,8 +43,8 @@ object Property {
   @ConfiguredJsonCodec(decodeOnly = true) final case class Url(id: String, url: Option[String])                   extends Property
   @ConfiguredJsonCodec(decodeOnly = true) final case class Select(id: String, select: Option[SelectData])         extends Property
   @ConfiguredJsonCodec(decodeOnly = true) final case class MultiSelect(id: String, multiSelect: List[SelectData]) extends Property
-  @ConfiguredJsonCodec(decodeOnly = true) final case class Date(id: String, date: Option[Date.Data])              extends Property
-  @ConfiguredJsonCodec(decodeOnly = true) final case class DateTime(id: String, date: Option[DateTime.Data])      extends Property
+  @ConfiguredJsonCodec(decodeOnly = true) final case class Date(id: String, date: Option[DateData])               extends Property
+  @ConfiguredJsonCodec(decodeOnly = true) final case class DateTime(id: String, date: Option[DateTimeData])       extends Property
   @ConfiguredJsonCodec(decodeOnly = true) final case class Email(id: String, email: Option[String])               extends Property
   @ConfiguredJsonCodec(decodeOnly = true) final case class PhoneNumber(id: String, phoneNumber: Option[String])   extends Property
   @ConfiguredJsonCodec(decodeOnly = true) final case class Checkbox(id: String, checkbox: Option[Boolean])        extends Property
@@ -61,14 +59,6 @@ object Property {
   @ConfiguredJsonCodec(decodeOnly = true) final case class LastEditedTime(id: String, lastEditedTime: String)     extends Property
   @ConfiguredJsonCodec(decodeOnly = true) final case class Formula(id: String, formula: FormulaData)              extends Property
   @ConfiguredJsonCodec(decodeOnly = true) final case class Rollup(id: String, rollup: RollupData)                 extends Property
-
-  object Date {
-    @ConfiguredJsonCodec final case class Data(start: LocalDate, end: Option[LocalDate])
-  }
-
-  object DateTime {
-    @ConfiguredJsonCodec final case class Data(start: OffsetDateTime, end: Option[OffsetDateTime], timeZone: Option[String])
-  }
 
   implicit val propertyDecoder: Decoder[Property] =
     (c: HCursor) =>

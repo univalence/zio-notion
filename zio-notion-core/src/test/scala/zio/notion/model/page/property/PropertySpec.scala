@@ -10,7 +10,7 @@ import zio.notion.model.common.richtext.RichTextData
 import zio.notion.model.common.richtext.RichTextData.Mention.MentionData
 import zio.notion.model.page.Property
 import zio.notion.model.page.Property._
-import zio.notion.model.page.property.data.RollupData
+import zio.notion.model.page.property.data.{DateData, DateTimeData, RollupData}
 import zio.test._
 import zio.test.Assertion._
 
@@ -67,7 +67,7 @@ object PropertySpec extends ZIOSpecDefault {
         val expected =
           Date(
             id   = fakeUUID,
-            date = Some(Date.Data(fakeDate, None))
+            date = Some(DateData(fakeDate, None))
           )
 
         assert(decode[Property](json))(isRight(equalTo(expected)))
@@ -87,7 +87,7 @@ object PropertySpec extends ZIOSpecDefault {
         val expected =
           DateTime(
             id   = fakeUUID,
-            date = Some(DateTime.Data(fakeDatetime.withOffsetSameInstant(ZoneOffset.ofHours(2)), None, None))
+            date = Some(DateTimeData(fakeDatetime.withOffsetSameInstant(ZoneOffset.ofHours(2)), None, None))
           )
 
         assert(decode[Property](json))(isRight(equalTo(expected)))
@@ -128,7 +128,7 @@ object PropertySpec extends ZIOSpecDefault {
             title =
               List(
                 RichTextData.Mention(
-                  mention     = MentionData.DateTime(DateTime.Data(fakeDatetime, None, None)),
+                  mention     = MentionData.DateTime(DateTimeData(fakeDatetime, None, None)),
                   annotations = richtext.Annotations.default,
                   plainText   = "Untitled",
                   href        = Some("https://www.notion.so/46cec14b98f44f2bb3135fe3a1a40a88")

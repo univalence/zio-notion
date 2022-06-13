@@ -35,7 +35,7 @@ object FormulaDataSpec extends ZIOSpecDefault {
              |    }
              |}""".stripMargin
 
-        val expected: FormulaData.DateTime = FormulaData.DateTime(date = Some(Property.DateTime.Data(start = fakeDatetime, None, None)))
+        val expected: FormulaData.DateTime = FormulaData.DateTime(date = Some(DateTimeData(start = fakeDatetime, None, None)))
 
         assertTrue(decode[FormulaData](json) == Right(expected))
       },
