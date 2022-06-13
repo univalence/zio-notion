@@ -3,12 +3,11 @@ package zio.notion.dsl
 import zio.Scope
 import zio.notion.Faker._
 import zio.notion.model.database.query.{Filter, PropertyFilter}
-import zio.notion.model.database.query.Filter.And
-import zio.notion.model.database.query.Filter.One
+import zio.notion.model.database.query.Filter.{And, One}
 import zio.notion.model.database.query.PropertyFilter._
 import zio.test._
 
-import java.time.LocalDate
+import java.time.{LocalDate, OffsetDateTime}
 
 object ColumnSpec extends ZIOSpecDefault {
 
@@ -124,6 +123,38 @@ object ColumnSpec extends ZIOSpecDefault {
               One(Date(fakeName, DatePropertyFilter.After(LocalDate.MIN.toString))),
               One(Date(fakeName, DatePropertyFilter.OnOrBefore(LocalDate.MAX.toString))),
               One(Date(fakeName, DatePropertyFilter.OnOrAfter(LocalDate.MIN.toString))),
+              One(Date(fakeName, DatePropertyFilter.PastWeek)),
+              One(Date(fakeName, DatePropertyFilter.PastMonth)),
+              One(Date(fakeName, DatePropertyFilter.NextWeek)),
+              One(Date(fakeName, DatePropertyFilter.NextMonth)),
+              One(Date(fakeName, DatePropertyFilter.NextYear)),
+              One(Date(fakeName, PropertyFilter.IsNotEmpty(true)))
+            )
+          )
+
+        assertTrue(filter == expected)
+      },
+      test("creates a datetime filter") {
+
+        val filter =
+          $"$fakeName".asDateTime < OffsetDateTime.MAX and
+            $"$fakeName".asDateTime > OffsetDateTime.MIN and
+            $"$fakeName".asDateTime <= OffsetDateTime.MAX and
+            $"$fakeName".asDateTime >= OffsetDateTime.MIN and
+            $"$fakeName".asDateTime.pastWeek and
+            $"$fakeName".asDateTime.pastMonth and
+            $"$fakeName".asDateTime.nextWeek and
+            $"$fakeName".asDateTime.nextMonth and
+            $"$fakeName".asDateTime.nextYear and
+            $"$fakeName".asDateTime.isNotEmpty
+
+        val expected =
+          And(
+            List(
+              One(Date(fakeName, DatePropertyFilter.Before(OffsetDateTime.MAX.toString))),
+              One(Date(fakeName, DatePropertyFilter.After(OffsetDateTime.MIN.toString))),
+              One(Date(fakeName, DatePropertyFilter.OnOrBefore(OffsetDateTime.MAX.toString))),
+              One(Date(fakeName, DatePropertyFilter.OnOrAfter(OffsetDateTime.MIN.toString))),
               One(Date(fakeName, DatePropertyFilter.PastWeek)),
               One(Date(fakeName, DatePropertyFilter.PastMonth)),
               One(Date(fakeName, DatePropertyFilter.NextWeek)),
