@@ -4,7 +4,7 @@ import io.circe.syntax.EncoderOps
 
 import zio.{Scope, UIO}
 import zio.notion.Faker._
-import zio.notion.model.common.{richtext, Url}
+import zio.notion.model.common.{richtext, Id, Url}
 import zio.notion.model.common.enumeration.Color
 import zio.notion.model.common.richtext.RichTextData
 import zio.notion.model.page.Page.Patch.Operations.Operation._
@@ -34,7 +34,8 @@ object PatchedColumnSpec extends ZIOSpecDefault {
       specPatchedFiles,
       specPatchedTitle,
       specPatchedRichText,
-      specPatchedPeople
+      specPatchedPeople,
+      specPatchedRelation
     ) + specEncoding
 
   implicit class PatchedPropertyOps(patchedProperty: PatchedProperty) {
@@ -62,6 +63,8 @@ object PatchedColumnSpec extends ZIOSpecDefault {
     def richText: Seq[RichTextData] = patchedProperty.asInstanceOf[PatchedRichText].richText
 
     def people: Seq[User] = patchedProperty.asInstanceOf[PatchedPeople].people
+
+    def relation: Seq[Id] = patchedProperty.asInstanceOf[PatchedRelation].relation
   }
 
   implicit class TransformTestOps(updateProperty: UpdateProperty) {
@@ -372,10 +375,40 @@ object PatchedColumnSpec extends ZIOSpecDefault {
 
         assertTrue(patch.value.people == people)
       },
-      test("We can set a new person") {
-        val patch: UpdateProperty = $"col".asPeople.patch.add(Hidden(fakeUUID))
+      test("We can set a list of people using ids") {
+        val ids: List[String] = List(fakeUUID)
+
+        val patch: SetProperty = $"col".asPeople.patch.set(ids)
+
+        assertTrue(patch.value.people.map(_.id) == ids)
+      },
+      test("We can add a new person") {
+        val patch: UpdateProperty = $"col".asPeople.patch.add(fakeUUID)
 
         assertTrue(patch.test(PatchedPeople(Seq.empty)).map(_.people) == Option(Seq(Hidden(fakeUUID))))
+      }
+    )
+
+  def specPatchedRelation: Spec[TestEnvironment with Scope, Any] =
+    suite("Test patching relation")(
+      test("We can set a list of ids") {
+        val ids: List[Id] = List(Id(fakeUUID))
+
+        val patch: SetProperty = $"col".asRelation.patch.set(ids)
+
+        assertTrue(patch.value.relation == ids)
+      },
+      test("We can set a list of people using ids") {
+        val ids: List[String] = List(fakeUUID)
+
+        val patch: SetProperty = $"col".asRelation.patch.set(ids)
+
+        assertTrue(patch.value.relation.map(_.id) == ids)
+      },
+      test("We can add a new relation") {
+        val patch: UpdateProperty = $"col".asRelation.patch.add(fakeUUID)
+
+        assertTrue(patch.test(PatchedRelation(Seq.empty)).map(_.relation) == Option(Seq(Id(fakeUUID))))
       }
     )
 

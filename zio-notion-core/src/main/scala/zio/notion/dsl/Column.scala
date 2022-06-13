@@ -230,6 +230,8 @@ object Column {
     def doesNotContain(string: String): Relation = Relation(property, DoesNotContain(string))
     def isEmpty: Relation                        = Relation(property, IsEmpty(true))
     def isNotEmpty: Relation                     = Relation(property, IsNotEmpty(true))
+
+    def patch: PatchedColumnRelation = PatchedColumnRelation(property)
   }
 
   final case class CreatedByDSLConstructor private (property: String) {
