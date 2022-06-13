@@ -9,20 +9,7 @@ import zio.notion.model.common.enumeration.Color
 import zio.notion.model.common.richtext.RichTextData
 import zio.notion.model.page.Page.Patch.Operations.Operation._
 import zio.notion.model.page.PatchedProperty
-import zio.notion.model.page.PatchedProperty.{
-  PatchedCheckbox,
-  PatchedDate,
-  PatchedEmail,
-  PatchedFiles,
-  PatchedMultiSelect,
-  PatchedNumber,
-  PatchedPeople,
-  PatchedPhoneNumber,
-  PatchedRichText,
-  PatchedSelect,
-  PatchedTitle,
-  PatchedUrl
-}
+import zio.notion.model.page.PatchedProperty._
 import zio.notion.model.page.property.Link
 import zio.notion.model.page.property.Link.External
 import zio.notion.model.printer
@@ -30,7 +17,7 @@ import zio.notion.model.user.User
 import zio.notion.model.user.User.Hidden
 import zio.test.{assertTrue, Spec, TestEnvironment, TestResult, ZIOSpecDefault}
 
-import java.time.{OffsetDateTime, ZoneOffset}
+import java.time.{LocalDate, OffsetDateTime, ZoneOffset}
 
 object PatchedColumnSpec extends ZIOSpecDefault {
 
@@ -41,6 +28,7 @@ object PatchedColumnSpec extends ZIOSpecDefault {
       specPatchedSelect,
       specPatchedMultiSelect,
       specPatchedDate,
+      specPatchedDateTime,
       specPatchedEmail,
       specPatchedCheckbox,
       specPatchedFiles,
@@ -60,10 +48,6 @@ object PatchedColumnSpec extends ZIOSpecDefault {
     def id: Option[String] = patchedProperty.asInstanceOf[PatchedSelect].id
 
     def multiSelect: List[PatchedSelect] = patchedProperty.asInstanceOf[PatchedMultiSelect].multiSelect
-
-    def start: OffsetDateTime = patchedProperty.asInstanceOf[PatchedDate].start
-
-    def end: Option[OffsetDateTime] = patchedProperty.asInstanceOf[PatchedDate].end
 
     def email: String = patchedProperty.asInstanceOf[PatchedEmail].email
 
@@ -197,29 +181,67 @@ object PatchedColumnSpec extends ZIOSpecDefault {
     )
   }
 
-  def specPatchedDate: Spec[TestEnvironment with Scope, Any] =
+  def specPatchedDate: Spec[TestEnvironment with Scope, Any] = {
+    implicit class PatchedPropertyDateOps(patchedProperty: PatchedProperty) {
+      def start: LocalDate = patchedProperty.asInstanceOf[PatchedDate].start
+
+      def end: Option[LocalDate] = patchedProperty.asInstanceOf[PatchedDate].end
+    }
+
     suite("Test patching dates")(
       test("We can set a start date") {
-        val patch: SetProperty = $"col".asDate.patch.startAt(fakeDatetime)
+        val patch: SetProperty = $"col".asDate.patch.startAt(fakeDate)
 
-        assertTrue(patch.value.start == fakeDatetime)
+        assertTrue(patch.value.start == fakeDate)
       },
       test("We can add an end date") {
-        val patch: UpdateProperty = $"col".asDate.patch.endAt(fakeDatetime.plusDays(2))
+        val patch: UpdateProperty = $"col".asDate.patch.endAt(fakeDate.plusDays(2))
 
-        assertTrue(patch.test(PatchedDate(fakeDatetime, None, None)).map(_.end).contains(Some(fakeDatetime.plusDays(2))))
+        assertTrue(patch.test(PatchedDate(fakeDate, None)).map(_.end).contains(Some(fakeDate.plusDays(2))))
       },
       test("We can set a date between two dates") {
-        val patch: SetProperty = $"col".asDate.patch.between(fakeDatetime, fakeDatetime.plusDays(2))
+        val patch: SetProperty = $"col".asDate.patch.between(fakeDate, fakeDate.plusDays(2))
 
-        assertTrue(patch.value.start == fakeDatetime && patch.value.end.contains(fakeDatetime.plusDays(2)))
+        assertTrue(patch.value.start == fakeDate && patch.value.end.contains(fakeDate.plusDays(2)))
       },
       test("We can set a start date to today") {
         val patch: UIO[SetProperty] = $"col".asDate.patch.today
 
+        patch.map(p => assertTrue(p.value.start == LocalDate.of(1970, 1, 1)))
+      }
+    )
+  }
+
+  def specPatchedDateTime: Spec[TestEnvironment with Scope, Any] = {
+    implicit class PatchedPropertyDateOps(patchedProperty: PatchedProperty) {
+      def start: OffsetDateTime = patchedProperty.asInstanceOf[PatchedDateTime].start
+
+      def end: Option[OffsetDateTime] = patchedProperty.asInstanceOf[PatchedDateTime].end
+    }
+
+    suite("Test patching date times")(
+      test("We can set a start date") {
+        val patch: SetProperty = $"col".asDateTime.patch.startAt(fakeDatetime)
+
+        assertTrue(patch.value.start == fakeDatetime)
+      },
+      test("We can add an end date") {
+        val patch: UpdateProperty = $"col".asDateTime.patch.endAt(fakeDatetime.plusDays(2))
+
+        assertTrue(patch.test(PatchedDateTime(fakeDatetime, None, None)).map(_.end).contains(Some(fakeDatetime.plusDays(2))))
+      },
+      test("We can set a date between two dates") {
+        val patch: SetProperty = $"col".asDateTime.patch.between(fakeDatetime, fakeDatetime.plusDays(2))
+
+        assertTrue(patch.value.start == fakeDatetime && patch.value.end.contains(fakeDatetime.plusDays(2)))
+      },
+      test("We can set a start date to now") {
+        val patch: UIO[SetProperty] = $"col".asDateTime.patch.now
+
         patch.map(p => assertTrue(p.value.start == OffsetDateTime.of(1970, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC)))
       }
     )
+  }
 
   def specPatchedEmail: Spec[TestEnvironment with Scope, Any] =
     suite("Test patching emails")(
@@ -409,7 +431,7 @@ object PatchedColumnSpec extends ZIOSpecDefault {
         assertTrue(printer.print(property.asJson) == expected)
       },
       test("PatchedDate encoding") {
-        val property: PatchedDate = PatchedDate(fakeDatetime, Some(fakeDatetime.plusDays(2)), Some("America/New_York"))
+        val property: PatchedDateTime = PatchedDateTime(fakeDatetime, Some(fakeDatetime.plusDays(2)), Some("America/New_York"))
 
         val expected: String =
           s"""{

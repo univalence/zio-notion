@@ -8,25 +8,26 @@ import zio.notion.model.magnolia.{NoDiscriminantNoNullEncoderDerivation, Patched
 import zio.notion.model.page.property.Link
 import zio.notion.model.user.User
 
-import java.time.OffsetDateTime
+import java.time.{LocalDate, OffsetDateTime}
 
 sealed trait PatchedProperty
 
 // TODO: Add formula and rollup patches
 object PatchedProperty {
-  final case class PatchedTitle(title: Seq[RichTextData])                                                    extends PatchedProperty
-  final case class PatchedRichText(richText: Seq[RichTextData])                                              extends PatchedProperty
-  final case class PatchedNumber(number: Double)                                                             extends PatchedProperty
-  final case class PatchedCheckbox(checkbox: Boolean)                                                        extends PatchedProperty
-  final case class PatchedSelect(id: Option[String], name: Option[String])                                   extends PatchedProperty
-  final case class PatchedMultiSelect(multiSelect: List[PatchedSelect])                                      extends PatchedProperty
-  final case class PatchedDate(start: OffsetDateTime, end: Option[OffsetDateTime], timeZone: Option[String]) extends PatchedProperty
-  final case class PatchedPeople(people: Seq[User])                                                          extends PatchedProperty
-  final case class PatchedRelation(relation: Seq[Id])                                                        extends PatchedProperty
-  final case class PatchedFiles(files: Seq[Link])                                                            extends PatchedProperty
-  final case class PatchedUrl(url: String)                                                                   extends PatchedProperty
-  final case class PatchedEmail(email: String)                                                               extends PatchedProperty
-  final case class PatchedPhoneNumber(phoneNumber: String)                                                   extends PatchedProperty
+  final case class PatchedTitle(title: Seq[RichTextData])                                                        extends PatchedProperty
+  final case class PatchedRichText(richText: Seq[RichTextData])                                                  extends PatchedProperty
+  final case class PatchedNumber(number: Double)                                                                 extends PatchedProperty
+  final case class PatchedCheckbox(checkbox: Boolean)                                                            extends PatchedProperty
+  final case class PatchedSelect(id: Option[String], name: Option[String])                                       extends PatchedProperty
+  final case class PatchedMultiSelect(multiSelect: List[PatchedSelect])                                          extends PatchedProperty
+  final case class PatchedDate(start: LocalDate, end: Option[LocalDate])                                         extends PatchedProperty
+  final case class PatchedDateTime(start: OffsetDateTime, end: Option[OffsetDateTime], timeZone: Option[String]) extends PatchedProperty
+  final case class PatchedPeople(people: Seq[User])                                                              extends PatchedProperty
+  final case class PatchedRelation(relation: Seq[Id])                                                            extends PatchedProperty
+  final case class PatchedFiles(files: Seq[Link])                                                                extends PatchedProperty
+  final case class PatchedUrl(url: String)                                                                       extends PatchedProperty
+  final case class PatchedEmail(email: String)                                                                   extends PatchedProperty
+  final case class PatchedPhoneNumber(phoneNumber: String)                                                       extends PatchedProperty
 
   object PatchedTitle {
     implicit val encoder: Encoder[PatchedTitle] = PatchedPropertyEncoderDerivation.gen[PatchedTitle]
@@ -59,6 +60,10 @@ object PatchedProperty {
 
   object PatchedDate {
     implicit val encoder: Encoder[PatchedDate] = PatchedPropertyEncoderDerivation.gen[PatchedDate]
+  }
+
+  object PatchedDateTime {
+    implicit val encoder: Encoder[PatchedDateTime] = PatchedPropertyEncoderDerivation.gen[PatchedDateTime]
   }
 
   object PatchedPeople {

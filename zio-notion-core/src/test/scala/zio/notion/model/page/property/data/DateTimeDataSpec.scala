@@ -7,21 +7,21 @@ import zio.notion.Faker._
 import zio.test._
 import zio.test.Assertion._
 
-object DateDataSpec extends ZIOSpecDefault {
+object DateTimeDataSpec extends ZIOSpecDefault {
 
   override def spec: Spec[TestEnvironment with Scope, Any] =
-    suite("DateData serde suite")(
-      test("We should be able to parse a date as json") {
+    suite("DateTimeData serde suite")(
+      test("We should be able to parse a datetime as json") {
         val json: String =
           s"""{
-             |    "start": "$fakeDate",
+             |    "start": "$fakeDatetime",
              |    "end": null,
              |    "time_zone": null
              |}""".stripMargin
 
-        val expected: DateData = DateData(start = fakeDate, end = None)
+        val expected: DateTimeData = DateTimeData(start = fakeDatetime, end = None, timeZone = None)
 
-        assert(decode[DateData](json))(isRight(equalTo(expected)))
+        assert(decode[DateTimeData](json))(isRight(equalTo(expected)))
       }
     )
 }
