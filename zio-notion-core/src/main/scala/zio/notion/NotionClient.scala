@@ -21,18 +21,21 @@ import zio.notion.model.page.{Page, PatchedProperty}
 import zio.notion.model.printer
 
 trait NotionClient {
-  def retrievePage(pageId: String): IO[NotionError, NotionResponse]
-  def retrieveDatabase(databaseId: String): IO[NotionError, NotionResponse]
-  def retrieveUser(userId: String): IO[NotionError, NotionResponse]
-  def retrieveUsers(pagination: Pagination): IO[NotionError, NotionResponse]
+  def retrievePage(pageId: String)(implicit trace: Trace): IO[NotionError, NotionResponse]
+  def retrieveDatabase(databaseId: String)(implicit trace: Trace): IO[NotionError, NotionResponse]
+  def retrieveUser(userId: String)(implicit trace: Trace): IO[NotionError, NotionResponse]
+  def retrieveUsers(pagination: Pagination)(implicit trace: Trace): IO[NotionError, NotionResponse]
 
-  def queryDatabase(databaseId: String, query: Query, pagination: Pagination): IO[NotionError, NotionResponse]
+  def queryDatabase(databaseId: String, query: Query, pagination: Pagination)(implicit trace: Trace): IO[NotionError, NotionResponse]
 
-  def updatePage(pageId: String, operations: Page.Patch.StatelessOperations): IO[NotionError, NotionResponse]
-  def updatePage(page: Page, operations: Page.Patch.Operations): IO[NotionError, NotionResponse]
+  def updatePage(pageId: String, operations: Page.Patch.StatelessOperations)(implicit trace: Trace): IO[NotionError, NotionResponse]
+  def updatePage(page: Page, operations: Page.Patch.Operations)(implicit trace: Trace): IO[NotionError, NotionResponse]
 
-  def updateDatabase(databaseId: String, operations: Database.Patch.StatelessOperations): IO[NotionError, NotionResponse]
-  def updateDatabase(database: Database, operations: Database.Patch.Operations): IO[NotionError, NotionResponse]
+  def updateDatabase(
+      databaseId: String,
+      operations: Database.Patch.StatelessOperations
+  )(implicit trace: Trace): IO[NotionError, NotionResponse]
+  def updateDatabase(database: Database, operations: Database.Patch.Operations)(implicit trace: Trace): IO[NotionError, NotionResponse]
 
   def createDatabase(
       pageId: String,
@@ -40,50 +43,63 @@ trait NotionClient {
       icon: Option[Icon],
       cover: Option[Cover],
       properties: Map[String, PropertySchema]
-  ): IO[NotionError, NotionResponse]
+  )(implicit trace: Trace): IO[NotionError, NotionResponse]
 
   def createPageInPage(
       parent: PageId,
       title: Option[PatchedProperty],
       icon: Option[Icon],
       cover: Option[Cover]
-  ): IO[NotionError, NotionResponse]
+  )(implicit trace: Trace): IO[NotionError, NotionResponse]
 
   def createPageInDatabase(
       parent: DatabaseId,
       properties: Map[String, PatchedProperty],
       icon: Option[Icon],
       cover: Option[Cover]
-  ): IO[NotionError, NotionResponse]
+  )(implicit trace: Trace): IO[NotionError, NotionResponse]
 }
 
 object NotionClient {
 
-  def retrievePage(pageId: String): ZIO[NotionClient, NotionError, NotionResponse] =
+  def retrievePage(pageId: String)(implicit trace: Trace): ZIO[NotionClient, NotionError, NotionResponse] =
     ZIO.service[NotionClient].flatMap(_.retrievePage(pageId))
 
-  def retrieveDatabase(databaseId: String): ZIO[NotionClient, NotionError, NotionResponse] =
+  def retrieveDatabase(databaseId: String)(implicit trace: Trace): ZIO[NotionClient, NotionError, NotionResponse] =
     ZIO.service[NotionClient].flatMap(_.retrieveDatabase(databaseId))
 
-  def retrieveUser(userId: String): ZIO[NotionClient, NotionError, NotionResponse] =
+  def retrieveUser(userId: String)(implicit trace: Trace): ZIO[NotionClient, NotionError, NotionResponse] =
     ZIO.service[NotionClient].flatMap(_.retrieveUser(userId))
 
-  def retrieveUsers(pagination: Pagination): ZIO[NotionClient, NotionError, NotionResponse] =
+  def retrieveUsers(pagination: Pagination)(implicit trace: Trace): ZIO[NotionClient, NotionError, NotionResponse] =
     ZIO.service[NotionClient].flatMap(_.retrieveUsers(pagination))
 
-  def queryDatabase(databaseId: String, query: Query, pagination: Pagination): ZIO[NotionClient, NotionError, NotionResponse] =
+  def queryDatabase(
+      databaseId: String,
+      query: Query,
+      pagination: Pagination
+  )(implicit trace: Trace): ZIO[NotionClient, NotionError, NotionResponse] =
     ZIO.service[NotionClient].flatMap(_.queryDatabase(databaseId, query, pagination))
 
-  def updatePage(pageId: String, operations: Page.Patch.StatelessOperations): ZIO[NotionClient, NotionError, NotionResponse] =
+  def updatePage(
+      pageId: String,
+      operations: Page.Patch.StatelessOperations
+  )(implicit trace: Trace): ZIO[NotionClient, NotionError, NotionResponse] =
     ZIO.service[NotionClient].flatMap(_.updatePage(pageId, operations))
 
-  def updatePage(page: Page, operations: Page.Patch.Operations): ZIO[NotionClient, NotionError, NotionResponse] =
+  def updatePage(page: Page, operations: Page.Patch.Operations)(implicit trace: Trace): ZIO[NotionClient, NotionError, NotionResponse] =
     ZIO.service[NotionClient].flatMap(_.updatePage(page, operations))
 
-  def updateDatabase(databaseId: String, operations: Database.Patch.StatelessOperations): ZIO[NotionClient, NotionError, NotionResponse] =
+  def updateDatabase(
+      databaseId: String,
+      operations: Database.Patch.StatelessOperations
+  )(implicit trace: Trace): ZIO[NotionClient, NotionError, NotionResponse] =
     ZIO.service[NotionClient].flatMap(_.updateDatabase(databaseId, operations))
 
-  def updateDatabase(database: Database, operations: Database.Patch.Operations): ZIO[NotionClient, NotionError, NotionResponse] =
+  def updateDatabase(
+      database: Database,
+      operations: Database.Patch.Operations
+  )(implicit trace: Trace): ZIO[NotionClient, NotionError, NotionResponse] =
     ZIO.service[NotionClient].flatMap(_.updateDatabase(database, operations))
 
   type NotionResponse = String
@@ -136,34 +152,38 @@ object NotionClient {
         .header("Notion-Version", "2022-02-22")
         .header("Content-Type", "application/json")
 
-    override def retrievePage(pageId: String): IO[NotionError, NotionResponse] =
+    override def retrievePage(pageId: String)(implicit trace: Trace): IO[NotionError, NotionResponse] =
       defaultRequest
         .get(uri"$endpoint/pages/$pageId")
         .handle
 
-    override def retrieveDatabase(databaseId: String): IO[NotionError, NotionResponse] =
+    override def retrieveDatabase(databaseId: String)(implicit trace: Trace): IO[NotionError, NotionResponse] =
       defaultRequest
         .get(uri"$endpoint/databases/$databaseId")
         .handle
 
-    override def retrieveUser(userId: String): IO[NotionError, NotionResponse] =
+    override def retrieveUser(userId: String)(implicit trace: Trace): IO[NotionError, NotionResponse] =
       defaultRequest
         .get(uri"$endpoint/users/$userId")
         .handle
 
-    override def retrieveUsers(pagination: Pagination): IO[NotionError, NotionResponse] =
+    override def retrieveUsers(pagination: Pagination)(implicit trace: Trace): IO[NotionError, NotionResponse] =
       defaultRequest
         .get(uri"$endpoint/users")
         .body(printer.print(pagination.asJson))
         .handle
 
-    override def queryDatabase(databaseId: String, query: Query, pagination: Pagination): IO[NotionError, NotionResponse] =
+    override def queryDatabase(databaseId: String, query: Query, pagination: Pagination)(implicit
+        trace: Trace
+    ): IO[NotionError, NotionResponse] =
       defaultRequest
         .post(uri"$endpoint/databases/$databaseId/query")
         .body(printer.print(query.asJson deepMerge pagination.asJson))
         .handle
 
-    override def updatePage(pageId: String, operations: Page.Patch.StatelessOperations): IO[NotionError, NotionResponse] = {
+    override def updatePage(pageId: String, operations: Page.Patch.StatelessOperations)(implicit
+        trace: Trace
+    ): IO[NotionError, NotionResponse] = {
       val patch = Page.Patch.empty.setOperations(operations)
 
       defaultRequest
@@ -172,7 +192,7 @@ object NotionClient {
         .handle
     }
 
-    override def updatePage(page: Page, operations: Page.Patch.Operations): IO[NotionError, NotionResponse] =
+    override def updatePage(page: Page, operations: Page.Patch.Operations)(implicit trace: Trace): IO[NotionError, NotionResponse] =
       for {
         patch <- ZIO.fromEither(Page.Patch.empty.updateOperations(page, operations))
         response <-
@@ -182,7 +202,9 @@ object NotionClient {
             .handle
       } yield response
 
-    override def updateDatabase(databaseId: String, operations: Database.Patch.StatelessOperations): IO[NotionError, NotionResponse] = {
+    override def updateDatabase(databaseId: String, operations: Database.Patch.StatelessOperations)(implicit
+        trace: Trace
+    ): IO[NotionError, NotionResponse] = {
       val patch = Database.Patch.empty.setOperations(operations)
 
       defaultRequest
@@ -191,7 +213,9 @@ object NotionClient {
         .handle
     }
 
-    override def updateDatabase(database: Database, operations: Database.Patch.Operations): IO[NotionError, NotionResponse] =
+    override def updateDatabase(database: Database, operations: Database.Patch.Operations)(implicit
+        trace: Trace
+    ): IO[NotionError, NotionResponse] =
       for {
         patch <- ZIO.fromEither(Database.Patch.empty.updateOperations(database, operations))
         response <-
@@ -207,7 +231,7 @@ object NotionClient {
         icon: Option[Icon],
         cover: Option[Cover],
         properties: Map[String, PropertySchema]
-    ): IO[NotionError, NotionResponse] = {
+    )(implicit trace: Trace): IO[NotionError, NotionResponse] = {
       val json =
         Json.obj(
           "parent" -> Json.obj(
@@ -231,7 +255,7 @@ object NotionClient {
         properties: Map[String, PatchedProperty],
         icon: Option[Icon],
         cover: Option[Cover]
-    ): IO[NotionError, NotionResponse] = {
+    )(implicit trace: Trace): IO[NotionError, NotionResponse] = {
       val json =
         Json.obj(
           "parent"     -> parent.asJson,
@@ -250,7 +274,7 @@ object NotionClient {
         title: Option[PatchedProperty],
         icon: Option[Icon],
         cover: Option[Cover]
-    ): IO[NotionError, NotionResponse] = {
+    )(implicit trace: Trace): IO[NotionError, NotionResponse] = {
       val json =
         Json.obj(
           "parent"     -> parent.asJson,

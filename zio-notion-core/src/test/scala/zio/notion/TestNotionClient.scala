@@ -149,9 +149,9 @@ final case class TestNotionClient() extends NotionClient {
        |    "url": "https://www.notion.so/Les-num-rations-en-Scala-2-X-1c2d0a80332146419615f345185de05a"
        |}""".stripMargin
 
-  override def retrievePage(pageId: String): IO[NotionError, NotionResponse] = ZIO.succeed(pagePayload(pageId))
+  override def retrievePage(pageId: String)(implicit trace: Trace): IO[NotionError, NotionResponse] = ZIO.succeed(pagePayload(pageId))
 
-  override def retrieveDatabase(databaseId: String): IO[NotionError, NotionResponse] =
+  override def retrieveDatabase(databaseId: String)(implicit trace: Trace): IO[NotionError, NotionResponse] =
     ZIO.succeed(s"""{
                    |    "object": "database",
                    |    "id": "$databaseId",
@@ -315,7 +315,7 @@ final case class TestNotionClient() extends NotionClient {
                    |    "archived": false
                    |}""".stripMargin)
 
-  override def retrieveUser(userId: String): IO[NotionError, NotionResponse] =
+  override def retrieveUser(userId: String)(implicit trace: Trace): IO[NotionError, NotionResponse] =
     ZIO.succeed(s"""{
                    |    "object": "user",
                    |    "id": "$userId",
@@ -327,7 +327,7 @@ final case class TestNotionClient() extends NotionClient {
                    |    }
                    |}""".stripMargin)
 
-  override def retrieveUsers(pagination: Pagination): IO[NotionError, NotionResponse] =
+  override def retrieveUsers(pagination: Pagination)(implicit trace: Trace): IO[NotionError, NotionResponse] =
     ZIO.succeed(
       pagination.startCursor match {
         case Some("a") =>
@@ -345,7 +345,7 @@ final case class TestNotionClient() extends NotionClient {
              |  "next_cursor": null,
              |  "has_more": true
              |}""".stripMargin
-        case None =>
+        case _ =>
           s"""{
              |  "results": [
              |    {
@@ -366,7 +366,11 @@ final case class TestNotionClient() extends NotionClient {
       }
     )
 
-  override def queryDatabase(databaseId: String, query: Query, pagination: Pagination): IO[NotionError, NotionResponse] =
+  override def queryDatabase(
+      databaseId: String,
+      query: Query,
+      pagination: Pagination
+  )(implicit trace: Trace): IO[NotionError, NotionResponse] =
     ZIO.succeed(
       pagination.startCursor match {
         case Some("a") =>
@@ -393,16 +397,23 @@ final case class TestNotionClient() extends NotionClient {
       }
     )
 
-  override def updatePage(pageId: String, operations: Page.Patch.StatelessOperations): IO[NotionError, NotionResponse] =
-    retrievePage(pageId)
+  override def updatePage(
+      pageId: String,
+      operations: Page.Patch.StatelessOperations
+  )(implicit trace: Trace): IO[NotionError, NotionResponse] = retrievePage(pageId)
 
-  override def updatePage(page: Page, operations: Page.Patch.Operations): IO[NotionError, NotionResponse] = retrievePage(page.id)
+  override def updatePage(page: Page, operations: Page.Patch.Operations)(implicit trace: Trace): IO[NotionError, NotionResponse] =
+    retrievePage(page.id)
 
-  override def updateDatabase(databaseId: String, operations: Database.Patch.StatelessOperations): IO[NotionError, NotionResponse] =
-    retrieveDatabase(databaseId)
+  override def updateDatabase(
+      databaseId: String,
+      operations: Database.Patch.StatelessOperations
+  )(implicit trace: Trace): IO[NotionError, NotionResponse] = retrieveDatabase(databaseId)
 
-  override def updateDatabase(database: Database, operations: Database.Patch.Operations): IO[NotionError, NotionResponse] =
-    retrieveDatabase(database.id)
+  override def updateDatabase(
+      database: Database,
+      operations: Database.Patch.Operations
+  )(implicit trace: Trace): IO[NotionError, NotionResponse] = retrieveDatabase(database.id)
 
   override def createDatabase(
       pageId: String,
@@ -410,14 +421,14 @@ final case class TestNotionClient() extends NotionClient {
       icon: Option[Icon],
       cover: Option[Cover],
       properties: Map[String, PatchedPropertyDefinition.PropertySchema]
-  ): IO[NotionError, NotionResponse] = retrieveDatabase(fakeUUID)
+  )(implicit trace: Trace): IO[NotionError, NotionResponse] = retrieveDatabase(fakeUUID)
 
   override def createPageInPage(
       parent: PageId,
       title: Option[PatchedProperty],
       icon: Option[Icon],
       cover: Option[Cover]
-  ): IO[NotionError, NotionResponse] =
+  )(implicit trace: Trace): IO[NotionError, NotionResponse] =
     ZIO.succeed(s"""
                    |{
                    |    "object": "page",
@@ -473,7 +484,7 @@ final case class TestNotionClient() extends NotionClient {
       properties: Map[String, PatchedProperty],
       icon: Option[Icon],
       cover: Option[Cover]
-  ): IO[NotionError, NotionResponse] =
+  )(implicit trace: Trace): IO[NotionError, NotionResponse] =
     ZIO.succeed(s"""
                    |{
                    |    "object": "page",
