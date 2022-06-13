@@ -92,6 +92,21 @@ object PropertySpec extends ZIOSpecDefault {
 
         assert(decode[Property](json))(isRight(equalTo(expected)))
       },
+      test("We should be able to convert a datetime property into a date property") {
+        val source =
+          DateTime(
+            id   = fakeUUID,
+            date = Some(DateTimeData(fakeDatetime.withOffsetSameInstant(ZoneOffset.ofHours(2)), None, None))
+          )
+
+        val expected =
+          Date(
+            id   = fakeUUID,
+            date = Some(DateData(fakeDate, None))
+          )
+
+        assertTrue(source.toDateProperty == expected)
+      },
       test("We should be able to parse a title object as json containing mention") {
         val json: String =
           s"""{
