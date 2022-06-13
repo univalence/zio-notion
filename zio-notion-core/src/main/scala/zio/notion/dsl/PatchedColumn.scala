@@ -2,12 +2,14 @@ package zio.notion.dsl
 
 import zio.Clock
 import zio.notion.NotionError
+import zio.notion.model.common.Id
 import zio.notion.model.common.enumeration.Color
 import zio.notion.model.common.richtext.{Annotations, RichTextData}
 import zio.notion.model.page.Page.Patch.Operations.Operation._
 import zio.notion.model.page.PatchedProperty._
 import zio.notion.model.page.property.Link
 import zio.notion.model.user.User
+import zio.notion.model.user.User.Hidden
 
 import java.time.{LocalDate, OffsetDateTime}
 
@@ -137,13 +139,17 @@ object PatchedColumn {
   }
 
   final case class PatchedColumnPeople(columnName: String) {
-    def set(people: Seq[User]): SetProperty = SetProperty(columnName, PatchedPeople(people))
+    def set(people: Seq[User]): SetProperty                           = SetProperty(columnName, PatchedPeople(people))
+    def set(ids: Seq[String])(implicit d: DummyImplicit): SetProperty = set(ids.map(Hidden.apply))
 
     def update(f: Seq[User] => Seq[User]): UpdateProperty =
       UpdateProperty.succeed[PatchedPeople](columnName, property => property.copy(people = f(property.people)))
 
-    def add(people: Seq[User]): UpdateProperty = update(_ ++ people)
-    def add(people: User): UpdateProperty      = add(List(people))
+    def add(people: Seq[User]): UpdateProperty                           = update(_ ++ people)
+    def add(people: User): UpdateProperty                                = add(List(people))
+    def add(ids: Seq[String])(implicit d: DummyImplicit): UpdateProperty = add(ids.map(Hidden.apply))
+    def add(id: String)(implicit d: DummyImplicit): UpdateProperty       = add(List(id))
+
   }
 
   final case class PatchedColumnFiles(columnName: String) {
@@ -173,5 +179,18 @@ object PatchedColumn {
 
     def update(f: String => String): UpdateProperty =
       UpdateProperty.succeed[PatchedPhoneNumber](columnName, property => property.copy(phoneNumber = f(property.phoneNumber)))
+  }
+
+  final case class PatchedColumnRelation(columnName: String) {
+    def set(relation: Seq[Id]): SetProperty                                = SetProperty(columnName, PatchedRelation(relation))
+    def set(relation: Seq[String])(implicit d: DummyImplicit): SetProperty = set(relation.map(Id.apply))
+
+    def update(f: Seq[Id] => Seq[Id]): UpdateProperty =
+      UpdateProperty.succeed[PatchedRelation](columnName, property => property.copy(relation = f(property.relation)))
+
+    def add(notionIds: Seq[Id]): UpdateProperty                          = update(_ ++ notionIds)
+    def add(notionId: Id): UpdateProperty                                = add(List(notionId))
+    def add(ids: Seq[String])(implicit d: DummyImplicit): UpdateProperty = add(ids.map(Id.apply))
+    def add(id: String)(implicit d: DummyImplicit): UpdateProperty       = add(List(id))
   }
 }

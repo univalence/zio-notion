@@ -345,7 +345,7 @@ final case class TestNotionClient() extends NotionClient {
              |  "next_cursor": null,
              |  "has_more": true
              |}""".stripMargin
-        case None =>
+        case _ =>
           s"""{
              |  "results": [
              |    {
