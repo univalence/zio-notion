@@ -4,7 +4,7 @@ import zio.{Scope, ZIO}
 import zio.notion.Faker._
 import zio.notion.Faker.FakePatchedProperty.{fakePatchedNumber, fakePatchedTitle}
 import zio.notion.dsl._
-import zio.notion.model.common.Parent.Workspace.StringOps
+import zio.notion.model.common.Parent.StringOps
 import zio.notion.model.database.{Database, DatabaseQuery}
 import zio.notion.model.database.query.Query
 import zio.notion.model.page.Page
