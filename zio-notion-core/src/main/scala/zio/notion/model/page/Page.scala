@@ -31,6 +31,13 @@ final case class Page(
     properties:     Map[String, Property],
     url:            String
 ) {
+
+  /**
+   * Convert the properties of a Page into a particular case class.
+   *
+   * It uses Magnolia to automatically implement a converter for your
+   * case class and it supports optional values.
+   */
   def propertiesAs[A](implicit A: Converter[A]): Validation[ParsingError, A] = decodePropertiesAs[A](properties)
 }
 
