@@ -26,7 +26,7 @@ object RetrievePage extends ZIOAppDefault {
       }
   }
 
-  case class Row(title: Seq[RichTextFragment], @NotionColumn("Age") age: Int, sex: Sex)
+  final case class Row(title: Seq[RichTextFragment], @NotionColumn("Age") age: Int, sex: Sex)
 
   def example: ZIO[Notion, NotionError, Unit] =
     for {
