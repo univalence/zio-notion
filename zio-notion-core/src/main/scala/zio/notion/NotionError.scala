@@ -36,4 +36,34 @@ object NotionError {
   final case class PropertyIsEmpty(propertyName: String) extends NotionError {
     override def humanize: String = s"Property $propertyName can't be updated because is is empty."
   }
+
+  final case class ParsingError(field: String, error: PropertyConverterError) extends NotionError {
+    override def humanize: String = s"We can't parse $field because ${error.humanize}."
+  }
+
+  sealed trait PropertyConverterError extends NotionError
+
+  object PropertyConverterError {
+
+    final case class NotParsableError(stype: String) extends PropertyConverterError {
+      override def humanize: String = s"the field is not parsable into a $stype"
+    }
+
+    final case class EnumerationError(value: String, stype: String) extends PropertyConverterError {
+      override def humanize: String = s"the select $value is not parsable into a $stype"
+    }
+
+    final case object NotExistError extends PropertyConverterError {
+      override def humanize: String = s"the field does not exist"
+    }
+
+    final case object RequiredError extends PropertyConverterError {
+      override def humanize: String = s"the field is mandatory"
+    }
+
+    final case object NestedError extends PropertyConverterError {
+      override def humanize: String = s"the field is a nested class"
+    }
+
+  }
 }

@@ -6,7 +6,7 @@ import zio.{Scope, UIO}
 import zio.notion.Faker._
 import zio.notion.model.common.{richtext, Id, Url}
 import zio.notion.model.common.enumeration.Color
-import zio.notion.model.common.richtext.RichTextData
+import zio.notion.model.common.richtext.RichTextFragment
 import zio.notion.model.page.Page.Patch.Operations.Operation._
 import zio.notion.model.page.PatchedProperty
 import zio.notion.model.page.PatchedProperty._
@@ -58,9 +58,9 @@ object PatchedColumnSpec extends ZIOSpecDefault {
 
     def files: Seq[Link] = patchedProperty.asInstanceOf[PatchedFiles].files
 
-    def title: Seq[RichTextData] = patchedProperty.asInstanceOf[PatchedTitle].title
+    def title: Seq[RichTextFragment] = patchedProperty.asInstanceOf[PatchedTitle].title
 
-    def richText: Seq[RichTextData] = patchedProperty.asInstanceOf[PatchedRichText].richText
+    def richText: Seq[RichTextFragment] = patchedProperty.asInstanceOf[PatchedRichText].richText
 
     def people: Seq[User] = patchedProperty.asInstanceOf[PatchedPeople].people
 
@@ -319,14 +319,14 @@ object PatchedColumnSpec extends ZIOSpecDefault {
       test("We can set a new title") {
         val patch: SetProperty = $"col".asTitle.patch.set("Title")
 
-        assertTrue(patch.value.title.head.asInstanceOf[RichTextData.Text].plainText == "Title")
+        assertTrue(patch.value.title.head.asInstanceOf[RichTextFragment.Text].plainText == "Title")
       },
       test("We can capitalize a title") {
         val patch: UpdateProperty = $"col".asTitle.patch.capitalize
 
-        val source = PatchedTitle(List(RichTextData.default("title", richtext.Annotations.default)))
+        val source = PatchedTitle(List(RichTextFragment.default("title", richtext.Annotations.default)))
 
-        assertTrue(patch.test(source).map(_.title.head.asInstanceOf[RichTextData.Text].plainText) == Option("Title"))
+        assertTrue(patch.test(source).map(_.title.head.asInstanceOf[RichTextFragment.Text].plainText) == Option("Title"))
       }
     )
 
@@ -336,8 +336,8 @@ object PatchedColumnSpec extends ZIOSpecDefault {
         val default: PatchedRichText =
           PatchedRichText(
             List(
-              RichTextData.Text(
-                RichTextData.Text.TextData("This is a content", None),
+              RichTextFragment.Text(
+                RichTextFragment.Text.TextData("This is a content", None),
                 richtext.Annotations.default,
                 "This is a content",
                 None
@@ -346,7 +346,7 @@ object PatchedColumnSpec extends ZIOSpecDefault {
           )
 
         assertTrue(
-          patch.test(default).map(_.richText.map(_.asInstanceOf[RichTextData.Text].annotations).forall(expected)) == Option(true)
+          patch.test(default).map(_.richText.map(_.asInstanceOf[RichTextFragment.Text].annotations).forall(expected)) == Option(true)
         )
       }
 
@@ -354,7 +354,7 @@ object PatchedColumnSpec extends ZIOSpecDefault {
       test("We can write a new rich text") {
         val patch: SetProperty = $"col".asRichText.patch.write("A new content")
 
-        assertTrue(patch.value.richText.headOption.map(_.asInstanceOf[RichTextData.Text].plainText).contains("A new content"))
+        assertTrue(patch.value.richText.headOption.map(_.asInstanceOf[RichTextFragment.Text].plainText).contains("A new content"))
       },
       testAnnotation("reset", $"col".asRichText.patch.reset, _ == richtext.Annotations.default),
       testAnnotation("bold", $"col".asRichText.patch.bold, _.bold),
@@ -526,7 +526,7 @@ object PatchedColumnSpec extends ZIOSpecDefault {
         assertTrue(printer.print(property.asJson) == expected)
       },
       test("PatchedTitle encoding") {
-        val property: PatchedTitle = PatchedTitle(List(RichTextData.default("Title", richtext.Annotations.default)))
+        val property: PatchedTitle = PatchedTitle(List(RichTextFragment.default("Title", richtext.Annotations.default)))
 
         val expected: String =
           s"""{
@@ -557,8 +557,8 @@ object PatchedColumnSpec extends ZIOSpecDefault {
         val property: PatchedRichText =
           PatchedRichText(
             List(
-              RichTextData.Text(
-                RichTextData.Text.TextData("This is a content", None),
+              RichTextFragment.Text(
+                RichTextFragment.Text.TextData("This is a content", None),
                 richtext.Annotations.default,
                 "This is a content",
                 None

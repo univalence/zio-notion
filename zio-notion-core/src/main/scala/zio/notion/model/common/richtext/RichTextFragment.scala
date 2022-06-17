@@ -5,19 +5,37 @@ import io.circe.Decoder.Result
 import io.circe.generic.extras._
 import io.circe.syntax.EncoderOps
 
-import zio.notion.model.common.{Id, Url}
-import zio.notion.model.page.property.data.{DateData, DateTimeData}
+import zio.notion.model.common.{Id, Period, TimePeriod, Url}
+import zio.notion.model.common.richtext.RichTextFragment.{Equation, Mention, Text}
+import zio.notion.model.common.richtext.RichTextFragment.Mention.MentionData
 
-@ConfiguredJsonCodec sealed trait RichTextData
+@ConfiguredJsonCodec sealed trait RichTextFragment { self =>
 
-object RichTextData {
+  override def toString: String =
+    self match {
+      case Text(_, _, plainText, _) => plainText
+      case Mention(mention, _, plainText, href) =>
+        mention match {
+          case MentionData.User(_)            => plainText
+          case MentionData.LinkPreview(_)     => href.get // scalafix:ok
+          case MentionData.Page(_)            => href.get // scalafix:ok
+          case MentionData.Database(_)        => href.get // scalafix:ok
+          case MentionData.Date(date)         => date.toString()
+          case MentionData.DateTime(date)     => date.toString()
+          case MentionData.TemplateMention(_) => href.get // scalafix:ok
+        }
+      case Equation(_, _, plainText, _) => plainText
+    }
+}
+
+object RichTextFragment {
 
   final case class Text(
       text:        Text.TextData,
       annotations: Annotations,
       plainText:   String,
       href:        Option[String]
-  ) extends RichTextData
+  ) extends RichTextFragment
 
   object Text {
     @ConfiguredJsonCodec final case class TextData(content: String, link: Option[Url])
@@ -28,7 +46,7 @@ object RichTextData {
       annotations: Annotations,
       plainText:   String,
       href:        Option[String]
-  ) extends RichTextData
+  ) extends RichTextFragment
 
   object Mention {
     sealed trait MentionData
@@ -38,8 +56,8 @@ object RichTextData {
       @ConfiguredJsonCodec final case class LinkPreview(linkPreview: Url)                          extends MentionData
       @ConfiguredJsonCodec final case class Page(page: Id)                                         extends MentionData
       @ConfiguredJsonCodec final case class Database(database: Id)                                 extends MentionData
-      @ConfiguredJsonCodec final case class Date(date: DateData)                                   extends MentionData
-      @ConfiguredJsonCodec final case class DateTime(date: DateTimeData)                           extends MentionData
+      @ConfiguredJsonCodec final case class Date(date: Period)                                     extends MentionData
+      @ConfiguredJsonCodec final case class DateTime(date: TimePeriod)                             extends MentionData
       @ConfiguredJsonCodec final case class TemplateMention(templateMention: TemplateMention.Data) extends MentionData
 
       object TemplateMention {
@@ -88,12 +106,12 @@ object RichTextData {
       annotations: Annotations,
       plainText:   String,
       href:        Option[String]
-  ) extends RichTextData
+  ) extends RichTextFragment
 
   object Equation {
     @ConfiguredJsonCodec final case class Expression(expression: String)
   }
 
   def default(text: String, annotations: Annotations): Text =
-    RichTextData.Text(RichTextData.Text.TextData(text, None), annotations, text, None)
+    RichTextFragment.Text(RichTextFragment.Text.TextData(text, None), annotations, text, None)
 }

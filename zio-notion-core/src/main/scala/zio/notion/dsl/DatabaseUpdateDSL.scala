@@ -1,7 +1,7 @@
 package zio.notion.dsl
 
 import zio.notion.model.common.enumeration.Color
-import zio.notion.model.common.richtext.{Annotations, RichTextData}
+import zio.notion.model.common.richtext.{Annotations, RichTextFragment}
 import zio.notion.model.database.Database.Patch.Operations.Operation
 import zio.notion.model.database.Database.Patch.Operations.Operation._
 import zio.notion.model.database.PatchedPropertyDefinition.PropertySchema
@@ -9,9 +9,9 @@ import zio.notion.model.database.PatchedPropertyDefinition.PropertySchema.Select
 import zio.notion.model.database.metadata.NumberMetadata.NumberFormat
 
 trait DatabaseUpdateDSL {
-  def setDatabaseTitle(title: Seq[RichTextData]): Operation.Stateless = SetTitle(title)
-  def setDatabaseTitle(title: String): Operation.Stateless = setDatabaseTitle(List(RichTextData.default(title, Annotations.default)))
-  def renameDatabase(f: Seq[RichTextData] => Seq[RichTextData]): Operation.Stateful = UpdateTitle(f)
+  def setDatabaseTitle(title: Seq[RichTextFragment]): Operation.Stateless = SetTitle(title)
+  def setDatabaseTitle(title: String): Operation.Stateless = setDatabaseTitle(List(RichTextFragment.default(title, Annotations.default)))
+  def renameDatabase(f: Seq[RichTextFragment] => Seq[RichTextFragment]): Operation.Stateful = UpdateTitle(f)
 
   implicit def selectOptionConversion(string: String): SelectOption = SelectOption(string, None)
 

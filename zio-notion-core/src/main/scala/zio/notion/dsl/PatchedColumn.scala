@@ -4,7 +4,7 @@ import zio.Clock
 import zio.notion.NotionError
 import zio.notion.model.common.Id
 import zio.notion.model.common.enumeration.Color
-import zio.notion.model.common.richtext.{Annotations, RichTextData}
+import zio.notion.model.common.richtext.{Annotations, RichTextFragment}
 import zio.notion.model.page.Page.Patch.Operations.Operation._
 import zio.notion.model.page.PatchedProperty._
 import zio.notion.model.page.property.Link
@@ -16,34 +16,34 @@ import java.time.{LocalDate, OffsetDateTime}
 object PatchedColumn {
 
   final case class PatchedColumnTitle(columnName: String) extends {
-    def set(title: Seq[RichTextData.Text]): SetProperty = SetProperty(columnName, PatchedTitle(title))
-    def set(title: String): SetProperty                 = set(Seq(RichTextData.default(title, Annotations.default)))
+    def set(title: Seq[RichTextFragment.Text]): SetProperty = SetProperty(columnName, PatchedTitle(title))
+    def set(title: String): SetProperty                     = set(Seq(RichTextFragment.default(title, Annotations.default)))
 
-    def update(f: Seq[RichTextData] => Seq[RichTextData]): UpdateProperty =
+    def update(f: Seq[RichTextFragment] => Seq[RichTextFragment]): UpdateProperty =
       UpdateProperty.succeed[PatchedTitle](columnName, property => property.copy(title = f(property.title)))
 
     def capitalize: UpdateProperty =
       update(_.map {
-        case d: RichTextData.Text => d.copy(text = d.text.copy(content = d.text.content.capitalize), plainText = d.plainText.capitalize)
-        case d                    => d
+        case d: RichTextFragment.Text => d.copy(text = d.text.copy(content = d.text.content.capitalize), plainText = d.plainText.capitalize)
+        case d                        => d
       })
   }
 
   final case class PatchedColumnRichText(columnName: String) {
-    def set(title: Seq[RichTextData.Text]): SetProperty = SetProperty(columnName, PatchedRichText(title))
-    def set(title: String): SetProperty                 = set(Seq(RichTextData.default(title, Annotations.default)))
+    def set(title: Seq[RichTextFragment.Text]): SetProperty = SetProperty(columnName, PatchedRichText(title))
+    def set(title: String): SetProperty                     = set(Seq(RichTextFragment.default(title, Annotations.default)))
 
-    def update(f: Seq[RichTextData] => Seq[RichTextData]): UpdateProperty =
+    def update(f: Seq[RichTextFragment] => Seq[RichTextFragment]): UpdateProperty =
       UpdateProperty.succeed[PatchedRichText](columnName, property => property.copy(richText = f(property.richText)))
 
     def write(text: String, annotations: Annotations = Annotations.default): SetProperty =
-      set(List(RichTextData.default(text, annotations)))
+      set(List(RichTextFragment.default(text, annotations)))
 
     def annotate(f: Annotations => Annotations): UpdateProperty =
       update(_.map {
-        case d: RichTextData.Text     => d.copy(annotations = f(d.annotations))
-        case d: RichTextData.Mention  => d.copy(annotations = f(d.annotations))
-        case d: RichTextData.Equation => d.copy(annotations = f(d.annotations))
+        case d: RichTextFragment.Text     => d.copy(annotations = f(d.annotations))
+        case d: RichTextFragment.Mention  => d.copy(annotations = f(d.annotations))
+        case d: RichTextFragment.Equation => d.copy(annotations = f(d.annotations))
       })
 
     def reset: UpdateProperty               = annotate(_ => Annotations.default)

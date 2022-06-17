@@ -5,12 +5,14 @@ import io.circe.Decoder.Result
 import io.circe.generic.extras.ConfiguredJsonCodec
 import io.circe.syntax.EncoderOps
 
+import zio.notion.model.common.{Period, TimePeriod}
+
 sealed trait FormulaData
 
 object FormulaData {
   @ConfiguredJsonCodec final case class String(string: Option[Predef.String])   extends FormulaData
-  @ConfiguredJsonCodec final case class Date(date: Option[DateData])            extends FormulaData
-  @ConfiguredJsonCodec final case class DateTime(date: Option[DateTimeData])    extends FormulaData
+  @ConfiguredJsonCodec final case class Date(date: Option[Period])              extends FormulaData
+  @ConfiguredJsonCodec final case class DateTime(date: Option[TimePeriod])      extends FormulaData
   @ConfiguredJsonCodec final case class Number(number: Option[Double])          extends FormulaData
   @ConfiguredJsonCodec final case class Boolean(boolean: Option[scala.Boolean]) extends FormulaData
 

@@ -10,7 +10,7 @@ import zio.notion.NotionError.JsonError
 import zio.notion.dsl._
 import zio.notion.model.common.{Cover, Icon}
 import zio.notion.model.common.Parent.{DatabaseId, PageId}
-import zio.notion.model.common.richtext.RichTextData
+import zio.notion.model.common.richtext.RichTextFragment
 import zio.notion.model.database.{Database, DatabaseQuery}
 import zio.notion.model.database.PatchedPropertyDefinition.PropertySchema
 import zio.notion.model.database.query.Query
@@ -41,7 +41,7 @@ sealed trait Notion {
 
   def createDatabase(
       pageId: String,
-      title: Seq[RichTextData],
+      title: Seq[RichTextFragment],
       icon: Option[Icon],
       cover: Option[Cover],
       properties: Map[String, PropertySchema]
@@ -219,7 +219,7 @@ object Notion {
 
   def createDatabase(
       pageId: String,
-      title: Seq[RichTextData],
+      title: Seq[RichTextFragment],
       icon: Option[Icon],
       cover: Option[Cover],
       properties: Map[String, PropertySchema]
@@ -286,7 +286,7 @@ object Notion {
 
     override def createDatabase(
         pageId: String,
-        title: Seq[RichTextData],
+        title: Seq[RichTextFragment],
         icon: Option[Icon],
         cover: Option[Cover],
         properties: Map[String, PropertySchema]
