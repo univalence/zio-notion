@@ -3,13 +3,15 @@ package zio.notion.model.page
 import io.circe.Encoder
 import io.circe.generic.extras.ConfiguredJsonCodec
 
-import zio.notion.{NotionError, Removable}
+import zio.notion.{decodePropertiesAs, Converter, NotionError, Removable}
+import zio.notion.NotionError.ParsingError
 import zio.notion.Removable.{Ignore, Keep, Remove}
 import zio.notion.model.common.{Cover, Icon, Id, Parent}
 import zio.notion.model.magnolia.PatchEncoderDerivation
 import zio.notion.model.page.Page.Patch.{Operations, StatelessOperations}
 import zio.notion.model.page.Page.Patch.Operations.Operation
 import zio.notion.model.page.Page.Patch.Operations.Operation.UpdateProperty.Transform.{Compute, IgnoreEmpty}
+import zio.prelude.Validation
 
 import scala.reflect.ClassTag
 
@@ -28,7 +30,9 @@ final case class Page(
     archived:       Boolean,
     properties:     Map[String, Property],
     url:            String
-)
+) {
+  def propertiesAs[A](implicit A: Converter[A]): Validation[ParsingError, A] = decodePropertiesAs[A](properties)
+}
 
 object Page {
 

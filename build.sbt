@@ -71,6 +71,7 @@ addCommandAlias("testSpecificWithCoverage", "; clean; coverage; test; coverageRe
 
 // -- Lib versions
 val zio          = "2.0.0-RC6"
+val zioPrelude   = "1.0.0-RC14"
 val circe        = "0.14.2"
 val sttp         = "3.6.2"
 val magnolia     = "1.1.2"
@@ -86,6 +87,7 @@ lazy val core =
         "com.softwaremill.sttp.client3" %% "async-http-client-backend-zio" % sttp,
         "com.softwaremill.sttp.client3" %% "core"                          % sttp,
         "dev.zio"                       %% "zio"                           % zio,
+        "dev.zio"                       %% "zio-prelude"                   % zioPrelude,
         "io.circe"                      %% "circe-core"                    % circe,
         "io.circe"                      %% "circe-parser"                  % circe,
         "io.circe"                      %% "circe-generic"                 % circe,

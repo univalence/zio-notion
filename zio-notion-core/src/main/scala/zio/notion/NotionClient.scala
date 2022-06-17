@@ -13,7 +13,7 @@ import zio.notion.NotionClient.NotionResponse
 import zio.notion.NotionError._
 import zio.notion.model.common.{Cover, Icon}
 import zio.notion.model.common.Parent.{DatabaseId, PageId}
-import zio.notion.model.common.richtext.RichTextData
+import zio.notion.model.common.richtext.RichTextFragment
 import zio.notion.model.database.Database
 import zio.notion.model.database.PatchedPropertyDefinition.PropertySchema
 import zio.notion.model.database.query.Query
@@ -39,7 +39,7 @@ trait NotionClient {
 
   def createDatabase(
       pageId: String,
-      title: Seq[RichTextData],
+      title: Seq[RichTextFragment],
       icon: Option[Icon],
       cover: Option[Cover],
       properties: Map[String, PropertySchema]
@@ -227,7 +227,7 @@ object NotionClient {
 
     override def createDatabase(
         pageId: String,
-        title: Seq[RichTextData],
+        title: Seq[RichTextFragment],
         icon: Option[Icon],
         cover: Option[Cover],
         properties: Map[String, PropertySchema]

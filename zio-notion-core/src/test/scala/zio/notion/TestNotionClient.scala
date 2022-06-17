@@ -5,7 +5,7 @@ import zio.notion.Faker._
 import zio.notion.NotionClient.NotionResponse
 import zio.notion.model.common.{Cover, Icon, Parent}
 import zio.notion.model.common.Parent.PageId
-import zio.notion.model.common.richtext.RichTextData
+import zio.notion.model.common.richtext.RichTextFragment
 import zio.notion.model.database.{Database, PatchedPropertyDefinition}
 import zio.notion.model.database.query.Query
 import zio.notion.model.page.{Page, PatchedProperty}
@@ -417,7 +417,7 @@ final case class TestNotionClient() extends NotionClient {
 
   override def createDatabase(
       pageId: String,
-      title: Seq[RichTextData],
+      title: Seq[RichTextFragment],
       icon: Option[Icon],
       cover: Option[Cover],
       properties: Map[String, PatchedPropertyDefinition.PropertySchema]

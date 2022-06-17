@@ -5,8 +5,15 @@ import io.circe.Decoder.Result
 import io.circe.generic.extras.ConfiguredJsonCodec
 import io.circe.syntax.EncoderOps
 
-sealed trait User {
+sealed trait User { self =>
   def id: String
+
+  override def toString: String =
+    self match {
+      case User.Hidden(id)                  => id
+      case User.Person(id, name, _, person) => name.orElse(person.email).getOrElse(id)
+      case User.Bot(id, name, _, _)         => name.getOrElse(id)
+    }
 }
 
 object User {

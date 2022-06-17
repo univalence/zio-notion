@@ -6,7 +6,7 @@ import io.circe.generic.extras.ConfiguredJsonCodec
 import zio.notion.NotionError
 import zio.notion.NotionError.PropertyNotExist
 import zio.notion.model.common.{Cover, Icon, Id, Parent}
-import zio.notion.model.common.richtext.RichTextData
+import zio.notion.model.common.richtext.RichTextFragment
 import zio.notion.model.database.Database.Patch.{Operations, StatelessOperations}
 import zio.notion.model.database.Database.Patch.Operations.Operation
 import zio.notion.model.database.PatchedPropertyDefinition.PropertySchema
@@ -21,7 +21,7 @@ final case class Database(
     createdBy:      Id,
     lastEditedBy:   Id,
     id:             String,
-    title:          Seq[RichTextData],
+    title:          Seq[RichTextFragment],
     cover:          Option[Cover],
     icon:           Option[Icon],
     parent:         Parent,
@@ -33,7 +33,7 @@ final case class Database(
 object Database {
 
   final case class Patch(
-      title:      Option[Seq[RichTextData]],
+      title:      Option[Seq[RichTextFragment]],
       properties: Map[String, Option[PatchedPropertyDefinition]]
   ) { self =>
 
@@ -55,7 +55,7 @@ object Database {
         case stateful: Operation.Stateful =>
           stateful match {
             case Operation.UpdateTitle(f) =>
-              val oldTitle: Seq[RichTextData] = title.getOrElse(database.title)
+              val oldTitle: Seq[RichTextFragment] = title.getOrElse(database.title)
               Right(copy(title = Some(f(oldTitle))))
             case Operation.UpdateColumn(name, update) =>
               database.properties.get(name) match {
@@ -101,10 +101,10 @@ object Database {
           def ++(operation: Operation): Operations = Operations(List(self, operation))
         }
         final case class RemoveColumn(name: String)                         extends Stateless
-        final case class SetTitle(title: Seq[RichTextData])                 extends Stateless
+        final case class SetTitle(title: Seq[RichTextFragment])             extends Stateless
         final case class CreateColumn(name: String, schema: PropertySchema) extends Stateless
 
-        final case class UpdateTitle(f: Seq[RichTextData] => Seq[RichTextData]) extends Stateful
+        final case class UpdateTitle(f: Seq[RichTextFragment] => Seq[RichTextFragment]) extends Stateful
 
         final case class UpdateColumn(name: String, update: PatchedPropertyDefinition) extends Stateful {
           def rename(name: String): UpdateColumn = copy(update = update.copy(name = Some(name)))

@@ -4,6 +4,7 @@ import io.circe.parser.decode
 
 import zio.Scope
 import zio.notion.Faker.{fakeDate, fakeDatetime}
+import zio.notion.model.common.{Period, TimePeriod}
 import zio.notion.model.page.property.data.FormulaData.Number
 import zio.test._
 import zio.test.Assertion._
@@ -34,7 +35,7 @@ object FormulaDataSpec extends ZIOSpecDefault {
              |    }
              |}""".stripMargin
 
-        val expected: FormulaData.Date = FormulaData.Date(date = Some(DateData(start = fakeDate, None)))
+        val expected: FormulaData.Date = FormulaData.Date(date = Some(Period(start = fakeDate, None)))
 
         assertTrue(decode[FormulaData](json) == Right(expected))
       },
@@ -49,7 +50,7 @@ object FormulaDataSpec extends ZIOSpecDefault {
              |    }
              |}""".stripMargin
 
-        val expected: FormulaData.DateTime = FormulaData.DateTime(date = Some(DateTimeData(start = fakeDatetime, None, None)))
+        val expected: FormulaData.DateTime = FormulaData.DateTime(date = Some(TimePeriod(start = fakeDatetime, None, None)))
 
         assertTrue(decode[FormulaData](json) == Right(expected))
       },

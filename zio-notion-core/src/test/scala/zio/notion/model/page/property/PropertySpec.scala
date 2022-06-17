@@ -4,13 +4,14 @@ import io.circe.parser.decode
 
 import zio.Scope
 import zio.notion.Faker._
-import zio.notion.model.common.{richtext, Id}
+import zio.notion.model.common
+import zio.notion.model.common.{richtext, Id, Period, TimePeriod}
 import zio.notion.model.common.enumeration.RollupFunction.Count
-import zio.notion.model.common.richtext.RichTextData
-import zio.notion.model.common.richtext.RichTextData.Mention.MentionData
+import zio.notion.model.common.richtext.RichTextFragment
+import zio.notion.model.common.richtext.RichTextFragment.Mention.MentionData
 import zio.notion.model.page.Property
 import zio.notion.model.page.Property._
-import zio.notion.model.page.property.data.{DateData, DateTimeData, RollupData}
+import zio.notion.model.page.property.data.RollupData
 import zio.test._
 import zio.test.Assertion._
 
@@ -67,7 +68,7 @@ object PropertySpec extends ZIOSpecDefault {
         val expected =
           Date(
             id   = fakeUUID,
-            date = Some(DateData(fakeDate, None))
+            date = Some(Period(fakeDate, None))
           )
 
         assert(decode[Property](json))(isRight(equalTo(expected)))
@@ -87,7 +88,7 @@ object PropertySpec extends ZIOSpecDefault {
         val expected =
           DateTime(
             id   = fakeUUID,
-            date = Some(DateTimeData(fakeDatetime.withOffsetSameInstant(ZoneOffset.ofHours(2)), None, None))
+            date = Some(TimePeriod(fakeDatetime.withOffsetSameInstant(ZoneOffset.ofHours(2)), None, None))
           )
 
         assert(decode[Property](json))(isRight(equalTo(expected)))
@@ -96,13 +97,13 @@ object PropertySpec extends ZIOSpecDefault {
         val source =
           DateTime(
             id   = fakeUUID,
-            date = Some(DateTimeData(fakeDatetime.withOffsetSameInstant(ZoneOffset.ofHours(2)), None, None))
+            date = Some(common.TimePeriod(fakeDatetime.withOffsetSameInstant(ZoneOffset.ofHours(2)), None, None))
           )
 
         val expected =
           Date(
             id   = fakeUUID,
-            date = Some(DateData(fakeDate, None))
+            date = Some(common.Period(fakeDate, None))
           )
 
         assertTrue(source.toDateProperty == expected)
@@ -142,8 +143,8 @@ object PropertySpec extends ZIOSpecDefault {
             id = fakeUUID,
             title =
               List(
-                RichTextData.Mention(
-                  mention     = MentionData.DateTime(DateTimeData(fakeDatetime, None, None)),
+                RichTextFragment.Mention(
+                  mention     = MentionData.DateTime(common.TimePeriod(fakeDatetime, None, None)),
                   annotations = richtext.Annotations.default,
                   plainText   = "Untitled",
                   href        = Some("https://www.notion.so/46cec14b98f44f2bb3135fe3a1a40a88")

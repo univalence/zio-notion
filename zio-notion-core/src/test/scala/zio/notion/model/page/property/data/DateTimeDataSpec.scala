@@ -4,6 +4,8 @@ import io.circe.parser.decode
 
 import zio.Scope
 import zio.notion.Faker._
+import zio.notion.model.common
+import zio.notion.model.common.TimePeriod
 import zio.test._
 import zio.test.Assertion._
 
@@ -19,9 +21,9 @@ object DateTimeDataSpec extends ZIOSpecDefault {
              |    "time_zone": null
              |}""".stripMargin
 
-        val expected: DateTimeData = DateTimeData(start = fakeDatetime, end = None, timeZone = None)
+        val expected: TimePeriod = common.TimePeriod(start = fakeDatetime, end = None, timeZone = None)
 
-        assert(decode[DateTimeData](json))(isRight(equalTo(expected)))
+        assert(decode[TimePeriod](json))(isRight(equalTo(expected)))
       }
     )
 }

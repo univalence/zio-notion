@@ -2,7 +2,7 @@ package zio.notion
 
 import zio.notion.Faker.FakeProperty.{fakeCheckbox, fakeTitle}
 import zio.notion.model.common.{Id, Parent}
-import zio.notion.model.common.richtext.{Annotations, RichTextData}
+import zio.notion.model.common.richtext.{Annotations, RichTextFragment}
 import zio.notion.model.database.{Database, PropertyDefinition}
 import zio.notion.model.database.PatchedPropertyDefinition.PropertySchema
 import zio.notion.model.page.Page
@@ -28,7 +28,7 @@ object Faker {
 
   val fakeDatetime: OffsetDateTime = fakeDate.atTime(OffsetTime.of(15, 10, 0, 0, ZoneOffset.UTC))
 
-  val fakePage: Page =
+  val emptyPage: Page =
     Page(
       createdTime    = fakeDatetime,
       lastEditedTime = fakeDatetime,
@@ -39,9 +39,11 @@ object Faker {
       icon           = None,
       parent         = Parent.Workspace,
       archived       = false,
-      properties     = Map("Test" -> fakeTitle, "Checkbox" -> fakeCheckbox),
+      properties     = Map.empty,
       url            = fakeUrl
     )
+
+  val fakePage: Page = emptyPage.copy(properties = Map("Test" -> fakeTitle, "Checkbox" -> fakeCheckbox))
 
   val fakeDatabase: Database =
     Database(
@@ -50,7 +52,7 @@ object Faker {
       createdBy      = Id(fakeUUID),
       lastEditedBy   = Id(fakeUUID),
       id             = fakeUUID,
-      title          = List(RichTextData.default("test", Annotations.default)),
+      title          = List(RichTextFragment.default("test", Annotations.default)),
       cover          = None,
       icon           = None,
       parent         = Parent.Workspace,
@@ -63,7 +65,7 @@ object Faker {
 
   object FakeProperty {
 
-    val fakeTitle: Title = Title("abc", List(RichTextData.default("test", Annotations.default)))
+    val fakeTitle: Title = Title("abc", List(RichTextFragment.default("test", Annotations.default)))
 
     val fakeDate: Date = Date("abc", None)
 
@@ -72,7 +74,7 @@ object Faker {
 
   object FakePatchedProperty {
 
-    val fakePatchedTitle: PatchedTitle   = PatchedTitle(List(RichTextData.default("test", Annotations.default)))
+    val fakePatchedTitle: PatchedTitle   = PatchedTitle(List(RichTextFragment.default("test", Annotations.default)))
     val fakePatchedNumber: PatchedNumber = PatchedNumber(85)
 
   }

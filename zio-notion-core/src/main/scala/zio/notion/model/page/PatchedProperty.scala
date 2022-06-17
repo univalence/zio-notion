@@ -3,7 +3,7 @@ package zio.notion.model.page
 import io.circe.{Encoder, Json}
 
 import zio.notion.model.common.Id
-import zio.notion.model.common.richtext.RichTextData
+import zio.notion.model.common.richtext.RichTextFragment
 import zio.notion.model.magnolia.{NoDiscriminantNoNullEncoderDerivation, PatchedPropertyEncoderDerivation}
 import zio.notion.model.page.property.Link
 import zio.notion.model.user.User
@@ -14,8 +14,8 @@ sealed trait PatchedProperty
 
 // TODO: Add formula and rollup patches
 object PatchedProperty {
-  final case class PatchedTitle(title: Seq[RichTextData])                                                        extends PatchedProperty
-  final case class PatchedRichText(richText: Seq[RichTextData])                                                  extends PatchedProperty
+  final case class PatchedTitle(title: Seq[RichTextFragment])                                                    extends PatchedProperty
+  final case class PatchedRichText(richText: Seq[RichTextFragment])                                              extends PatchedProperty
   final case class PatchedNumber(number: Double)                                                                 extends PatchedProperty
   final case class PatchedCheckbox(checkbox: Boolean)                                                            extends PatchedProperty
   final case class PatchedSelect(id: Option[String], name: Option[String])                                       extends PatchedProperty
