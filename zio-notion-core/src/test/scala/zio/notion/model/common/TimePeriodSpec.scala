@@ -1,15 +1,13 @@
-package zio.notion.model.page.property.data
+package zio.notion.model.common
 
-import io.circe.parser.decode
+import io.circe.jawn
 
 import zio.Scope
-import zio.notion.Faker._
+import zio.notion.Faker.fakeDatetime
 import zio.notion.model.common
-import zio.notion.model.common.TimePeriod
 import zio.test._
-import zio.test.Assertion._
 
-object DateTimeDataSpec extends ZIOSpecDefault {
+object TimePeriodSpec extends ZIOSpecDefault {
 
   override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("DateTimeData serde suite")(
@@ -23,7 +21,12 @@ object DateTimeDataSpec extends ZIOSpecDefault {
 
         val expected: TimePeriod = common.TimePeriod(start = fakeDatetime, end = None, timeZone = None)
 
-        assert(decode[TimePeriod](json))(isRight(equalTo(expected)))
+        assertTrue(jawn.decode[TimePeriod](json) == Right(expected))
+      },
+      test("We should be able to stringify a Period") {
+        val period: TimePeriod = TimePeriod(start = fakeDatetime, end = Some(fakeDatetime.plusDays(10)), None)
+
+        assertTrue(period.toString == "2022-12-24T15:10Z -> 2023-01-03T15:10Z")
       }
     )
 }
