@@ -22,7 +22,7 @@ object ConverterSpec extends ZIOSpecDefault {
       test("It should convert a simple page") {
         val number = 10
 
-        case class CaseClass(test: Double)
+        final case class CaseClass(test: Double)
 
         val page = emptyPage.copy(properties = Map("test" -> Property.Number("", Some(number))))
 
@@ -47,7 +47,7 @@ object ConverterSpec extends ZIOSpecDefault {
             "url"            -> Property.Url("", Some(fakeUrl))
           )
 
-        case class CaseClass(
+        final case class CaseClass(
             number:         Double,
             localDate:      LocalDate,
             offsetDateTime: OffsetDateTime,
@@ -77,7 +77,7 @@ object ConverterSpec extends ZIOSpecDefault {
         assertTrue(page.propertiesAs[CaseClass] == Validation.succeed(expected))
       },
       test("It should convert a page with optional value") {
-        case class CaseClass(test: Option[Double])
+        final case class CaseClass(test: Option[Double])
 
         val page = emptyPage.copy(properties = Map("test" -> Property.Number("", None)))
 
@@ -89,7 +89,7 @@ object ConverterSpec extends ZIOSpecDefault {
           final case object Earth extends Planet
         }
 
-        case class CaseClass(planet: Planet)
+        final case class CaseClass(planet: Planet)
 
         implicit val planetConverter: PropertyConverter[Planet] = convertEnumeration { case "earth" => Planet.Earth }
 
@@ -98,28 +98,28 @@ object ConverterSpec extends ZIOSpecDefault {
         assertTrue(page.propertiesAs[CaseClass] == Validation.succeed(CaseClass(Planet.Earth)))
       },
       test("It should convert a page with another notion name") {
-        case class CaseClass(@NotionColumn("Test") test: Option[Double])
+        final case class CaseClass(@NotionColumn("Test") test: Option[Double])
 
         val page = emptyPage.copy(properties = Map("Test" -> Property.Number("", None)))
 
         assertTrue(page.propertiesAs[CaseClass] == Validation.succeed(CaseClass(None)))
       },
       test("It should not convert a page with missing column") {
-        case class CaseClass(test: Option[Double])
+        final case class CaseClass(test: Option[Double])
 
         val page = emptyPage.copy(properties = Map("unknown" -> Property.Number("", None)))
 
         assertTrue(page.propertiesAs[CaseClass] == Validation.fail(ParsingError("test", NotExistError)))
       },
       test("It should not convert a page with missing required value") {
-        case class CaseClass(test: Double)
+        final case class CaseClass(test: Double)
 
         val page = emptyPage.copy(properties = Map("test" -> Property.Number("", None)))
 
         assertTrue(page.propertiesAs[CaseClass] == Validation.fail(ParsingError("test", RequiredError)))
       },
       test("It should not convert a page with a nested page") {
-        case class CaseClass(nested: CaseClass)
+        final case class CaseClass(nested: CaseClass)
 
         val page = emptyPage.copy(properties = Map("nested" -> Property.Number("", None)))
 
@@ -131,7 +131,7 @@ object ConverterSpec extends ZIOSpecDefault {
           final case object Earth extends Planet
         }
 
-        case class CaseClass(planet: Planet)
+        final case class CaseClass(planet: Planet)
 
         implicit val planetConverter: PropertyConverter[Planet] = convertEnumeration { case "earth" => Planet.Earth }
 
