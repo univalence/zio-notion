@@ -1,7 +1,7 @@
 package zio.notion
 
 import zio.Scope
-import zio.notion.Converter.parseEnumeration
+import zio.notion.Converter.convertEnumeration
 import zio.notion.Faker.{emptyPage, fakeDate, fakeUrl, fakeUUID}
 import zio.notion.NotionError.ParsingError
 import zio.notion.NotionError.PropertyConverterError.{EnumerationError, NestedError, NotExistError, RequiredError}
@@ -73,7 +73,7 @@ object ConverterSpec extends ZIOSpecDefault {
 
         case class CaseClass(planet: Planet)
 
-        implicit val planetConverter: PropertyConverter[Planet] = parseEnumeration { case "earth" => Planet.Earth }
+        implicit val planetConverter: PropertyConverter[Planet] = convertEnumeration { case "earth" => Planet.Earth }
 
         val page = emptyPage.copy(properties = Map("planet" -> Property.Select("", Some(SelectData("", "earth", Default)))))
 
@@ -115,7 +115,7 @@ object ConverterSpec extends ZIOSpecDefault {
 
         case class CaseClass(planet: Planet)
 
-        implicit val planetConverter: PropertyConverter[Planet] = parseEnumeration { case "earth" => Planet.Earth }
+        implicit val planetConverter: PropertyConverter[Planet] = convertEnumeration { case "earth" => Planet.Earth }
 
         val page = emptyPage.copy(properties = Map("planet" -> Property.Select("", Some(SelectData("", "mars", Default)))))
 

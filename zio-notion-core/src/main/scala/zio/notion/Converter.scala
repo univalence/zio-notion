@@ -3,7 +3,7 @@ package zio.notion
 import io.circe.jawn
 import magnolia1.{CaseClass, Magnolia}
 
-import zio.notion.Converter.parseEnumeration
+import zio.notion.Converter.convertEnumeration
 import zio.notion.NotionError.{ParsingError, PropertyConverterError}
 import zio.notion.NotionError.PropertyConverterError._
 import zio.notion.Test.Status.{Posted, Scala}
@@ -43,7 +43,7 @@ object Converter {
     case _                          => Validation.fail(NotParsableError(stype))
   }
 
-  def parseEnumeration[A](convert: PartialFunction[String, A])(implicit tag: ClassTag[A]): PropertyConverter[A] =
+  def convertEnumeration[A](convert: PartialFunction[String, A])(implicit tag: ClassTag[A]): PropertyConverter[A] =
     (p: Property) => {
       val className: String =
         tag.runtimeClass.getSimpleName match {
@@ -215,7 +215,7 @@ object Test extends App {
   }
 
   implicit val status: PropertyConverter[Status] =
-    parseEnumeration {
+    convertEnumeration {
       case "Poste"  => Posted
       case "scala2" => Scala
     }
