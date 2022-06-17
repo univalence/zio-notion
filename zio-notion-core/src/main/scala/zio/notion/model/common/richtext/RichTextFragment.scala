@@ -17,12 +17,12 @@ import zio.notion.model.common.richtext.RichTextFragment.Mention.MentionData
       case Mention(mention, _, plainText, href) =>
         mention match {
           case MentionData.User(_)            => plainText
-          case MentionData.LinkPreview(_)     => href.get
-          case MentionData.Page(_)            => href.get
-          case MentionData.Database(_)        => href.get
+          case MentionData.LinkPreview(_)     => href.get // scalafix:ok
+          case MentionData.Page(_)            => href.get // scalafix:ok
+          case MentionData.Database(_)        => href.get // scalafix:ok
           case MentionData.Date(date)         => date.toString()
           case MentionData.DateTime(date)     => date.toString()
-          case MentionData.TemplateMention(_) => href.get
+          case MentionData.TemplateMention(_) => href.get // scalafix:ok
         }
       case Equation(_, _, plainText, _) => plainText
     }

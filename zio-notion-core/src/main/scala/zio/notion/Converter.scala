@@ -21,7 +21,7 @@ final class NotionColumn(val name: String) extends scala.annotation.StaticAnnota
 
 sealed trait Converter[A]
 
-trait PropertyConverter[A] extends Converter[A] { self =>
+trait PropertyConverter[A] extends Converter[A] { self => // scalafix:ok
   def convert(p: Property): Validation[PropertyConverterError, A]
 
   def map[B](f: A => B): PropertyConverter[B] = (p: Property) => self.convert(p).map(f)
@@ -29,7 +29,7 @@ trait PropertyConverter[A] extends Converter[A] { self =>
   def flatMap[B](f: A => Validation[PropertyConverterError, B]): PropertyConverter[B] = (p: Property) => self.convert(p).flatMap(f)
 }
 
-trait PageConverter[A] extends Converter[A] {
+trait PageConverter[A] extends Converter[A] { // scalafix:ok
   def convert(properties: Map[String, Property]): Validation[ParsingError, A]
 }
 
@@ -204,7 +204,7 @@ object Converter {
 }
 
 object Test extends App {
-  case class Foo(@NotionColumn("Mots clés") status: List[Status], @NotionColumn("Date de publication") date: LocalDate)
+  final case class Foo(@NotionColumn("Mots clés") status: List[Status], @NotionColumn("Date de publication") date: LocalDate)
 
   sealed trait Status
 
