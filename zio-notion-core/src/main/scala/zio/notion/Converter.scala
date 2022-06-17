@@ -43,13 +43,22 @@ object Converter {
     case _                          => Validation.fail(NotParsableError(stype))
   }
 
-  def parseEnumeration[A](convert: PartialFunction[String, A])(implicit tag: ClassTag[A]): PropertyConverter[A] = {
-    case Property.Select(_, select) =>
-      required(select)
-        .map(_.name)
-        .flatMap(name => Validation.fromOptionWith(EnumerationError(name, tag.runtimeClass.getSimpleName))(convert.lift(name)))
-    case _ => Validation.fail(NotParsableError(tag.runtimeClass.getSimpleName))
-  }
+  def parseEnumeration[A](convert: PartialFunction[String, A])(implicit tag: ClassTag[A]): PropertyConverter[A] =
+    (p: Property) => {
+      val className: String =
+        tag.runtimeClass.getSimpleName match {
+          case s"$name$$$_" => name
+          case name         => name
+        }
+
+      p match {
+        case Property.Select(_, select) =>
+          required(select)
+            .map(_.name)
+            .flatMap(name => Validation.fromOptionWith(EnumerationError(name, className))(convert.lift(name)))
+        case _ => Validation.fail(NotParsableError(className))
+      }
+    }
 
   implicit def list[A](implicit A: PropertyConverter[Seq[A]]): PropertyConverter[List[A]] = (p: Property) => A.convert(p).map(_.toList)
 
