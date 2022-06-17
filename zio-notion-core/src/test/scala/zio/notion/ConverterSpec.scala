@@ -2,10 +2,10 @@ package zio.notion
 
 import zio.Scope
 import zio.notion.Converter.convertEnumeration
-import zio.notion.Faker.{emptyPage, fakeDate, fakeUrl, fakeUUID}
+import zio.notion.Faker.{emptyPage, fakeDate, fakeDatetime, fakeUrl, fakeUUID}
 import zio.notion.NotionError.ParsingError
 import zio.notion.NotionError.PropertyConverterError.{EnumerationError, NestedError, NotExistError, RequiredError}
-import zio.notion.model.common.{Id, Period}
+import zio.notion.model.common.{Id, Period, TimePeriod}
 import zio.notion.model.common.enumeration.Color.Default
 import zio.notion.model.page.Property
 import zio.notion.model.page.property.data.SelectData
@@ -13,7 +13,7 @@ import zio.notion.model.user.User.Hidden
 import zio.prelude.Validation
 import zio.test._
 
-import java.time.LocalDate
+import java.time.{LocalDate, OffsetDateTime}
 
 object ConverterSpec extends ZIOSpecDefault {
 
@@ -29,20 +29,35 @@ object ConverterSpec extends ZIOSpecDefault {
         assertTrue(page.propertiesAs[CaseClass] == Validation.succeed(CaseClass(number)))
       },
       test("It should convert a complex page") {
-        val numberValue  = 10
-        val booleanValue = true
+        val numberValue     = 10
+        val booleanValue    = true
+        val periodValue     = Period(fakeDate, Some(fakeDate.plusDays(10)))
+        val timePeriodValue = TimePeriod(fakeDatetime, Some(fakeDatetime.plusDays(10)), None)
 
         val properties =
           Map(
-            "number"    -> Property.Number("", Some(numberValue)),
-            "localDate" -> Property.Date("", Some(Period(fakeDate, None))),
-            "boolean"   -> Property.Checkbox("", Some(booleanValue)),
-            "id"        -> Property.People("", Seq(Hidden(fakeUUID))),
-            "ids"       -> Property.People("", Seq(Hidden(fakeUUID))),
-            "url"       -> Property.Url("", Some(fakeUrl))
+            "number"         -> Property.Number("", Some(numberValue)),
+            "localDate"      -> Property.Date("", Some(Period(fakeDate, None))),
+            "offsetDateTime" -> Property.DateTime("", Some(TimePeriod(fakeDatetime, None, None))),
+            "period"         -> Property.Date("", Some(periodValue)),
+            "timePeriod"     -> Property.DateTime("", Some(timePeriodValue)),
+            "boolean"        -> Property.Checkbox("", Some(booleanValue)),
+            "id"             -> Property.People("", Seq(Hidden(fakeUUID))),
+            "ids"            -> Property.People("", Seq(Hidden(fakeUUID))),
+            "url"            -> Property.Url("", Some(fakeUrl))
           )
 
-        case class CaseClass(number: Double, localDate: LocalDate, boolean: Boolean, id: Id, ids: Seq[Id], url: String)
+        case class CaseClass(
+            number:         Double,
+            localDate:      LocalDate,
+            offsetDateTime: OffsetDateTime,
+            period:         Period,
+            timePeriod:     TimePeriod,
+            boolean:        Boolean,
+            id:             Id,
+            ids:            Seq[Id],
+            url:            String
+        )
 
         val page = emptyPage.copy(properties = properties)
 
@@ -50,6 +65,9 @@ object ConverterSpec extends ZIOSpecDefault {
           CaseClass(
             numberValue,
             fakeDate,
+            fakeDatetime,
+            periodValue,
+            timePeriodValue,
             booleanValue,
             Id(fakeUUID),
             Seq(Id(fakeUUID)),
