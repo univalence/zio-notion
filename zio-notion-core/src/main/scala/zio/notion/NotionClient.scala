@@ -122,7 +122,7 @@ object NotionClient {
       } yield LiveNotionClient(config, sttpClient)
     }
 
-  final case class LiveNotionClient(config: NotionConfiguration, sttpClient: SttpClient) extends NotionClient {
+  case class LiveNotionClient(config: NotionConfiguration, sttpClient: SttpClient) extends NotionClient { // scalafix:ok
     val endpoint: Uri = uri"https://api.notion.com/v1"
 
     def apply(request: NotionRequest): IO[NotionError, NotionResponse] =
