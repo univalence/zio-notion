@@ -34,37 +34,7 @@ object Block {
           lastEditedBy   <- c.downField("last_edited_by").as[Id]
           hasChildren    <- c.downField("has_children").as[Boolean]
           archived       <- c.downField("archived").as[Boolean]
-          contentType    <- c.downField("type").as[String]
-          content <-
-            contentType match {
-              case "unsupported"        => Right(Unsupported)
-              case "paragraph"          => c.downField("paragraph").as[Paragraph]
-              case "heading_1"          => c.downField("heading_1").as[HeadingOne]
-              case "heading_2"          => c.downField("heading_2").as[HeadingTwo]
-              case "heading_3"          => c.downField("heading_3").as[HeadingThree]
-              case "callout"            => c.downField("callout").as[Callout]
-              case "quote"              => c.downField("quote").as[Quote]
-              case "to_do"              => c.downField("to_do").as[ToDo]
-              case "bulleted_list_item" => c.downField("bulleted_list_item").as[BulletedListItem]
-              case "numbered_list_item" => c.downField("numbered_list_item").as[NumberedListItem]
-              case "toggle"             => c.downField("toggle").as[Toggle]
-              case "code"               => c.downField("code").as[Code]
-              case "child_page"         => c.downField("child_page").as[ChildPage]
-              case "child_database"     => c.downField("child_database").as[ChildDatabase]
-              case "embed"              => c.downField("embed").as[Embed]
-              case "image"              => c.downField("image").as[Image]
-              case "video"              => c.downField("video").as[Video]
-              case "file"               => c.downField("file").as[File]
-              case "pdf"                => c.downField("pdf").as[Pdf]
-              case "bookmark"           => c.downField("bookmark").as[Bookmark]
-              case "equation"           => c.downField("equation").as[Equation]
-              case "divider"            => Right(Divider)
-              case "table_of_contents"  => c.downField("table_of_contents").as[TableOfContents]
-              case "breadcrumb"         => Right(Breadcrumb)
-              case "column_list"        => c.downField("column_list").as[ColumnList]
-              case "column"             => c.downField("column").as[Column]
-              case contentType          => Left(DecodingFailure(s"The type '$contentType' is unknown for block", c.history))
-            }
+          content        <- c.as[BlockContent]
         } yield Block(
           id             = id,
           createdTime    = createdTime,
