@@ -1,6 +1,6 @@
 package zio.notion.model.magnolia
 
-import io.circe.{Decoder, HCursor}
+import io.circe.{Decoder, DecodingFailure, HCursor}
 import io.circe.Decoder.Result
 import magnolia1._
 
@@ -16,7 +16,11 @@ object DecoderDerivation {
     (cursor: HCursor) =>
       for {
         discriminant <- cursor.downField("type").as[String]
-        typeclass = ctx.subtypes.find(subtype => notionify(subtype.typeName.short) == discriminant).get.typeclass
+        typeclass <-
+          ctx.subtypes.find(subtype => notionify(subtype.typeName.short) == discriminant) match {
+            case Some(value) => Right(value.typeclass)
+            case None        => Left(DecodingFailure(s"The type '$discriminant' does not exist", cursor.history))
+          }
         t <- typeclass.tryDecode(cursor.downField(discriminant))
       } yield t
 

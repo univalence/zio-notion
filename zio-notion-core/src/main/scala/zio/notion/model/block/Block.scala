@@ -9,7 +9,7 @@ import zio.notion.model.common.Id
 
 import java.time.OffsetDateTime
 
-case class Block(
+final case class Block(
     id:             String,
     createdTime:    OffsetDateTime,
     lastEditedTime: OffsetDateTime,

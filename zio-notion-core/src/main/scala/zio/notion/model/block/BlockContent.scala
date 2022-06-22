@@ -13,31 +13,31 @@ sealed trait BlockContent
 
 object BlockContent {
   case object Unsupported                                                                                            extends BlockContent
-  case class Paragraph(richText: Seq[RichTextFragment], color: Color, children: Seq[Block] = Seq.empty)              extends BlockContent
-  case class HeadingOne(richText: Seq[RichTextFragment], color: Color)                                               extends BlockContent
-  case class HeadingTwo(richText: Seq[RichTextFragment], color: Color)                                               extends BlockContent
-  case class HeadingThree(richText: Seq[RichTextFragment], color: Color)                                             extends BlockContent
-  case class Callout(richText: Seq[RichTextFragment], icon: Icon, color: Color, children: Seq[Block] = Seq.empty)    extends BlockContent
-  case class Quote(richText: Seq[RichTextFragment], color: Color, children: Seq[Block] = Seq.empty)                  extends BlockContent
-  case class BulletedListItem(richText: Seq[RichTextFragment], color: Color, children: Seq[Block] = Seq.empty)       extends BlockContent
-  case class NumberedListItem(richText: Seq[RichTextFragment], color: Color, children: Seq[Block] = Seq.empty)       extends BlockContent
-  case class ToDo(richText: Seq[RichTextFragment], checked: Boolean, color: Color, children: Seq[Block] = Seq.empty) extends BlockContent
-  case class Toggle(richText: Seq[RichTextFragment], color: Color, children: Seq[Block] = Seq.empty)                 extends BlockContent
-  case class Code(richText: Seq[RichTextFragment], language: Language)                                               extends BlockContent
-  case class ChildPage(title: String)                                                                                extends BlockContent
-  case class ChildDatabase(title: String)                                                                            extends BlockContent
-  case class Embed(url: String)                                                                                      extends BlockContent
-  case class Image(file: common.File)                                                                                extends BlockContent
-  case class Video(file: common.File)                                                                                extends BlockContent
-  case class File(file: common.File, caption: Seq[RichTextFragment] = Seq.empty)                                     extends BlockContent
-  case class Pdf(file: common.File)                                                                                  extends BlockContent
-  case class Bookmark(url: String, caption: Seq[RichTextFragment] = Seq.empty)                                       extends BlockContent
-  case class Equation(expression: String)                                                                            extends BlockContent
+  final case class Paragraph(richText: Seq[RichTextFragment], color: Color, children: Seq[Block] = Seq.empty)              extends BlockContent
+  final case class HeadingOne(richText: Seq[RichTextFragment], color: Color)                                               extends BlockContent
+  final case class HeadingTwo(richText: Seq[RichTextFragment], color: Color)                                               extends BlockContent
+  final case class HeadingThree(richText: Seq[RichTextFragment], color: Color)                                             extends BlockContent
+  final case class Callout(richText: Seq[RichTextFragment], icon: Icon, color: Color, children: Seq[Block] = Seq.empty)    extends BlockContent
+  final case class Quote(richText: Seq[RichTextFragment], color: Color, children: Seq[Block] = Seq.empty)                  extends BlockContent
+  final case class BulletedListItem(richText: Seq[RichTextFragment], color: Color, children: Seq[Block] = Seq.empty)       extends BlockContent
+  final case class NumberedListItem(richText: Seq[RichTextFragment], color: Color, children: Seq[Block] = Seq.empty)       extends BlockContent
+  final case class ToDo(richText: Seq[RichTextFragment], checked: Boolean, color: Color, children: Seq[Block] = Seq.empty) extends BlockContent
+  final case class Toggle(richText: Seq[RichTextFragment], color: Color, children: Seq[Block] = Seq.empty)                 extends BlockContent
+  final case class Code(richText: Seq[RichTextFragment], language: Language)                                               extends BlockContent
+  final case class ChildPage(title: String)                                                                                extends BlockContent
+  final case class ChildDatabase(title: String)                                                                            extends BlockContent
+  final case class Embed(url: String)                                                                                      extends BlockContent
+  final case class Image(file: common.File)                                                                                extends BlockContent
+  final case class Video(file: common.File)                                                                                extends BlockContent
+  final case class File(file: common.File, caption: Seq[RichTextFragment] = Seq.empty)                                     extends BlockContent
+  final case class Pdf(file: common.File)                                                                                  extends BlockContent
+  final case class Bookmark(url: String, caption: Seq[RichTextFragment] = Seq.empty)                                       extends BlockContent
+  final case class Equation(expression: String)                                                                            extends BlockContent
   case object Divider                                                                                                extends BlockContent
-  case class TableOfContents(color: Color)                                                                           extends BlockContent
+  final case class TableOfContents(color: Color)                                                                           extends BlockContent
   case object Breadcrumb                                                                                             extends BlockContent
-  case class Column(children: Seq[BlockContent])                                                                     extends BlockContent
-  case class ColumnList(children: Seq[Column])                                                                       extends BlockContent
+  final case class Column(children: Seq[BlockContent])                                                                     extends BlockContent
+  final case class ColumnList(children: Seq[Column])                                                                       extends BlockContent
 
   implicit val encoder: Encoder[BlockContent] = EncoderDerivation.gen[BlockContent]
   implicit val encoderImage: Encoder[Image]   = Encoder[common.File].contramap(_.file)
