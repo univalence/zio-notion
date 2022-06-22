@@ -18,7 +18,7 @@ import magnolia1._
  * val bar = Bar(1, None)
  * }}}
  */
-object NoDiscriminantNoNullEncoderDerivation extends EncoderDerivation {
+object NoDiscriminantNoNullEncoderDerivation extends BaseEncoderDerivation with NoDiscriminantSplit {
 
   def join[T](ctx: CaseClass[Encoder, T]): Encoder[T] =
     (value: T) => {

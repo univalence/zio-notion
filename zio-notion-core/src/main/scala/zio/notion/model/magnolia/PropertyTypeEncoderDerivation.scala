@@ -22,7 +22,7 @@ import magnolia1._
  * val foo = Foo(1, 2)
  * }}}
  */
-object PropertyTypeEncoderDerivation extends EncoderDerivation {
+object PropertyTypeEncoderDerivation extends BaseEncoderDerivation with NoDiscriminantSplit {
 
   def join[T](ctx: CaseClass[Encoder, T]): Encoder[T] =
     (value: T) =>
