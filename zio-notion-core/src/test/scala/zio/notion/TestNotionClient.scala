@@ -13,7 +13,7 @@ import zio.notion.model.page.{Page, PatchedProperty}
 /** Notion client mock for test purpose */
 final case class TestNotionClient() extends NotionClient {
 
-  def pagePayload(pageId: String): String =
+  private def pagePayload(pageId: String): String =
     s"""{
        |    "object": "page",
        |    "id": "$pageId",
@@ -149,6 +149,46 @@ final case class TestNotionClient() extends NotionClient {
        |    "url": "https://www.notion.so/Les-num-rations-en-Scala-2-X-1c2d0a80332146419615f345185de05a"
        |}""".stripMargin
 
+  private def blockPayload(blockId: String): String =
+    s"""{
+       |    "object": "block",
+       |    "id": "$blockId",
+       |    "created_time": "2022-06-22T08:03:00.000Z",
+       |    "last_edited_time": "2022-06-22T08:06:00.000Z",
+       |    "created_by": {
+       |        "object": "user",
+       |        "id": "9774a0c9-ba00-434e-a779-bdc60ace9c71"
+       |    },
+       |    "last_edited_by": {
+       |        "object": "user",
+       |        "id": "9774a0c9-ba00-434e-a779-bdc60ace9c71"
+       |    },
+       |    "has_children": true,
+       |    "archived": false,
+       |    "type": "paragraph",
+       |    "paragraph": {
+       |        "color": "default",
+       |        "rich_text": [
+       |            {
+       |                "type": "text",
+       |                "text": {
+       |                    "content": "qdsqdsds",
+       |                    "link": null
+       |                },
+       |                "annotations": {
+       |                    "bold": false,
+       |                    "italic": false,
+       |                    "strikethrough": false,
+       |                    "underline": false,
+       |                    "code": false,
+       |                    "color": "default"
+       |                },
+       |                "plain_text": "qdsqdsds",
+       |                "href": null
+       |            }
+       |        ]
+       |    }
+       |}""".stripMargin
   override def retrievePage(pageId: String)(implicit trace: Trace): IO[NotionError, NotionResponse] = ZIO.succeed(pagePayload(pageId))
 
   override def retrieveDatabase(databaseId: String)(implicit trace: Trace): IO[NotionError, NotionResponse] =
@@ -365,6 +405,26 @@ final case class TestNotionClient() extends NotionClient {
 
       }
     )
+
+  override def retrieveBlock(blockId: String)(implicit trace: Trace): IO[NotionError, NotionResponse] = ZIO.succeed(blockPayload(fakeUUID))
+
+  override def retrieveBlocks(pageId: String, pagination: Pagination)(implicit trace: Trace): IO[NotionError, NotionResponse] =
+    ZIO.succeed(pagination.startCursor match {
+      case Some("a") =>
+        s"""{
+           |    "object": "list",
+           |    "results": [${blockPayload(fakeUUID)}],
+           |    "next_cursor": null,
+           |    "has_more": true
+           |}""".stripMargin
+      case _ =>
+        s"""{
+           |    "object": "list",
+           |    "results": [${blockPayload(fakeUUID)}],
+           |    "next_cursor": "a",
+           |    "has_more": true
+           |}""".stripMargin
+    })
 
   override def queryDatabase(
       databaseId: String,

@@ -27,7 +27,7 @@ import magnolia1._
  * val patch = Patch(1, None, Ignore, Remove)
  * }}}
  */
-object PatchEncoderDerivation extends EncoderDerivation {
+object PatchEncoderDerivation extends BaseEncoderDerivation with NoDiscriminantSplit {
 
   def join[T](ctx: CaseClass[Encoder, T]): Encoder[T] =
     (value: T) => {

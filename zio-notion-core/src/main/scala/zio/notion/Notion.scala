@@ -8,6 +8,7 @@ import zio._
 import zio.notion.NotionClient.NotionResponse
 import zio.notion.NotionError.JsonError
 import zio.notion.dsl._
+import zio.notion.model.block.{Block, Blocks}
 import zio.notion.model.common.{Cover, Icon}
 import zio.notion.model.common.Parent.{DatabaseId, PageId}
 import zio.notion.model.common.richtext.RichTextFragment
@@ -30,6 +31,8 @@ sealed trait Notion {
   def retrieveDatabase(databaseId: String)(implicit trace: Trace): IO[NotionError, Database]
   def retrieveUser(userId: String)(implicit trace: Trace): IO[NotionError, User]
   def retrieveUsers(pagination: Pagination)(implicit trace: Trace): IO[NotionError, Users]
+  def retrieveBlock(blockId: String)(implicit trace: Trace): IO[NotionError, Block]
+  def retrieveBlocks(pageId: String, pagination: Pagination)(implicit trace: Trace): IO[NotionError, Blocks]
 
   def queryDatabase(databaseId: String, query: Query, pagination: Pagination)(implicit trace: Trace): IO[NotionError, DatabaseQuery]
 
@@ -118,6 +121,55 @@ object Notion {
     } yield Users(allUsers, None)
   }
 
+  def retrieveBlock(blockId: String)(implicit trace: Trace): ZIO[Notion, NotionError, Block] =
+    ZIO.service[Notion].flatMap(_.retrieveBlock(blockId))
+
+  /**
+   * Query a batch of blocks.
+   *
+   * By default, this query may not retrieve all the blocks of a page
+   * but only a small set of them defined by the Pagination. You still
+   * can use [[retrieveAllBlocks]] to handle the pagination
+   * automatically.
+   *
+   * @param pageId
+   *   The page id containing the blocks
+   * @param pagination
+   *   The pagination information necessary to the Notion API
+   * @return
+   *   The result of the query
+   */
+  def retrieveBlocks(pageId: String, pagination: Pagination)(implicit trace: Trace): ZIO[Notion, NotionError, Blocks] =
+    ZIO.service[Notion].flatMap(_.retrieveBlocks(pageId, pagination))
+
+  /**
+   * Query all users handling pagination itself.
+   *
+   * @return
+   *   The result of the concatenated queries
+   */
+  def retrieveAllBlocks(pageId: String)(implicit trace: Trace): ZIO[Notion, NotionError, Blocks] = {
+    val BLOCKS_FETCHED_PER_BATCH = 100
+
+    def retrieveBlocksOnceMore(
+        maybeStartCursor: Option[String],
+        blocks: Seq[Block]
+    ): ZIO[Notion, NotionError, Seq[Block]] =
+      maybeStartCursor match {
+        case Some(startCursor) =>
+          for {
+            result <- retrieveBlocks(pageId, Pagination(BLOCKS_FETCHED_PER_BATCH, Some(startCursor)))
+            blocks <- retrieveBlocksOnceMore(result.nextCursor, blocks ++ result.results)
+          } yield blocks
+        case None => ZIO.succeed(blocks)
+      }
+
+    for {
+      firstQuery <- retrieveBlocks(pageId, Pagination.start(BLOCKS_FETCHED_PER_BATCH))
+      allBlocks  <- retrieveBlocksOnceMore(firstQuery.nextCursor, firstQuery.results)
+    } yield Blocks(allBlocks, None)
+  }
+
   /**
    * Query a batch of pages of a database base on a query.
    *
@@ -163,7 +215,6 @@ object Notion {
     val PAGES_FETCHED_PER_BATCH = 100
 
     def queryDatabaseOnceMore(
-        query: Query,
         maybeStartCursor: Option[String],
         pages: Seq[Page]
     ): ZIO[Notion, NotionError, Seq[Page]] =
@@ -171,14 +222,14 @@ object Notion {
         case Some(startCursor) =>
           for {
             result <- queryDatabase(databaseId, query, Pagination(PAGES_FETCHED_PER_BATCH, Some(startCursor)))
-            pages  <- queryDatabaseOnceMore(query, result.nextCursor, pages ++ result.results)
+            pages  <- queryDatabaseOnceMore(result.nextCursor, pages ++ result.results)
           } yield pages
         case None => ZIO.succeed(pages)
       }
 
     for {
       firstQuery <- queryDatabase(databaseId, query, Pagination.start(PAGES_FETCHED_PER_BATCH))
-      allPages   <- queryDatabaseOnceMore(query, firstQuery.nextCursor, firstQuery.results)
+      allPages   <- queryDatabaseOnceMore(firstQuery.nextCursor, firstQuery.results)
     } yield DatabaseQuery(allPages, None)
   }
 
@@ -260,6 +311,12 @@ object Notion {
 
     override def retrieveUsers(pagination: Pagination)(implicit trace: Trace): IO[NotionError, Users] =
       decodeResponse[Users](notionClient.retrieveUsers(pagination))
+
+    override def retrieveBlock(blockId: String)(implicit trace: Trace): IO[NotionError, Block] =
+      decodeResponse[Block](notionClient.retrieveBlock(blockId))
+
+    def retrieveBlocks(pageId: String, pagination: Pagination)(implicit trace: Trace): IO[NotionError, Blocks] =
+      decodeResponse[Blocks](notionClient.retrieveBlocks(pageId, pagination))
 
     override def queryDatabase(
         databaseId: String,

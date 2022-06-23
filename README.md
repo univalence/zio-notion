@@ -51,6 +51,8 @@ object UpdatePage extends ZIOAppDefault {
 }
 ```
 
+We provide [other examples](https://github.com/univalence/zio-notion/tree/master/examples) in this repository.
+
 ## Features
 
 ### Page
@@ -58,23 +60,27 @@ object UpdatePage extends ZIOAppDefault {
 - You can update a page
 - You can retrieve a page
 - You can archive a page
-- ~~You can create a page~~ 🕦 COMING SOON
+- You can create a page
 
 ### Database
 
 - You can update a database
 - You can retrieve a database
 - You can query a database
-- You can create a database
+- You can create a database (without blocks for the moment)
 
 ### Block
 
-🕦 COMING SOON
+- You can retrieve a block
+- You can retrieve blocks of a page
+- ~~You can retrieve update a block~~ 🕦 COMING SOON
+- ~~You can retrieve delete a block~~ 🕦 COMING SOON
+- ~~You can append a block to a page~~ 🕦 COMING SOON
 
 ### User
 
 - You can retrieve a user
-- ~~You can list users~~ 🕦 COMING SOON
+- You can list users
 - ~~You can retrieve your token's bot user~~ 🕦 COMING SOON
 
 ### Search
