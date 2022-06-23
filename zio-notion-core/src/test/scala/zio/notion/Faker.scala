@@ -102,7 +102,9 @@ object Faker {
     val fakeTableOfContents: TableOfContents   = TableOfContents(Color.Default)
     val fakeColumn: Column                     = Column(Seq(fakeEquation, fakeFile))
     val fakeColumnList: ColumnList             = ColumnList(Seq(fakeColumn, fakeColumn))
-
+    val fakeLinkPreview: LinkPreview           = LinkPreview(fakeUrl)
+    val fakeTemplate: Template                 = Template(Seq.empty, Seq(fakePdf))
+    val fakeLinkToPage: LinkToPage             = LinkToPage(LinkToPage.LinkType.Database, fakeUUID)
   }
 
   object FakeProperty {

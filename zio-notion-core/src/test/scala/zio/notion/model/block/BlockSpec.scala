@@ -14,7 +14,7 @@ import zio.test._
 object BlockSpec extends ZIOSpecDefault {
 
   def testBlockContentDeserialization(content: BlockContent): Spec[Any, Nothing] = {
-    val contentName: String = notionify(content.getClass.getSimpleName)
+    val contentName: String = notionify(content.getClass.getSimpleName.split('$').head)
     val block               = fakeBlock.copy(content = content)
 
     test(s"We should be able to encode then decode again a block with a $contentName") {
@@ -179,6 +179,9 @@ object BlockSpec extends ZIOSpecDefault {
       testBlockContentDeserialization(fakeTableOfContents),
       testBlockContentDeserialization(Breadcrumb),
       testBlockContentDeserialization(fakeColumn),
-      testBlockContentDeserialization(fakeColumnList)
+      testBlockContentDeserialization(fakeColumnList),
+      testBlockContentDeserialization(fakeLinkPreview),
+      testBlockContentDeserialization(fakeTemplate),
+      testBlockContentDeserialization(fakeLinkToPage)
     )
 }

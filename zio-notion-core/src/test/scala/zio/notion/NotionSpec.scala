@@ -4,6 +4,7 @@ import zio.{Scope, ZIO}
 import zio.notion.Faker._
 import zio.notion.Faker.FakePatchedProperty.{fakePatchedNumber, fakePatchedTitle}
 import zio.notion.dsl._
+import zio.notion.model.block.{Block, Blocks}
 import zio.notion.model.common.Parent.StringOps
 import zio.notion.model.database.{Database, DatabaseQuery}
 import zio.notion.model.database.query.Query
@@ -39,6 +40,16 @@ object NotionSpec extends ZIOSpecDefault {
         val effect: ZIO[Notion, NotionError, Users] = Notion.retrieveAllUsers
 
         effect.map(users => assertTrue(users.results.length == 2))
+      },
+      test("User can retrieve a block from Notion") {
+        val effect: ZIO[Notion, NotionError, Block] = Notion.retrieveBlock(fakeUUID)
+
+        effect.map(block => assertTrue(block.id == fakeUUID))
+      },
+      test("User can retrieve blocks from Notion") {
+        val effect: ZIO[Notion, NotionError, Blocks] = Notion.retrieveAllBlocks(fakeUUID)
+
+        effect.map(blocks => assertTrue(blocks.results.length == 2))
       },
       test("User can query a database") {
         val effect: ZIO[Notion, NotionError, DatabaseQuery] = Notion.queryDatabase(fakeUUID, Query.empty, Pagination.default)

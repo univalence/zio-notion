@@ -25,6 +25,8 @@ trait NotionClient {
   def retrieveDatabase(databaseId: String)(implicit trace: Trace): IO[NotionError, NotionResponse]
   def retrieveUser(userId: String)(implicit trace: Trace): IO[NotionError, NotionResponse]
   def retrieveUsers(pagination: Pagination)(implicit trace: Trace): IO[NotionError, NotionResponse]
+  def retrieveBlock(blockId: String)(implicit trace: Trace): IO[NotionError, NotionResponse]
+  def retrieveBlocks(pageId: String, pagination: Pagination)(implicit trace: Trace): IO[NotionError, NotionResponse]
 
   def queryDatabase(databaseId: String, query: Query, pagination: Pagination)(implicit trace: Trace): IO[NotionError, NotionResponse]
 
@@ -171,6 +173,17 @@ object NotionClient {
     override def retrieveUsers(pagination: Pagination)(implicit trace: Trace): IO[NotionError, NotionResponse] =
       defaultRequest
         .get(uri"$endpoint/users")
+        .body(printer.print(pagination.asJson))
+        .handle
+
+    override def retrieveBlock(blockId: String)(implicit trace: Trace): IO[NotionError, NotionResponse] =
+      defaultRequest
+        .get(uri"$endpoint/blocks/$blockId")
+        .handle
+
+    override def retrieveBlocks(pageId: String, pagination: Pagination)(implicit trace: Trace): IO[NotionError, NotionResponse] =
+      defaultRequest
+        .get(uri"$endpoint/blocks/$pageId/children")
         .body(printer.print(pagination.asJson))
         .handle
 
