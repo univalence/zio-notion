@@ -1,8 +1,8 @@
 # Retrieve a database
 
-Retrieve a database is useful if you want to retrieve all the properties (the metadata) of a database.
+The `Notion.retrieveDatabase` function retrieve the metadata of a Notion database.
 
-To retrieve a retrieve you can call the following function providing the id of the database:
+You can use it as follows:
 
 ```scala
 for {
@@ -10,9 +10,7 @@ for {
 } yield database
 ```
 
-The **Database** type provides you with several properties and methods.
-
-You can retrieve the following kind or properties:
+The **Database** type provides the following properties:
 - createdTime
 - lastEditedTime
 - createdBy
@@ -25,7 +23,5 @@ You can retrieve the following kind or properties:
 - archived
 - properties
 - url
-
-The **Database** type provides you with patching functions described in the patch a `How to patch a database` section.
 
 For more information, you can check the [notion documentation](https://developers.notion.com/reference/retrieve-a-database).

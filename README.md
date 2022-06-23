@@ -51,6 +51,8 @@ object UpdatePage extends ZIOAppDefault {
 }
 ```
 
+We provide [other examples](https://github.com/univalence/zio-notion/tree/master/examples) in this repository.
+
 ## Features
 
 ### Page
