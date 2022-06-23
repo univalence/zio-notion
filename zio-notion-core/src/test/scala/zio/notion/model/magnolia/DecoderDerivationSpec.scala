@@ -13,7 +13,7 @@ object DecoderDerivationSpec extends ZIOSpecDefault {
     suite("JSON decoder derivations suite")(
       test("should parse json to case class Foo") {
         val json = """{"foo": "bar"}"""
-        case class Foo(foo: String)
+        final case class Foo(foo: String)
 
         implicit val decoder: Decoder[Foo] = DecoderDerivation.gen[Foo]
 
@@ -21,7 +21,7 @@ object DecoderDerivationSpec extends ZIOSpecDefault {
       },
       test("should use default value") {
         val json = """{"foo": "bar"}"""
-        case class Foo(foo: String, baz: String = "default")
+        final case class Foo(foo: String, baz: String = "default")
 
         implicit val decoder: Decoder[Foo] = DecoderDerivation.gen[Foo]
 
@@ -29,7 +29,7 @@ object DecoderDerivationSpec extends ZIOSpecDefault {
       },
       test("should not use default value") {
         val json = """{"foo": "bar", "baz": "bouse"}"""
-        case class Foo(foo: String, baz: String = "default")
+        final case class Foo(foo: String, baz: String = "default")
 
         implicit val decoder: Decoder[Foo] = DecoderDerivation.gen[Foo]
 
