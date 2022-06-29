@@ -3,6 +3,7 @@ package zio.notion
 import zio._
 import zio.notion.Faker._
 import zio.notion.NotionClient.NotionResponse
+import zio.notion.model.block.BlockContent
 import zio.notion.model.common.{Cover, Icon, Parent}
 import zio.notion.model.common.Parent.PageId
 import zio.notion.model.common.richtext.RichTextFragment
@@ -487,7 +488,8 @@ final case class TestNotionClient() extends NotionClient {
       parent: PageId,
       title: Option[PatchedProperty],
       icon: Option[Icon],
-      cover: Option[Cover]
+      cover: Option[Cover],
+      children: Seq[BlockContent]
   )(implicit trace: Trace): IO[NotionError, NotionResponse] =
     ZIO.succeed(s"""
                    |{
@@ -543,7 +545,8 @@ final case class TestNotionClient() extends NotionClient {
       parent: Parent.DatabaseId,
       properties: Map[String, PatchedProperty],
       icon: Option[Icon],
-      cover: Option[Cover]
+      cover: Option[Cover],
+      children: Seq[BlockContent]
   )(implicit trace: Trace): IO[NotionError, NotionResponse] =
     ZIO.succeed(s"""
                    |{

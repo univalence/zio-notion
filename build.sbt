@@ -70,8 +70,8 @@ addCommandAlias("testSpecific", "; clean; test;")
 addCommandAlias("testSpecificWithCoverage", "; clean; coverage; test; coverageReport;")
 
 // -- Lib versions
-val zio          = "2.0.0-RC6"
-val zioPrelude   = "1.0.0-RC15"
+val zio          = "2.0.0"
+val zioPrelude   = "1.0.0-RC14"
 val circe        = "0.14.2"
 val sttp         = "3.6.2"
 val magnolia     = "1.1.2"

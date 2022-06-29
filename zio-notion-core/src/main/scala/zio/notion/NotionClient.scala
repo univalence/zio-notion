@@ -11,6 +11,7 @@ import sttp.model.Uri
 import zio.{IO, _}
 import zio.notion.NotionClient.NotionResponse
 import zio.notion.NotionError._
+import zio.notion.model.block.BlockContent
 import zio.notion.model.common.{Cover, Icon}
 import zio.notion.model.common.Parent.{DatabaseId, PageId}
 import zio.notion.model.common.richtext.RichTextFragment
@@ -51,14 +52,16 @@ trait NotionClient {
       parent: PageId,
       title: Option[PatchedProperty],
       icon: Option[Icon],
-      cover: Option[Cover]
+      cover: Option[Cover],
+      children: Seq[BlockContent]
   )(implicit trace: Trace): IO[NotionError, NotionResponse]
 
   def createPageInDatabase(
       parent: DatabaseId,
       properties: Map[String, PatchedProperty],
       icon: Option[Icon],
-      cover: Option[Cover]
+      cover: Option[Cover],
+      children: Seq[BlockContent]
   )(implicit trace: Trace): IO[NotionError, NotionResponse]
 }
 
@@ -268,14 +271,16 @@ object NotionClient {
         parent: DatabaseId,
         properties: Map[String, PatchedProperty],
         icon: Option[Icon],
-        cover: Option[Cover]
+        cover: Option[Cover],
+        children: Seq[BlockContent]
     )(implicit trace: Trace): IO[NotionError, NotionResponse] = {
       val json =
         Json.obj(
           "parent"     -> parent.asJson,
           "properties" -> properties.asJson,
           "icon"       -> icon.asJson,
-          "cover"      -> cover.asJson
+          "cover"      -> cover.asJson,
+          "children"   -> children.asJson
         )
       defaultRequest
         .post(uri"$endpoint/pages/")
@@ -287,14 +292,16 @@ object NotionClient {
         parent: PageId,
         title: Option[PatchedProperty],
         icon: Option[Icon],
-        cover: Option[Cover]
+        cover: Option[Cover],
+        children: Seq[BlockContent]
     )(implicit trace: Trace): IO[NotionError, NotionResponse] = {
       val json =
         Json.obj(
           "parent"     -> parent.asJson,
           "properties" -> Json.obj("title" -> title.asJson),
           "icon"       -> icon.asJson,
-          "cover"      -> cover.asJson
+          "cover"      -> cover.asJson,
+          "children"   -> children.asJson
         )
 
       defaultRequest
