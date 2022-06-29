@@ -8,7 +8,7 @@ import zio._
 import zio.notion.NotionClient.NotionResponse
 import zio.notion.NotionError.JsonError
 import zio.notion.dsl._
-import zio.notion.model.block.{Block, Blocks}
+import zio.notion.model.block.{Block, BlockContent, Blocks}
 import zio.notion.model.common.{Cover, Icon}
 import zio.notion.model.common.Parent.{DatabaseId, PageId}
 import zio.notion.model.common.richtext.RichTextFragment
@@ -54,14 +54,16 @@ sealed trait Notion {
       parent: PageId,
       title: Option[PatchedProperty],
       icon: Option[Icon],
-      cover: Option[Cover]
+      cover: Option[Cover],
+      children: Seq[BlockContent]
   )(implicit trace: Trace): IO[NotionError, Page]
 
   def createPageInDatabase(
       parent: DatabaseId,
       properties: Map[String, PatchedProperty],
       icon: Option[Icon],
-      cover: Option[Cover]
+      cover: Option[Cover],
+      children: Seq[BlockContent]
   )(implicit trace: Trace): IO[NotionError, Page]
 
 }
@@ -281,16 +283,19 @@ object Notion {
       parent: PageId,
       title: Option[PatchedTitle],
       icon: Option[Icon],
-      cover: Option[Cover]
-  )(implicit trace: Trace): ZIO[Notion, NotionError, Page] = ZIO.service[Notion].flatMap(_.createPageInPage(parent, title, icon, cover))
+      cover: Option[Cover],
+      children: Seq[BlockContent]
+  )(implicit trace: Trace): ZIO[Notion, NotionError, Page] =
+    ZIO.service[Notion].flatMap(_.createPageInPage(parent, title, icon, cover, children))
 
   def createPageInDatabase(
       parent: DatabaseId,
       properties: Map[String, PatchedProperty],
       icon: Option[Icon],
-      cover: Option[Cover]
+      cover: Option[Cover],
+      children: Seq[BlockContent]
   )(implicit trace: Trace): ZIO[Notion, NotionError, Page] =
-    ZIO.service[Notion].flatMap(_.createPageInDatabase(parent, properties, icon, cover))
+    ZIO.service[Notion].flatMap(_.createPageInDatabase(parent, properties, icon, cover, children))
 
   val live: URLayer[NotionClient, Notion] = ZLayer(ZIO.service[NotionClient].map(LiveNotion))
 
@@ -354,15 +359,18 @@ object Notion {
         parent: PageId,
         title: Option[PatchedProperty],
         icon: Option[Icon],
-        cover: Option[Cover]
-    )(implicit trace: Trace): IO[NotionError, Page] = decodeResponse[Page](notionClient.createPageInPage(parent, title, icon, cover))
+        cover: Option[Cover],
+        children: Seq[BlockContent]
+    )(implicit trace: Trace): IO[NotionError, Page] =
+      decodeResponse[Page](notionClient.createPageInPage(parent, title, icon, cover, children))
 
     override def createPageInDatabase(
         parent: DatabaseId,
         properties: Map[String, PatchedProperty],
         icon: Option[Icon],
-        cover: Option[Cover]
+        cover: Option[Cover],
+        children: Seq[BlockContent]
     )(implicit trace: Trace): IO[NotionError, Page] =
-      decodeResponse[Page](notionClient.createPageInDatabase(parent, properties, icon, cover))
+      decodeResponse[Page](notionClient.createPageInDatabase(parent, properties, icon, cover, children))
   }
 }
