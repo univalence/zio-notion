@@ -92,7 +92,7 @@ We provide [other examples](https://github.com/univalence/zio-notion/tree/master
 If you want to get the very last version of this library you can still download it using:
 
 ```scala
-libraryDependencies += "io.univalence" %% "zio-notion" % "0.6.2"
+libraryDependencies += "io.univalence" %% "zio-notion" % "0.7.0"
 ```
 
 ### Snapshots
