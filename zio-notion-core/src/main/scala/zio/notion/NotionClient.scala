@@ -68,44 +68,44 @@ trait NotionClient {
 object NotionClient {
 
   def retrievePage(pageId: String)(implicit trace: Trace): ZIO[NotionClient, NotionError, NotionResponse] =
-    ZIO.service[NotionClient].flatMap(_.retrievePage(pageId))
+    ZIO.serviceWithZIO[NotionClient](_.retrievePage(pageId))
 
   def retrieveDatabase(databaseId: String)(implicit trace: Trace): ZIO[NotionClient, NotionError, NotionResponse] =
-    ZIO.service[NotionClient].flatMap(_.retrieveDatabase(databaseId))
+    ZIO.serviceWithZIO[NotionClient](_.retrieveDatabase(databaseId))
 
   def retrieveUser(userId: String)(implicit trace: Trace): ZIO[NotionClient, NotionError, NotionResponse] =
-    ZIO.service[NotionClient].flatMap(_.retrieveUser(userId))
+    ZIO.serviceWithZIO[NotionClient](_.retrieveUser(userId))
 
   def retrieveUsers(pagination: Pagination)(implicit trace: Trace): ZIO[NotionClient, NotionError, NotionResponse] =
-    ZIO.service[NotionClient].flatMap(_.retrieveUsers(pagination))
+    ZIO.serviceWithZIO[NotionClient](_.retrieveUsers(pagination))
 
   def queryDatabase(
       databaseId: String,
       query: Query,
       pagination: Pagination
   )(implicit trace: Trace): ZIO[NotionClient, NotionError, NotionResponse] =
-    ZIO.service[NotionClient].flatMap(_.queryDatabase(databaseId, query, pagination))
+    ZIO.serviceWithZIO[NotionClient](_.queryDatabase(databaseId, query, pagination))
 
   def updatePage(
       pageId: String,
       operations: Page.Patch.StatelessOperations
   )(implicit trace: Trace): ZIO[NotionClient, NotionError, NotionResponse] =
-    ZIO.service[NotionClient].flatMap(_.updatePage(pageId, operations))
+    ZIO.serviceWithZIO[NotionClient](_.updatePage(pageId, operations))
 
   def updatePage(page: Page, operations: Page.Patch.Operations)(implicit trace: Trace): ZIO[NotionClient, NotionError, NotionResponse] =
-    ZIO.service[NotionClient].flatMap(_.updatePage(page, operations))
+    ZIO.serviceWithZIO[NotionClient](_.updatePage(page, operations))
 
   def updateDatabase(
       databaseId: String,
       operations: Database.Patch.StatelessOperations
   )(implicit trace: Trace): ZIO[NotionClient, NotionError, NotionResponse] =
-    ZIO.service[NotionClient].flatMap(_.updateDatabase(databaseId, operations))
+    ZIO.serviceWithZIO[NotionClient](_.updateDatabase(databaseId, operations))
 
   def updateDatabase(
       database: Database,
       operations: Database.Patch.Operations
   )(implicit trace: Trace): ZIO[NotionClient, NotionError, NotionResponse] =
-    ZIO.service[NotionClient].flatMap(_.updateDatabase(database, operations))
+    ZIO.serviceWithZIO[NotionClient](_.updateDatabase(database, operations))
 
   type NotionResponse = String
 
