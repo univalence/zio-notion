@@ -112,6 +112,6 @@ object RichTextFragment {
     @ConfiguredJsonCodec final case class Expression(expression: String)
   }
 
-  def default(text: String, annotations: Annotations): Text =
+  def default(text: String, annotations: Annotations = Annotations.default): Text =
     RichTextFragment.Text(RichTextFragment.Text.TextData(text, None), annotations, text, None)
 }

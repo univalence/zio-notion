@@ -3,9 +3,11 @@ package zio.notion.dsl
 trait ColumnDSL {
 
   implicit class ColumnContext(val sc: StringContext) {
-    def $(args: Any*): Column = col(sc.s(args: _*))
+    private def text(args: Any*): String = sc.s(args: _*)
 
-    def $$(args: Any*): ColumnDefinition = colDefinition(sc.s(args: _*))
+    def $(args: Any*): Column = col(text(args: _*))
+
+    def $$(args: Any*): ColumnDefinition = colDefinition(text(args: _*))
   }
 
   def col(colName: String): Column = Column(colName)

@@ -4,7 +4,7 @@ import zio.Clock
 import zio.notion.NotionError
 import zio.notion.model.common.Id
 import zio.notion.model.common.enumeration.Color
-import zio.notion.model.common.richtext.{Annotations, RichTextFragment}
+import zio.notion.model.common.richtext.{Annotations, RichText, RichTextFragment}
 import zio.notion.model.page.Page.Patch.Operations.Operation._
 import zio.notion.model.page.PatchedProperty._
 import zio.notion.model.page.property.Link
@@ -17,7 +17,7 @@ object PatchedColumn {
 
   final case class PatchedColumnTitle(columnName: String) extends {
     def set(title: Seq[RichTextFragment.Text]): SetProperty = SetProperty(columnName, PatchedTitle(title))
-    def set(title: String): SetProperty                     = set(Seq(RichTextFragment.default(title, Annotations.default)))
+    def set(title: String): SetProperty                     = set(RichText.fromString(title))
 
     def update(f: Seq[RichTextFragment] => Seq[RichTextFragment]): UpdateProperty =
       UpdateProperty.succeed[PatchedTitle](columnName, property => property.copy(title = f(property.title)))
@@ -31,7 +31,7 @@ object PatchedColumn {
 
   final case class PatchedColumnRichText(columnName: String) {
     def set(title: Seq[RichTextFragment.Text]): SetProperty = SetProperty(columnName, PatchedRichText(title))
-    def set(title: String): SetProperty                     = set(Seq(RichTextFragment.default(title, Annotations.default)))
+    def set(title: String): SetProperty                     = set(RichText.fromString(title))
 
     def update(f: Seq[RichTextFragment] => Seq[RichTextFragment]): UpdateProperty =
       UpdateProperty.succeed[PatchedRichText](columnName, property => property.copy(richText = f(property.richText)))
