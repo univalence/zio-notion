@@ -47,7 +47,7 @@ Chosen option: "Circe", because it is a library :
 
 ### Json4s
 
-/!\ We didn't test a lot of this solution to be honest
+/!\ We didn't test a lot this solution to be honest
 
 * Good, because it is a well maintained library with more than 1K stars
 * Good, because it is totally agnostic

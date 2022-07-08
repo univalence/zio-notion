@@ -7,7 +7,7 @@ The `Notion.queryDatabase` function retrieve the metadata of a Notion database.
 You can query the whole database, but you generally want to retrieve a subset of the database.
 
 You can select what kind of information you want specifying a Query object containing information about how you want
-to sort the result (based on certain column) or what do you want to retrieve (based on certain columns).
+to sort the result (based on certain columns) or what do you want to retrieve (based on certain columns).
 
 It can be a bit cumbersome to write the object by hand, we advise you to use the DSL to create our own filters and sorts.
 
