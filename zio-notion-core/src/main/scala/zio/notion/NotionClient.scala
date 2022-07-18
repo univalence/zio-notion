@@ -5,7 +5,6 @@ import io.circe.generic.semiauto.deriveDecoder
 import io.circe.parser.decode
 import io.circe.syntax.EncoderOps
 import sttp.client3._
-import sttp.client3.asynchttpclient.zio.SttpClient
 import sttp.model.Uri
 
 import zio.{IO, _}
@@ -119,19 +118,19 @@ object NotionClient {
     implicit val decoder: Decoder[NotionClientError] = deriveDecoder[NotionClientError]
   }
 
-  val live: URLayer[NotionConfiguration with SttpClient, NotionClient] =
+  val live: URLayer[NotionConfiguration with Backend, NotionClient] =
     ZLayer {
       for {
-        config     <- ZIO.service[NotionConfiguration]
-        sttpClient <- ZIO.service[SttpClient]
-      } yield LiveNotionClient(config, sttpClient)
+        config  <- ZIO.service[NotionConfiguration]
+        backend <- ZIO.service[Backend]
+      } yield LiveNotionClient(config, backend)
     }
 
-  case class LiveNotionClient(config: NotionConfiguration, sttpClient: SttpClient) extends NotionClient { // scalafix:ok
+  case class LiveNotionClient(config: NotionConfiguration, backend: Backend) extends NotionClient { // scalafix:ok
     val endpoint: Uri = uri"https://api.notion.com/v1"
 
     def apply(request: NotionRequest): IO[NotionError, NotionResponse] =
-      sttpClient
+      backend
         .send(request)
         .mapError(t => ConnectionError(t))
         .flatMap(response =>
