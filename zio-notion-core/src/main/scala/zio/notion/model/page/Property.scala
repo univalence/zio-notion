@@ -27,10 +27,10 @@ object ToPatchedProperty {
       case Property.RichText(_, richText)             => Some(PatchedRichText(richText))
       case Property.People(_, people)                 => Some(PatchedPeople(people))
       case Property.Relation(_, relation)             => Some(PatchedRelation(relation))
+      case Property.Select(_, Some(select))           => Some(PatchedSelect(Some(select.id), Some(select.name)))
       case Property.MultiSelect(_, multiSelect) =>
         val selects = multiSelect.map(data => PatchedSelect(Some(data.id), Some(data.name)))
         Some(PatchedMultiSelect(selects))
-      // We can't update a select from an existing one.
       case _ => None
     }
 }
