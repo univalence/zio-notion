@@ -133,19 +133,21 @@ object NotionClient {
       backend
         .send(request)
         .mapError(t => ConnectionError(t))
-        .flatMap(response =>
+        .flatMap { response =>
+          val body = response.body.merge
+
           response.code match {
-            case code if code.isSuccess => ZIO.succeed(response.body.merge)
-            case _ =>
+            case code if code.isSuccess => ZIO.succeed(body)
+            case code =>
               val error =
                 decode[NotionClientError](response.body.merge) match {
-                  case Left(error)  => JsonError(error)
+                  case Left(_)      => NotionError.HttpError(request.toCurl, code.code, "unknown", body)
                   case Right(error) => NotionError.HttpError(request.toCurl, error.status, error.code, error.message)
                 }
 
               ZIO.fail(error)
           }
-        )
+        }
 
     implicit private class RequestOps(request: NotionRequest) {
       def handle: IO[NotionError, NotionResponse] = apply(request)
