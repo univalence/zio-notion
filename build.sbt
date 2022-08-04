@@ -73,7 +73,7 @@ addCommandAlias("testSpecificWithCoverage", "; clean; coverage; test; coverageRe
 val zio          = "2.0.0"
 val zioPrelude   = "1.0.0-RC15"
 val circe        = "0.14.2"
-val sttp         = "3.7.1"
+val sttp         = "3.7.2"
 val magnolia     = "1.1.2"
 val scalaReflect = "2.13.8"
 
