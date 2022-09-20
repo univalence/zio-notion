@@ -1,5 +1,6 @@
 .bsp/
 .idea/
+.DS_Store
 target/
 Main.scala
 
