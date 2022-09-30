@@ -2,7 +2,7 @@ package zio.notion
 
 import zio.Scope
 import zio.notion.Converter.convertEnumeration
-import zio.notion.Faker.{emptyPage, fakeDate, fakeDatetime, fakeUrl, fakeUUID}
+import zio.notion.Faker.{emptyPage, fakeDate, fakeDatetime, fakeExternalLink, fakeUrl, fakeUUID}
 import zio.notion.NotionError.ParsingError
 import zio.notion.NotionError.PropertyConverterError.{EnumerationError, NestedError, NotExistError, RequiredError}
 import zio.notion.model.common.{Id, Period, TimePeriod}
@@ -36,6 +36,8 @@ object ConverterSpec extends ZIOSpecDefault {
 
         val properties =
           Map(
+            "files"          -> Property.Files("", Seq(fakeExternalLink)),
+            "file"           -> Property.Files("", Seq(fakeExternalLink)),
             "number"         -> Property.Number("", Some(numberValue)),
             "localDate"      -> Property.Date("", Some(Period(fakeDate, None))),
             "offsetDateTime" -> Property.DateTime("", Some(TimePeriod(fakeDatetime, None, None))),
@@ -48,6 +50,8 @@ object ConverterSpec extends ZIOSpecDefault {
           )
 
         final case class CaseClass(
+            files:          Seq[String],
+            file:           String,
             number:         Double,
             localDate:      LocalDate,
             offsetDateTime: OffsetDateTime,
@@ -63,6 +67,8 @@ object ConverterSpec extends ZIOSpecDefault {
 
         val expected =
           CaseClass(
+            Seq(fakeUrl),
+            fakeUrl,
             numberValue,
             fakeDate,
             fakeDatetime,
