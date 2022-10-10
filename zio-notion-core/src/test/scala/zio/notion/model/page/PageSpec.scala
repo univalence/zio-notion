@@ -47,6 +47,11 @@ object PageSpec extends ZIOSpecDefault {
             |            "type": "rich_text",
             |            "rich_text": []
             |        },
+            |        "NewStatus": {
+            |            "id": "BuJj",
+            |            "type": "status",
+            |            "status": null
+            |        },
             |        "Status": {
             |            "id": "@Gcb",
             |            "type": "select",

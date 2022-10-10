@@ -35,6 +35,7 @@ final case class Column(colName: String) {
   def asRichText: RichTextDSLConstructor             = RichTextDSLConstructor(colName)
   def asCheckbox: CheckboxDSLConstructor             = CheckboxDSLConstructor(colName)
   def asSelect: SelectDSLConstructor                 = SelectDSLConstructor(colName)
+  def asStatus: SelectDSLConstructor                 = SelectDSLConstructor(colName)
   def asMultiSelect: MultiSelectDSLConstructor       = MultiSelectDSLConstructor(colName)
   def asDate: DateDSLConstructor                     = DateDSLConstructor(colName)
   def asDateTime: DateTimeDSLConstructor             = DateTimeDSLConstructor(colName)

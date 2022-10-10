@@ -20,7 +20,19 @@ import java.time.ZoneOffset
 object PropertySpec extends ZIOSpecDefault {
 
   override def spec: Spec[TestEnvironment with Scope, Nothing] =
-    suite("RollupData serde suite")(
+    suite("Property serde suite")(
+      test("we should be able to parse a status property") {
+        val json: String =
+          s"""{
+             |    "id": "BuJj",
+             |    "type": "status",
+             |    "status": null
+             |}""".stripMargin
+
+        val expected = Status("BuJj", None)
+
+        assert(decode[Property](json))(isRight(equalTo(expected)))
+      },
       test("We should be able to parse a rollup object as json") {
         val json: String =
           s"""{
