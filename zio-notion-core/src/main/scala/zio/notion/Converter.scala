@@ -1,16 +1,18 @@
 package zio.notion
 
 import magnolia1.{CaseClass, Magnolia}
-import zio.notion.NotionError.PropertyConverterError._
+
 import zio.notion.NotionError.{ParsingError, PropertyConverterError}
-import zio.notion.model.common.richtext.RichTextFragment
+import zio.notion.NotionError.PropertyConverterError._
 import zio.notion.model.common.{Id, Period, TimePeriod}
+import zio.notion.model.common.richtext.RichTextFragment
 import zio.notion.model.page.Property
 import zio.notion.model.page.Property.{Files, People, Relation, RichText, Select, Title}
 import zio.prelude.{Validation, ZValidation}
 
-import java.time.{LocalDate, OffsetDateTime}
 import scala.reflect.ClassTag
+
+import java.time.{LocalDate, OffsetDateTime}
 
 final class NotionColumn(val name: String) extends scala.annotation.StaticAnnotation
 
@@ -89,8 +91,6 @@ object Converter {
       val isValidFloat = { val l = v.toLong; l.toDouble == v && l != Long.MaxValue }
       if (isValidFloat) Some(v.toLong) else None
     }("Long")
-
-
 
   /**
    * A best effort conversion to look like notion database default value
