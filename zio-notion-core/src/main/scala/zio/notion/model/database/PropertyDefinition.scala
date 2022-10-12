@@ -35,6 +35,5 @@ object PropertyDefinition {
   final case class CreatedTime(id: String, name: String)                              extends PropertyDefinition
   final case class LastEditedBy(id: String, name: String)                             extends PropertyDefinition
   final case class LastEditedTime(id: String, name: String)                           extends PropertyDefinition
-
-  final case class Status(id: String, name: String, status: StatusMetadata) extends PropertyDefinition
+  final case class Status(id: String, name: String, status: StatusMetadata)           extends PropertyDefinition
 }

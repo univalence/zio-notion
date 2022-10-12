@@ -6,12 +6,13 @@ import zio.Scope
 import zio.notion.Faker._
 import zio.notion.model.common
 import zio.notion.model.common.{richtext, Id, Period, TimePeriod}
+import zio.notion.model.common.enumeration.Color.Yellow
 import zio.notion.model.common.enumeration.RollupFunction.Count
 import zio.notion.model.common.richtext.RichTextFragment
 import zio.notion.model.common.richtext.RichTextFragment.Mention.MentionData
 import zio.notion.model.page.Property
 import zio.notion.model.page.Property._
-import zio.notion.model.page.property.data.RollupData
+import zio.notion.model.page.property.data.{RollupData, SelectData}
 import zio.test._
 import zio.test.Assertion._
 
@@ -21,7 +22,7 @@ object PropertySpec extends ZIOSpecDefault {
 
   override def spec: Spec[TestEnvironment with Scope, Nothing] =
     suite("Property serde suite")(
-      test("we should be able to parse a status property") {
+      test("we should be able to parse a null status property") {
         val json: String =
           s"""{
              |    "id": "BuJj",
@@ -30,6 +31,22 @@ object PropertySpec extends ZIOSpecDefault {
              |}""".stripMargin
 
         val expected = Status("BuJj", None)
+
+        assert(decode[Property](json))(isRight(equalTo(expected)))
+      },
+      test("we should be able to parse a status property") {
+        val json: String =
+          s"""{
+             |    "id": "BuJj",
+             |    "type": "status",
+             |    "status": {
+             |        "id": "xxx",
+             |        "name": "Doing",
+             |        "color": "yellow"
+             |    }
+             |}""".stripMargin
+
+        val expected = Status("BuJj", Some(SelectData("xxx", "Doing", Yellow)))
 
         assert(decode[Property](json))(isRight(equalTo(expected)))
       },

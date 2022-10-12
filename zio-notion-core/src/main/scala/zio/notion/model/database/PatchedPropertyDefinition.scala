@@ -16,21 +16,23 @@ object PatchedPropertyDefinition {
   sealed trait PropertySchema
 
   object PropertySchema {
-    final case object Title                                                       extends PropertySchema
-    final case object RichText                                                    extends PropertySchema
-    final case class Number(format: NumberFormat)                                 extends PropertySchema
-    final case class Select(options: Seq[SelectOption])                           extends PropertySchema
-    final case class Status(options: Seq[SelectOption], groups: Seq[StatusGroup]) extends PropertySchema
-    final case class MultiSelect(options: Seq[SelectOption])                      extends PropertySchema
-    final case object Date                                                        extends PropertySchema
-    final case object People                                                      extends PropertySchema
-    final case object Files                                                       extends PropertySchema
-    final case object Checkbox                                                    extends PropertySchema
-    final case object Url                                                         extends PropertySchema
-    final case object Email                                                       extends PropertySchema
-    final case object PhoneNumber                                                 extends PropertySchema
-    final case class Formula(expression: String)                                  extends PropertySchema
-    final case class Relation(databaseId: String)                                 extends PropertySchema
+    final case object Title                                  extends PropertySchema
+    final case object RichText                               extends PropertySchema
+    final case class Number(format: NumberFormat)            extends PropertySchema
+    final case class Select(options: Seq[SelectOption])      extends PropertySchema
+    final case class MultiSelect(options: Seq[SelectOption]) extends PropertySchema
+    final case object Date                                   extends PropertySchema
+    final case object People                                 extends PropertySchema
+    final case object Files                                  extends PropertySchema
+    final case object Checkbox                               extends PropertySchema
+    final case object Url                                    extends PropertySchema
+    final case object Email                                  extends PropertySchema
+    final case object PhoneNumber                            extends PropertySchema
+    final case class Formula(expression: String)             extends PropertySchema
+    final case class Relation(databaseId: String)            extends PropertySchema
+
+    final case object Status
+        extends PropertySchema // TODO: 12/10/22 undocumented yet https://developers.notion.com/reference/update-a-database
 
     final case class Rollup(
         rollupPropertyName:   Option[String],
@@ -48,12 +50,6 @@ object PatchedPropertyDefinition {
 
     object SelectOption {
       implicit val encoder: Encoder[SelectOption] = NoDiscriminantNoNullEncoderDerivation.gen[SelectOption]
-    }
-
-    final case class StatusGroup(name: String, color: Option[BaseColor])
-
-    object StatusGroup {
-      implicit val encoder: Encoder[StatusGroup] = NoDiscriminantNoNullEncoderDerivation.gen[StatusGroup]
     }
 
     implicit val encoder: Encoder[PropertySchema] = PropertyTypeEncoderDerivation.gen[PropertySchema]
