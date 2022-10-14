@@ -2,7 +2,14 @@ package zio.notion.model.database
 
 import io.circe.generic.extras.ConfiguredJsonCodec
 
-import zio.notion.model.database.metadata.{FormulaMetadata, NumberMetadata, RelationMetadata, RollupMetadata, SelectMetadata}
+import zio.notion.model.database.metadata.{
+  FormulaMetadata,
+  NumberMetadata,
+  RelationMetadata,
+  RollupMetadata,
+  SelectMetadata,
+  StatusMetadata
+}
 
 @ConfiguredJsonCodec sealed trait PropertyDefinition {
   def id: String
@@ -28,4 +35,5 @@ object PropertyDefinition {
   final case class CreatedTime(id: String, name: String)                              extends PropertyDefinition
   final case class LastEditedBy(id: String, name: String)                             extends PropertyDefinition
   final case class LastEditedTime(id: String, name: String)                           extends PropertyDefinition
+  final case class Status(id: String, name: String, status: StatusMetadata)           extends PropertyDefinition
 }
