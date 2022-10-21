@@ -5,8 +5,10 @@ sidebar_position: 1
 
 # Introduction
 
+## Getting started
+
 ZIO Notion is a library that allow user to interact with Notion in a functional way. Under the hood, the library uses
-STTP, Circe and ZIO to communicate with the Notion API. Thus, we tend to follow the Notion API spec as much as we can.
+STTP, Circe and ZIO to communicate with the Notion API. Thus, we tend to follow the Notion API spec as much as possible.
 
 To install the library, add the following line to your **build.sbt**:
 
@@ -32,10 +34,36 @@ If you are not comfortable with ZIO's layers, we advise you to read
 
 When it is done, you can start interacting with the Notion API:
 
-````scala
+```scala
 import zio.notion._
 
 val retrievePageId: ZIO[Notion, NotionError, String] = for {
   page <- Notion.retrievePage("page-id")
 } yield page.id
-````
+```
+## Base methods
+
+Here are the base methods that you can use to interact with Notion
+
+| Method                   | Parameters                                                                                                                                    | Return type                          |
+|--------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------|
+| **retrievePage**         | pageId: `String`                                                                                                                              | `IO`[`NotionError`, `Page`]          |
+| **retrieveDatabase**     | databaseId: `String`                                                                                                                          | `IO`[`NotionError`, `Database`]      |
+| **retrieveUser**         | userId: `String`                                                                                                                              | `IO`[`NotionError`, `User`]          |
+| **retrieveUsers**        | pagination: `Pagination`                                                                                                                      | `IO`[`NotionError`, `Users`]         |
+| **retrieveBlock**        | blockId: `String`                                                                                                                             | `IO`[`NotionError`, `Block`]         |
+| **retrieveBlocks**       | pageId: `String`, pagination: `Pagination`                                                                                                    | `IO`[`NotionError`, `Blocks`]        |
+| **queryDatabase**        | databaseId: `String`, query: `Query`, pagination: `Pagination`                                                                                | `IO`[`NotionError`, `DatabaseQuery`] |
+| **updatePage**           | pageId: `String`, operations: `Page.Patch.StatelessOperations`                                                                                | `IO`[`NotionError`, `Page`]          |
+| **updatePage**           | page: `Page`, operations: `Page.Patch.Operations`                                                                                             | `IO`[`NotionError`, `Page`]          |
+| **updateDatabase**       | databaseId: `String`, operations: `Database.Patch.StatelessOperations`                                                                        | `IO`[`NotionError`, `Database`]      |
+| **updateDatabase**       | database: `Database`, operations: `Database.Patch.Operations`                                                                                 | `IO`[`NotionError`, `Database`]      |
+| **createDatabase**       | pageId: `String`, title: `Seq[RichTextFragment]`, icon: `Option[Icon]`, cover: `Option[Cover]`, properties: `Map[String, PropertySchema]`     | `IO`[`NotionError`, `Database`]      |
+| **createPageInPage**     | parent: `PageId`, title: `Option[PatchedProperty]`, icon: `Option[Icon]`, cover: `Option[Cover]`, children: `Seq[BlockContent]`               | `IO`[`NotionError`, `Page`]          |
+| **createPageInDatabase** | parent: `DatabaseId`, properties: `Map[String, PatchedProperty]`, icon: `Option[Icon]`, cover: `Option[Cover]`, children: `Seq[BlockContent]` | `IO`[`NotionError`, `Page`]          |
+
+Feel free to read the `Tutorials` section for examples on how to use `zio-notion` or visit the [examples directory on github](https://github.com/univalence/zio-notion/tree/master/examples/)
+
+
+
+
