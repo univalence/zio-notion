@@ -17,13 +17,11 @@ You will need this type when handling database query results, retrieving a page 
 | icon            | Option[Icon]          | Emoji or URI of the page's icon picture file                         |
 | parent          | Parent                | Parent page or database. Can be used like so: "xxx".asParentDatabase |
 | archived        | Boolean               | State of the page archiving                                          |
-| properties      | Map[String, Property] | Property map. Is described below in the documentation                |
+| properties      | Map[String, Property] | Property map. Property is described in todo link                     |
 | url             | String                | Page's URL                                                           |
 
 ## Referenced methods
-
 TODO
-
 ## Recap
 todo
 ## Full example
