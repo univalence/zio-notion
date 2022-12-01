@@ -37,7 +37,12 @@ import java.time.LocalDate
 
 object UpdatePage extends ZIOAppDefault {
   def example: ZIO[Notion, NotionError, Unit] = {
-    val date       = LocalDate.of(2022, 2, 2)
+    val date = LocalDate.of(2022, 2, 2)
+    
+    // Apply the following operations to the page:
+    //   - Apply the ceil function to the value contained in "col1"
+    //   - Set the date between 2022-02-02 and 2022-02-16 in "col2"
+    //   - Archive the page
     val operations = $"col1".asNumber.patch.ceil ++ $"col2".asDate.patch.between(date, date.plusDays(14)) ++ archive
 
     for {
@@ -46,7 +51,7 @@ object UpdatePage extends ZIOAppDefault {
     } yield ()
   }
 
-  override def run: ZIO[Any with ZIOAppArgs with Scope, Any, Any] =
+  override def run =
     example.provide(Notion.layerWith("6A074793-D735-4BF6-9159-24351D239BBC")) // Insert your own bearer
 }
 ```
