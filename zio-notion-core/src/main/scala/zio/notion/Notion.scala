@@ -2,8 +2,7 @@ package zio.notion
 
 import io.circe.Decoder
 import io.circe.parser.decode
-import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
-
+import sttp.client3.httpclient.zio.HttpClientZioBackend
 import zio._
 import zio.notion.NotionClient.NotionResponse
 import zio.notion.NotionError.JsonError
@@ -300,7 +299,7 @@ object Notion {
   val live: URLayer[NotionClient, Notion] = ZLayer(ZIO.service[NotionClient].map(LiveNotion))
 
   def layerWith(bearer: String): Layer[Throwable, Notion] =
-    AsyncHttpClientZioBackend.layer() ++ ZLayer.succeed(NotionConfiguration(bearer)) >>> NotionClient.live >>> Notion.live
+    HttpClientZioBackend.layer() ++ ZLayer.succeed(NotionConfiguration(bearer)) >>> NotionClient.live >>> Notion.live
 
   final case class LiveNotion(notionClient: NotionClient) extends Notion {
     private def decodeResponse[T: Decoder](request: IO[NotionError, NotionResponse]): IO[NotionError, T] = request.flatMap(decodeJson[T])
