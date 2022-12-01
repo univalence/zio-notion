@@ -7,7 +7,7 @@ import zio.notion.NotionError.PropertyConverterError._
 import zio.notion.model.common.{Id, Period, TimePeriod}
 import zio.notion.model.common.richtext.RichTextFragment
 import zio.notion.model.page.Property
-import zio.notion.model.page.Property.{People, Relation, RichText, Title}
+import zio.notion.model.page.Property.{Files, People, Relation, RichText, Select, Title}
 import zio.prelude.{Validation, ZValidation}
 
 import scala.reflect.ClassTag
@@ -60,8 +60,10 @@ object Converter {
   implicit def list[A](implicit A: PropertyConverter[Seq[A]]): PropertyConverter[List[A]] = (p: Property) => A.convert(p).map(_.toList)
 
   implicit def seq[A](implicit A: PropertyConverter[A], tag: ClassTag[A]): PropertyConverter[Seq[A]] = {
+    case Property.Files(_, files) =>
+      Validation.validateAll(files.map(link => Files("", Seq(link))).map(A.convert))
     case Property.MultiSelect(_, multiSelect) =>
-      Validation.validateAll(multiSelect.map(select => Property.Select("", Some(select))).map(A.convert))
+      Validation.validateAll(multiSelect.map(select => Select("", Some(select))).map(A.convert))
     case Property.People(_, people) =>
       Validation.validateAll(people.map(person => People("", Seq(person))).map(A.convert))
     case Property.Relation(_, relation) =>
