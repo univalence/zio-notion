@@ -103,9 +103,10 @@ lazy val core =
 
 def example(project: Project): Project = project.dependsOn(core)
 
-lazy val exampleUpdatePage    = (project in file("examples/update-page")).configure(example)
-lazy val exampleRetrievePage  = (project in file("examples/retrieve-page")).configure(example)
-lazy val exampleQueryDatabase = (project in file("examples/query-database")).configure(example)
+lazy val exampleUpdatePage     = (project in file("examples/update-page")).configure(example)
+lazy val exampleRetrievePage   = (project in file("examples/retrieve-page")).configure(example)
+lazy val exampleQueryDatabase  = (project in file("examples/query-database")).configure(example)
+lazy val exampleUpdateDatabase = (project in file("examples/update-database")).configure(example)
 
 lazy val examples = (project in file("examples")).aggregate(exampleUpdatePage, exampleRetrievePage, exampleQueryDatabase)
 
