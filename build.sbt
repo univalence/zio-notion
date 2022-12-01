@@ -1,4 +1,4 @@
-lazy val scala213 = "2.13.8"
+lazy val scala213 = "2.13.10"
 
 lazy val supportedScalaVersions = List(scala213)
 
@@ -75,7 +75,7 @@ val zioPrelude   = "1.0.0-RC16"
 val circe        = "0.14.3"
 val sttp         = "3.8.3"
 val magnolia     = "1.1.2"
-val scalaReflect = "2.13.8"
+val scalaReflect = "2.13.10"
 
 // -- Main project settings
 lazy val core =
