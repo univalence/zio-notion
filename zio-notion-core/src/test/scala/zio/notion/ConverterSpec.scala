@@ -20,7 +20,7 @@ object ConverterSpec extends ZIOSpecDefault {
   override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("Converter suite")(
       test("It should convert a simple page") {
-        val number = 10
+        val number = 10.0
 
         final case class CaseClass(test: Double)
 
@@ -29,7 +29,7 @@ object ConverterSpec extends ZIOSpecDefault {
         assertTrue(page.propertiesAs[CaseClass] == Validation.succeed(CaseClass(number)))
       },
       test("It should convert a complex page") {
-        val numberValue     = 10
+        val numberValue     = 10.0
         val booleanValue    = true
         val periodValue     = Period(fakeDate, Some(fakeDate.plusDays(10)))
         val timePeriodValue = TimePeriod(fakeDatetime, Some(fakeDatetime.plusDays(10)), None)
