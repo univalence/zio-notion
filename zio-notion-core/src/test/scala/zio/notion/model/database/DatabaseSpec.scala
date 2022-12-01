@@ -99,6 +99,57 @@ object DatabaseSpec extends ZIOSpecDefault {
             |                ]
             |            }
             |        },
+            |        
+            |        "Status": {
+            |            "id": "BuJj",
+            |            "name": "StatusForTests",
+            |            "type": "status",
+            |            "status": {
+            |                "options": [
+            |                    {
+            |                        "id": "xxx",
+            |                        "name": "Todo",
+            |                        "color": "purple"
+            |                    },
+            |                    {
+            |                        "id": "yyy",
+            |                        "name": "Doing",
+            |                        "color": "gray"
+            |                    },
+            |                    {
+            |                        "id": "zzz",
+            |                        "name": "Done",
+            |                        "color": "brown"
+            |                    }
+            |                ],
+            |                "groups": [
+            |                    {
+            |                        "id": "4919864f-9ecb-49dc-8606-042f206c5adb",
+            |                        "name": "To-do",
+            |                        "color": "gray",
+            |                        "option_ids": [
+            |                            "xxx"
+            |                        ]
+            |                    },
+            |                    {
+            |                        "id": "30b1987b-48a2-4854-ace0-ffc6eadcebd3",
+            |                        "name": "In progress",
+            |                        "color": "blue",
+            |                        "option_ids": [
+            |                            "yyy"
+            |                        ]
+            |                    },
+            |                    {
+            |                        "id": "b0b824d3-80c5-4520-957c-959aabf14731",
+            |                        "name": "Complete",
+            |                        "color": "green",
+            |                        "option_ids": [
+            |                            "zzz"
+            |                        ]
+            |                    }
+            |                ]
+            |            }
+            |        },
             |            "Property 8": {
             |            "id": "JYsh",
             |            "name": "Property 8",

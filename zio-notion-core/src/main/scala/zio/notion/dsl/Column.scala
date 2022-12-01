@@ -35,6 +35,7 @@ final case class Column(colName: String) {
   def asRichText: RichTextDSLConstructor             = RichTextDSLConstructor(colName)
   def asCheckbox: CheckboxDSLConstructor             = CheckboxDSLConstructor(colName)
   def asSelect: SelectDSLConstructor                 = SelectDSLConstructor(colName)
+  def asStatus: StatusDSLConstructor                 = StatusDSLConstructor(colName)
   def asMultiSelect: MultiSelectDSLConstructor       = MultiSelectDSLConstructor(colName)
   def asDate: DateDSLConstructor                     = DateDSLConstructor(colName)
   def asDateTime: DateTimeDSLConstructor             = DateTimeDSLConstructor(colName)
@@ -117,6 +118,15 @@ object Column {
     def doesNotEqual(string: String): Select = Select(property, DoesNotEqual(string))
     def isEmpty: Select                      = Select(property, IsEmpty(true))
     def isNotEmpty: Select                   = Select(property, IsNotEmpty(true))
+
+    def patch: PatchedColumnSelect = PatchedColumnSelect(property)
+  }
+
+  final case class StatusDSLConstructor private (property: String) {
+    def equals(string: String): Status       = Status(property, Equals(string))
+    def doesNotEqual(string: String): Status = Status(property, DoesNotEqual(string))
+    def isEmpty: Status                      = Status(property, IsEmpty(true))
+    def isNotEmpty: Status                   = Status(property, IsNotEmpty(true))
 
     def patch: PatchedColumnSelect = PatchedColumnSelect(property)
   }

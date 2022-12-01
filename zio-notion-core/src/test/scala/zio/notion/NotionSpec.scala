@@ -73,13 +73,20 @@ object NotionSpec extends ZIOSpecDefault {
         effect.map(res => assertTrue(res.id == fakeUUID))
       },
       test("User can create an empty page") {
-        val effect: ZIO[Notion, NotionError, Page] = Notion.createPageInPage(fakeUUID.asParentPage, Some(fakePatchedTitle), None, None)
+        val effect: ZIO[Notion, NotionError, Page] =
+          Notion.createPageInPage(fakeUUID.asParentPage, Some(fakePatchedTitle), None, None, Seq.empty)
 
         effect.map(res => assertTrue(res.parent == fakeUUID.asParentPage))
       },
       test("User can create an empty page in database") {
         val effect: ZIO[Notion, NotionError, Page] =
-          Notion.createPageInDatabase(fakeUUID.asParentDatabase, Map("Name" -> fakePatchedTitle, "Price" -> fakePatchedNumber), None, None)
+          Notion.createPageInDatabase(
+            fakeUUID.asParentDatabase,
+            Map("Name" -> fakePatchedTitle, "Price" -> fakePatchedNumber),
+            None,
+            None,
+            Seq.empty
+          )
 
         effect.map(res => assertTrue(res.parent == fakeUUID.asParentDatabase))
       }

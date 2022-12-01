@@ -5,7 +5,7 @@ sidebar_position: 2
 
 # Pagination
 
-Some Notion endpoints required a`Pagination` object to work.
+Some Notion endpoints required a `Pagination` object to work.
 
 You will need to provide this object for the following endpoints:
 - Notion.queryDatabase
@@ -26,7 +26,7 @@ We also provide endpoints that handle the pagination for you:
 - Notion.retrieveAllUsers
 - Notion.retrieveAllBlocks
 
-However, it can be wise to don't use them in some case. For example if you search for a user in particular, you may
+However, it can be wise to avoid them in some case. For example if you search for a user in particular, you may
 want to stop when you find it preventing you to fetch the whole elements.
 
 [Notion pagination documentation](https://developers.notion.com/reference/pagination) for more information.

@@ -22,7 +22,7 @@ object SortSpec extends ZIOSpecDefault {
             |    "direction" : "ascending"
             |  },
             |  {
-            |    "property" : "created_time",
+            |    "timestamp" : "created_time",
             |    "direction" : "descending"
             |  }
             |]""".stripMargin

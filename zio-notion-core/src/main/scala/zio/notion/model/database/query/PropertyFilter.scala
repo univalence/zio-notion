@@ -13,6 +13,7 @@ object PropertyFilter {
   final case class Number(property: String, number: NumberPropertyFilter)               extends PropertyFilter
   final case class Checkbox(property: String, checkbox: CheckboxPropertyFilter)         extends PropertyFilter
   final case class Select(property: String, select: SelectPropertyFilter)               extends PropertyFilter
+  final case class Status(property: String, status: StatusPropertyFilter)               extends PropertyFilter
   final case class MultiSelect(property: String, multiSelect: TextPropertyFilter)       extends PropertyFilter
   final case class Date(property: String, date: DatePropertyFilter)                     extends PropertyFilter
   final case class People(property: String, people: PeoplePropertyFilter)               extends PropertyFilter
@@ -71,6 +72,12 @@ object PropertyFilter {
     implicit val encoder: Encoder[SelectPropertyFilter] = PatchedPropertyEncoderDerivation.gen[SelectPropertyFilter]
   }
 
+  sealed trait StatusPropertyFilter
+
+  object StatusPropertyFilter {
+    implicit val encoder: Encoder[StatusPropertyFilter] = PatchedPropertyEncoderDerivation.gen[StatusPropertyFilter]
+  }
+
   sealed trait MultiSelectPropertyFilter
 
   object MultiSelectPropertyFilter {
@@ -124,6 +131,7 @@ object PropertyFilter {
     final case class NumberRollupSubfilter(number: NumberPropertyFilter)                extends RollupSubFilterPropertyFilter
     final case class CheckboxRollupSubfilter(checkbox: CheckboxPropertyFilter)          extends RollupSubFilterPropertyFilter
     final case class SelectRollupSubfilter(select: SelectPropertyFilter)                extends RollupSubFilterPropertyFilter
+    final case class StatusRollupSubfilter(select: StatusPropertyFilter)                extends RollupSubFilterPropertyFilter
     final case class MultiSelectRollupSubfilter(multiSelect: MultiSelectPropertyFilter) extends RollupSubFilterPropertyFilter
     final case class RelationRollupSubfilter(relation: RelationPropertyFilter)          extends RollupSubFilterPropertyFilter
     final case class DateRollupSubfilter(date: DatePropertyFilter)                      extends RollupSubFilterPropertyFilter
@@ -145,8 +153,12 @@ object PropertyFilter {
     implicit val encoder: Encoder[RollupPropertyFilter] = PatchedPropertyEncoderDerivation.gen[RollupPropertyFilter]
   }
 
-  final case class Equals(equals: String)             extends TextPropertyFilter with SelectPropertyFilter with DatePropertyFilter
-  final case class DoesNotEqual(doesNotEqual: String) extends TextPropertyFilter with SelectPropertyFilter
+  final case class Equals(equals: String)
+      extends TextPropertyFilter
+      with SelectPropertyFilter
+      with StatusPropertyFilter
+      with DatePropertyFilter
+  final case class DoesNotEqual(doesNotEqual: String) extends TextPropertyFilter with SelectPropertyFilter with StatusPropertyFilter
 
   final case class Contains(contains: String)
       extends TextPropertyFilter
@@ -165,6 +177,7 @@ object PropertyFilter {
       with TextPropertyFilter
       with NumberPropertyFilter
       with SelectPropertyFilter
+      with StatusPropertyFilter
       with MultiSelectPropertyFilter
       with DatePropertyFilter
       with PeoplePropertyFilter
@@ -175,6 +188,7 @@ object PropertyFilter {
       with TextPropertyFilter
       with NumberPropertyFilter
       with SelectPropertyFilter
+      with StatusPropertyFilter
       with MultiSelectPropertyFilter
       with DatePropertyFilter
       with PeoplePropertyFilter

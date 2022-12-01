@@ -1,4 +1,4 @@
-lazy val scala213 = "2.13.8"
+lazy val scala213 = "2.13.10"
 
 lazy val supportedScalaVersions = List(scala213)
 
@@ -43,7 +43,7 @@ inThisBuild(
 ThisBuild / scalafixScalaBinaryVersion := "2.13"
 ThisBuild / semanticdbEnabled          := true
 ThisBuild / semanticdbVersion          := scalafixSemanticdb.revision
-ThisBuild / scalafixDependencies ++= Seq("com.github.vovapolu" %% "scaluzzi" % "0.1.21")
+ThisBuild / scalafixDependencies ++= Seq("com.github.vovapolu" %% "scaluzzi" % "0.1.23")
 
 // SCoverage configuration
 val excludedPackages: Seq[String] = Seq("example")
@@ -70,12 +70,12 @@ addCommandAlias("testSpecific", "; clean; test;")
 addCommandAlias("testSpecificWithCoverage", "; clean; coverage; test; coverageReport;")
 
 // -- Lib versions
-val zio          = "2.0.0-RC6"
-val zioPrelude   = "1.0.0-RC14"
-val circe        = "0.14.2"
-val sttp         = "3.6.2"
+val zio          = "2.0.4"
+val zioPrelude   = "1.0.0-RC16"
+val circe        = "0.14.3"
+val sttp         = "3.8.3"
 val magnolia     = "1.1.2"
-val scalaReflect = "2.13.8"
+val scalaReflect = "2.13.10"
 
 // -- Main project settings
 lazy val core =
@@ -84,18 +84,18 @@ lazy val core =
       name := "zio-notion",
       scalacOptions ~= fatalWarningsAsProperties,
       libraryDependencies ++= Seq(
-        "com.softwaremill.sttp.client3" %% "async-http-client-backend-zio" % sttp,
-        "com.softwaremill.sttp.client3" %% "core"                          % sttp,
-        "dev.zio"                       %% "zio"                           % zio,
-        "dev.zio"                       %% "zio-prelude"                   % zioPrelude,
-        "io.circe"                      %% "circe-core"                    % circe,
-        "io.circe"                      %% "circe-parser"                  % circe,
-        "io.circe"                      %% "circe-generic"                 % circe,
-        "io.circe"                      %% "circe-generic-extras"          % circe,
-        "dev.zio"                       %% "zio-test"                      % zio % Test,
-        "dev.zio"                       %% "zio-test-sbt"                  % zio % Test,
-        "com.softwaremill.magnolia1_2"  %% "magnolia"                      % magnolia,
-        "org.scala-lang"                 % "scala-reflect"                 % scalaReflect
+        "com.softwaremill.sttp.client3" %% "zio"                  % sttp,
+        "com.softwaremill.sttp.client3" %% "core"                 % sttp,
+        "dev.zio"                       %% "zio"                  % zio,
+        "dev.zio"                       %% "zio-prelude"          % zioPrelude,
+        "io.circe"                      %% "circe-core"           % circe,
+        "io.circe"                      %% "circe-parser"         % circe,
+        "io.circe"                      %% "circe-generic"        % circe,
+        "io.circe"                      %% "circe-generic-extras" % circe,
+        "dev.zio"                       %% "zio-test"             % zio % Test,
+        "dev.zio"                       %% "zio-test-sbt"         % zio % Test,
+        "com.softwaremill.magnolia1_2"  %% "magnolia"             % magnolia,
+        "org.scala-lang"                 % "scala-reflect"        % scalaReflect
       ),
       testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")),
       scalacOptions ++= Seq("-Ymacro-annotations")

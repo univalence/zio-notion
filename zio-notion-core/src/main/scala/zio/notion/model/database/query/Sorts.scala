@@ -42,7 +42,7 @@ object Sorts {
         )
       case Timestamp(timestamp, ascending) =>
         Json.obj(
-          "property" -> {
+          "timestamp" -> {
             timestamp match {
               case TimestampType.CreatedTime    => Json.fromString("created_time")
               case TimestampType.LastEditedTime => Json.fromString("last_edited_time")

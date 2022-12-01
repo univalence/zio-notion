@@ -3,6 +3,7 @@
 .DS_Store
 target/
 Main.scala
+.DS_Store
 
 # Docusaurus
 .cache-loader

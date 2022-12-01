@@ -5,12 +5,12 @@ import io.circe.generic.semiauto.deriveDecoder
 import io.circe.parser.decode
 import io.circe.syntax.EncoderOps
 import sttp.client3._
-import sttp.client3.asynchttpclient.zio.SttpClient
 import sttp.model.Uri
 
 import zio.{IO, _}
 import zio.notion.NotionClient.NotionResponse
 import zio.notion.NotionError._
+import zio.notion.model.block.BlockContent
 import zio.notion.model.common.{Cover, Icon}
 import zio.notion.model.common.Parent.{DatabaseId, PageId}
 import zio.notion.model.common.richtext.RichTextFragment
@@ -51,58 +51,60 @@ trait NotionClient {
       parent: PageId,
       title: Option[PatchedProperty],
       icon: Option[Icon],
-      cover: Option[Cover]
+      cover: Option[Cover],
+      children: Seq[BlockContent]
   )(implicit trace: Trace): IO[NotionError, NotionResponse]
 
   def createPageInDatabase(
       parent: DatabaseId,
       properties: Map[String, PatchedProperty],
       icon: Option[Icon],
-      cover: Option[Cover]
+      cover: Option[Cover],
+      children: Seq[BlockContent]
   )(implicit trace: Trace): IO[NotionError, NotionResponse]
 }
 
 object NotionClient {
 
   def retrievePage(pageId: String)(implicit trace: Trace): ZIO[NotionClient, NotionError, NotionResponse] =
-    ZIO.service[NotionClient].flatMap(_.retrievePage(pageId))
+    ZIO.serviceWithZIO[NotionClient](_.retrievePage(pageId))
 
   def retrieveDatabase(databaseId: String)(implicit trace: Trace): ZIO[NotionClient, NotionError, NotionResponse] =
-    ZIO.service[NotionClient].flatMap(_.retrieveDatabase(databaseId))
+    ZIO.serviceWithZIO[NotionClient](_.retrieveDatabase(databaseId))
 
   def retrieveUser(userId: String)(implicit trace: Trace): ZIO[NotionClient, NotionError, NotionResponse] =
-    ZIO.service[NotionClient].flatMap(_.retrieveUser(userId))
+    ZIO.serviceWithZIO[NotionClient](_.retrieveUser(userId))
 
   def retrieveUsers(pagination: Pagination)(implicit trace: Trace): ZIO[NotionClient, NotionError, NotionResponse] =
-    ZIO.service[NotionClient].flatMap(_.retrieveUsers(pagination))
+    ZIO.serviceWithZIO[NotionClient](_.retrieveUsers(pagination))
 
   def queryDatabase(
       databaseId: String,
       query: Query,
       pagination: Pagination
   )(implicit trace: Trace): ZIO[NotionClient, NotionError, NotionResponse] =
-    ZIO.service[NotionClient].flatMap(_.queryDatabase(databaseId, query, pagination))
+    ZIO.serviceWithZIO[NotionClient](_.queryDatabase(databaseId, query, pagination))
 
   def updatePage(
       pageId: String,
       operations: Page.Patch.StatelessOperations
   )(implicit trace: Trace): ZIO[NotionClient, NotionError, NotionResponse] =
-    ZIO.service[NotionClient].flatMap(_.updatePage(pageId, operations))
+    ZIO.serviceWithZIO[NotionClient](_.updatePage(pageId, operations))
 
   def updatePage(page: Page, operations: Page.Patch.Operations)(implicit trace: Trace): ZIO[NotionClient, NotionError, NotionResponse] =
-    ZIO.service[NotionClient].flatMap(_.updatePage(page, operations))
+    ZIO.serviceWithZIO[NotionClient](_.updatePage(page, operations))
 
   def updateDatabase(
       databaseId: String,
       operations: Database.Patch.StatelessOperations
   )(implicit trace: Trace): ZIO[NotionClient, NotionError, NotionResponse] =
-    ZIO.service[NotionClient].flatMap(_.updateDatabase(databaseId, operations))
+    ZIO.serviceWithZIO[NotionClient](_.updateDatabase(databaseId, operations))
 
   def updateDatabase(
       database: Database,
       operations: Database.Patch.Operations
   )(implicit trace: Trace): ZIO[NotionClient, NotionError, NotionResponse] =
-    ZIO.service[NotionClient].flatMap(_.updateDatabase(database, operations))
+    ZIO.serviceWithZIO[NotionClient](_.updateDatabase(database, operations))
 
   type NotionResponse = String
 
@@ -116,34 +118,36 @@ object NotionClient {
     implicit val decoder: Decoder[NotionClientError] = deriveDecoder[NotionClientError]
   }
 
-  val live: URLayer[NotionConfiguration with SttpClient, NotionClient] =
+  val live: URLayer[NotionConfiguration with Backend, NotionClient] =
     ZLayer {
       for {
-        config     <- ZIO.service[NotionConfiguration]
-        sttpClient <- ZIO.service[SttpClient]
-      } yield LiveNotionClient(config, sttpClient)
+        config  <- ZIO.service[NotionConfiguration]
+        backend <- ZIO.service[Backend]
+      } yield LiveNotionClient(config, backend)
     }
 
-  case class LiveNotionClient(config: NotionConfiguration, sttpClient: SttpClient) extends NotionClient { // scalafix:ok
+  case class LiveNotionClient(config: NotionConfiguration, backend: Backend) extends NotionClient { // scalafix:ok
     val endpoint: Uri = uri"https://api.notion.com/v1"
 
     def apply(request: NotionRequest): IO[NotionError, NotionResponse] =
-      sttpClient
+      backend
         .send(request)
         .mapError(t => ConnectionError(t))
-        .flatMap(response =>
+        .flatMap { response =>
+          val body = response.body.merge
+
           response.code match {
-            case code if code.isSuccess => ZIO.succeed(response.body.merge)
-            case _ =>
+            case code if code.isSuccess => ZIO.succeed(body)
+            case code =>
               val error =
                 decode[NotionClientError](response.body.merge) match {
-                  case Left(error)  => JsonError(error)
+                  case Left(_)      => NotionError.HttpError(request.toCurl, code.code, "unknown", body)
                   case Right(error) => NotionError.HttpError(request.toCurl, error.status, error.code, error.message)
                 }
 
               ZIO.fail(error)
           }
-        )
+        }
 
     implicit private class RequestOps(request: NotionRequest) {
       def handle: IO[NotionError, NotionResponse] = apply(request)
@@ -268,14 +272,16 @@ object NotionClient {
         parent: DatabaseId,
         properties: Map[String, PatchedProperty],
         icon: Option[Icon],
-        cover: Option[Cover]
+        cover: Option[Cover],
+        children: Seq[BlockContent]
     )(implicit trace: Trace): IO[NotionError, NotionResponse] = {
       val json =
         Json.obj(
           "parent"     -> parent.asJson,
           "properties" -> properties.asJson,
           "icon"       -> icon.asJson,
-          "cover"      -> cover.asJson
+          "cover"      -> cover.asJson,
+          "children"   -> children.asJson
         )
       defaultRequest
         .post(uri"$endpoint/pages/")
@@ -287,14 +293,16 @@ object NotionClient {
         parent: PageId,
         title: Option[PatchedProperty],
         icon: Option[Icon],
-        cover: Option[Cover]
+        cover: Option[Cover],
+        children: Seq[BlockContent]
     )(implicit trace: Trace): IO[NotionError, NotionResponse] = {
       val json =
         Json.obj(
           "parent"     -> parent.asJson,
           "properties" -> Json.obj("title" -> title.asJson),
           "icon"       -> icon.asJson,
-          "cover"      -> cover.asJson
+          "cover"      -> cover.asJson,
+          "children"   -> children.asJson
         )
 
       defaultRequest

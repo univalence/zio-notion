@@ -27,10 +27,11 @@ object ToPatchedProperty {
       case Property.RichText(_, richText)             => Some(PatchedRichText(richText))
       case Property.People(_, people)                 => Some(PatchedPeople(people))
       case Property.Relation(_, relation)             => Some(PatchedRelation(relation))
+      case Property.Select(_, Some(select))           => Some(PatchedSelect(Some(select.id), Some(select.name)))
+      case Property.Status(_, Some(status))           => Some(PatchedStatus(Some(status.id), Some(status.name)))
       case Property.MultiSelect(_, multiSelect) =>
         val selects = multiSelect.map(data => PatchedSelect(Some(data.id), Some(data.name)))
         Some(PatchedMultiSelect(selects))
-      // We can't update a select from an existing one.
       case _ => None
     }
 }
@@ -63,6 +64,7 @@ object Property {
   @ConfiguredJsonCodec(decodeOnly = true) final case class LastEditedTime(id: String, lastEditedTime: String)    extends Property
   @ConfiguredJsonCodec(decodeOnly = true) final case class Formula(id: String, formula: FormulaData)             extends Property
   @ConfiguredJsonCodec(decodeOnly = true) final case class Rollup(id: String, rollup: RollupData)                extends Property
+  @ConfiguredJsonCodec(decodeOnly = true) final case class Status(id: String, status: Option[SelectData])        extends Property
 
   implicit val propertyDecoder: Decoder[Property] =
     (c: HCursor) =>
@@ -72,6 +74,7 @@ object Property {
             case "number"           => Decoder[Number].apply(c)
             case "url"              => Decoder[Url].apply(c)
             case "select"           => Decoder[Select].apply(c)
+            case "status"           => Decoder[Status].apply(c)
             case "multi_select"     => Decoder[MultiSelect].apply(c)
             case "date"             => Decoder[Date].apply(c) orElse Decoder[DateTime].apply(c)
             case "email"            => Decoder[Email].apply(c)

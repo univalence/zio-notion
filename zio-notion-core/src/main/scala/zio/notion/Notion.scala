@@ -2,13 +2,13 @@ package zio.notion
 
 import io.circe.Decoder
 import io.circe.parser.decode
-import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
+import sttp.client3.httpclient.zio.HttpClientZioBackend
 
 import zio._
 import zio.notion.NotionClient.NotionResponse
 import zio.notion.NotionError.JsonError
 import zio.notion.dsl._
-import zio.notion.model.block.{Block, Blocks}
+import zio.notion.model.block.{Block, BlockContent, Blocks}
 import zio.notion.model.common.{Cover, Icon}
 import zio.notion.model.common.Parent.{DatabaseId, PageId}
 import zio.notion.model.common.richtext.RichTextFragment
@@ -54,14 +54,16 @@ sealed trait Notion {
       parent: PageId,
       title: Option[PatchedProperty],
       icon: Option[Icon],
-      cover: Option[Cover]
+      cover: Option[Cover],
+      children: Seq[BlockContent]
   )(implicit trace: Trace): IO[NotionError, Page]
 
   def createPageInDatabase(
       parent: DatabaseId,
       properties: Map[String, PatchedProperty],
       icon: Option[Icon],
-      cover: Option[Cover]
+      cover: Option[Cover],
+      children: Seq[BlockContent]
   )(implicit trace: Trace): IO[NotionError, Page]
 
 }
@@ -69,13 +71,13 @@ sealed trait Notion {
 object Notion {
 
   def retrievePage(pageId: String)(implicit trace: Trace): ZIO[Notion, NotionError, Page] =
-    ZIO.service[Notion].flatMap(_.retrievePage(pageId))
+    ZIO.serviceWithZIO[Notion](_.retrievePage(pageId))
 
   def retrieveDatabase(databaseId: String)(implicit trace: Trace): ZIO[Notion, NotionError, Database] =
-    ZIO.service[Notion].flatMap(_.retrieveDatabase(databaseId))
+    ZIO.serviceWithZIO[Notion](_.retrieveDatabase(databaseId))
 
   def retrieveUser(userId: String)(implicit trace: Trace): ZIO[Notion, NotionError, User] =
-    ZIO.service[Notion].flatMap(_.retrieveUser(userId))
+    ZIO.serviceWithZIO[Notion](_.retrieveUser(userId))
 
   /**
    * Query a batch of users.
@@ -91,7 +93,7 @@ object Notion {
    *   The result of the query
    */
   def retrieveUsers(pagination: Pagination)(implicit trace: Trace): ZIO[Notion, NotionError, Users] =
-    ZIO.service[Notion].flatMap(_.retrieveUsers(pagination))
+    ZIO.serviceWithZIO[Notion](_.retrieveUsers(pagination))
 
   /**
    * Query all users handling pagination itself.
@@ -122,7 +124,7 @@ object Notion {
   }
 
   def retrieveBlock(blockId: String)(implicit trace: Trace): ZIO[Notion, NotionError, Block] =
-    ZIO.service[Notion].flatMap(_.retrieveBlock(blockId))
+    ZIO.serviceWithZIO[Notion](_.retrieveBlock(blockId))
 
   /**
    * Query a batch of blocks.
@@ -140,7 +142,7 @@ object Notion {
    *   The result of the query
    */
   def retrieveBlocks(pageId: String, pagination: Pagination)(implicit trace: Trace): ZIO[Notion, NotionError, Blocks] =
-    ZIO.service[Notion].flatMap(_.retrieveBlocks(pageId, pagination))
+    ZIO.serviceWithZIO[Notion](_.retrieveBlocks(pageId, pagination))
 
   /**
    * Query all users handling pagination itself.
@@ -196,7 +198,7 @@ object Notion {
       query: Query,
       pagination: Pagination
   )(implicit trace: Trace): ZIO[Notion, NotionError, DatabaseQuery] =
-    ZIO.service[Notion].flatMap(_.queryDatabase(databaseId, query, pagination))
+    ZIO.serviceWithZIO[Notion](_.queryDatabase(databaseId, query, pagination))
 
   /**
    * Query all pages of a database handling pagination itself.
@@ -234,10 +236,10 @@ object Notion {
   }
 
   def updatePage(pageId: String, operations: Page.Patch.StatelessOperations)(implicit trace: Trace): ZIO[Notion, NotionError, Page] =
-    ZIO.service[Notion].flatMap(_.updatePage(pageId, operations))
+    ZIO.serviceWithZIO[Notion](_.updatePage(pageId, operations))
 
   def updatePage(page: Page, operations: Page.Patch.Operations)(implicit trace: Trace): ZIO[Notion, NotionError, Page] =
-    ZIO.service[Notion].flatMap(_.updatePage(page, operations))
+    ZIO.serviceWithZIO[Notion](_.updatePage(page, operations))
 
   def updatePage(
       pageId: String,
@@ -250,10 +252,10 @@ object Notion {
   def updateDatabase(
       databaseId: String,
       operations: Database.Patch.StatelessOperations
-  )(implicit trace: Trace): ZIO[Notion, NotionError, Database] = ZIO.service[Notion].flatMap(_.updateDatabase(databaseId, operations))
+  )(implicit trace: Trace): ZIO[Notion, NotionError, Database] = ZIO.serviceWithZIO[Notion](_.updateDatabase(databaseId, operations))
 
   def updateDatabase(database: Database, operations: Database.Patch.Operations)(implicit trace: Trace): ZIO[Notion, NotionError, Database] =
-    ZIO.service[Notion].flatMap(_.updateDatabase(database, operations))
+    ZIO.serviceWithZIO[Notion](_.updateDatabase(database, operations))
 
   def updateDatabase(
       databaseId: String,
@@ -275,27 +277,30 @@ object Notion {
       cover: Option[Cover],
       properties: Map[String, PropertySchema]
   )(implicit trace: Trace): ZIO[Notion, NotionError, Database] =
-    ZIO.service[Notion].flatMap(_.createDatabase(pageId, title, icon, cover, properties))
+    ZIO.serviceWithZIO[Notion](_.createDatabase(pageId, title, icon, cover, properties))
 
   def createPageInPage(
       parent: PageId,
       title: Option[PatchedTitle],
       icon: Option[Icon],
-      cover: Option[Cover]
-  )(implicit trace: Trace): ZIO[Notion, NotionError, Page] = ZIO.service[Notion].flatMap(_.createPageInPage(parent, title, icon, cover))
+      cover: Option[Cover],
+      children: Seq[BlockContent]
+  )(implicit trace: Trace): ZIO[Notion, NotionError, Page] =
+    ZIO.serviceWithZIO[Notion](_.createPageInPage(parent, title, icon, cover, children))
 
   def createPageInDatabase(
       parent: DatabaseId,
       properties: Map[String, PatchedProperty],
       icon: Option[Icon],
-      cover: Option[Cover]
+      cover: Option[Cover],
+      children: Seq[BlockContent]
   )(implicit trace: Trace): ZIO[Notion, NotionError, Page] =
-    ZIO.service[Notion].flatMap(_.createPageInDatabase(parent, properties, icon, cover))
+    ZIO.serviceWithZIO[Notion](_.createPageInDatabase(parent, properties, icon, cover, children))
 
   val live: URLayer[NotionClient, Notion] = ZLayer(ZIO.service[NotionClient].map(LiveNotion))
 
   def layerWith(bearer: String): Layer[Throwable, Notion] =
-    AsyncHttpClientZioBackend.layer() ++ ZLayer.succeed(NotionConfiguration(bearer)) >>> NotionClient.live >>> Notion.live
+    HttpClientZioBackend.layer() ++ ZLayer.succeed(NotionConfiguration(bearer)) >>> NotionClient.live >>> Notion.live
 
   final case class LiveNotion(notionClient: NotionClient) extends Notion {
     private def decodeResponse[T: Decoder](request: IO[NotionError, NotionResponse]): IO[NotionError, T] = request.flatMap(decodeJson[T])
@@ -354,15 +359,18 @@ object Notion {
         parent: PageId,
         title: Option[PatchedProperty],
         icon: Option[Icon],
-        cover: Option[Cover]
-    )(implicit trace: Trace): IO[NotionError, Page] = decodeResponse[Page](notionClient.createPageInPage(parent, title, icon, cover))
+        cover: Option[Cover],
+        children: Seq[BlockContent]
+    )(implicit trace: Trace): IO[NotionError, Page] =
+      decodeResponse[Page](notionClient.createPageInPage(parent, title, icon, cover, children))
 
     override def createPageInDatabase(
         parent: DatabaseId,
         properties: Map[String, PatchedProperty],
         icon: Option[Icon],
-        cover: Option[Cover]
+        cover: Option[Cover],
+        children: Seq[BlockContent]
     )(implicit trace: Trace): IO[NotionError, Page] =
-      decodeResponse[Page](notionClient.createPageInDatabase(parent, properties, icon, cover))
+      decodeResponse[Page](notionClient.createPageInDatabase(parent, properties, icon, cover, children))
   }
 }

@@ -1,12 +1,15 @@
 package zio
 
-import sttp.client3.Request
+import sttp.capabilities.WebSockets
+import sttp.capabilities.zio.ZioStreams
+import sttp.client3.{Request, SttpBackend}
 
 import zio.notion.NotionError.ParsingError
 import zio.notion.model.page.Property
 import zio.prelude.Validation
 
 package object notion {
+  type Backend       = SttpBackend[Task, ZioStreams with WebSockets]
   type NotionRequest = Request[Either[String, String], Any]
 
   def decodePropertiesAs[A](properties: Map[String, Property])(implicit A: Converter[A]): Validation[ParsingError, A] =
