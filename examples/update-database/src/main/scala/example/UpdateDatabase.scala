@@ -1,93 +1,89 @@
 package example
 
-import sttp.capabilities
-import sttp.capabilities.zio.ZioStreams
-import sttp.client3.SttpBackend
-import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
-
+import sttp.client3.httpclient.zio.HttpClientZioBackend
 import zio._
-import zio.notion._
 import zio.notion.NotionError.PropertyWrongType
-import zio.notion.dsl.{euro, ColumnContext}
+import zio.notion._
+import zio.notion.dsl.{ColumnContext, euro}
+import zio.notion.model.database.Database
 import zio.notion.model.page.{Page, Property}
-import zio.notion.model.page.Page.Patch.Operations.Operation
 
 /**
  * in this example we start off with this kind of database :
- * | Name      | Balance |
- * |:----------|:--------|
- * | balance 1 | 1$      |
+ * | Name      | Balance (in $) | Balance (in €) |
+ * |:----------|:---------------|:---------------|
+ * | balance 1 | 1$             |                |
  *
  * and want to end up with this :
  *
- * | Name      | Balance | ToEuros |
- * |:----------|:--------|:--------|
- * | balance 1 | 1$      | X€      |
+ * | Name      | Balance (in $) | Balance (in €) |
+ * |:----------|:---------------|:---------------|
+ * | balance 1 | 1$             | X€             |
  */
 object UpdateDatabase extends ZIOAppDefault {
 
   /**
    * Gets, for one page in a database, the value of a number column
-   * called "Balance" just like in the example below
+   * called "Balance (in $)" just like in the example below.
    *
    * Page:
-   * | Name      | Balance |
-   * |:----------|:--------|
-   * | balance 1 | 1$      |
-   *
-   * Returns an effect (that should return 1D)
+   * | Name      | Balance (in $) |
+   * |:----------|:---------------|
+   * | balance 1 | 1$             |
    */
-  def getBalance(page: Page): ZIO[Any, NotionError, Double] =
-    page.properties("Balance") match {
+  private def getBalance(page: Page): ZIO[Any, NotionError, Double] =
+    page.properties("Balance (in $)") match {
       case Property.Number(_, number) => ZIO.succeed(number.getOrElse(0))
       case _                          => ZIO.fail(PropertyWrongType("Balance", "number", "well not the right type"))
     }
 
   /**
-   * Returns an effect that updates the ToEuros column
+   * Returns an effect that updates the Balance (in €) column.
    *
    * Before:
-   * | Name      | Balance | ToEuros |
-   * |:----------|:--------|:--------|
-   * | balance 1 | 1$      |         |
+   * | Name      | Balance (in $) | Balance (in €) |
+   * |:----------|:---------------|:---------------|
+   * | balance 1 | 1$             |                |
    *
    * After:
-   * | Name      | Balance | ToEuros |
-   * |:----------|:--------|:--------|
-   * | balance 1 | 1$      | X€      |
+   * | Name      | Balance (in $) | Balance (in €) |
+   * |:----------|:---------------|:---------------|
+   * | balance 1 | 1$             | X€             |
    */
-  def updateToEurosColumn(p: Page, conv: Double): ZIO[Notion, NotionError, Unit] = {
-    def convert(dollarValue: Double, conversion: Double): Operation.SetProperty = $"ToEuros".asNumber.patch.set(dollarValue * conversion)
-
+  private def updateBalanceInEuroColumn(page: Page, conversionRate: Double): ZIO[Notion, NotionError, Unit] =
     for {
-      balance <- getBalance(p)
-      _       <- Notion.updatePage(p, convert(balance, conv))
+      balance <- getBalance(page)
+      balanceInEuro = $"Balance (in €)".asNumber.patch.set(balance * conversionRate)
+      _ <- Notion.updatePage(page, balanceInEuro)
     } yield ()
+
+  private def addBalanceInEuroColumn(databaseId: String): ZIO[Notion, NotionError, Database] = {
+    val balanceInEuroColumn = $$"Balance (in €)".create.as(euro)
+
+    Notion.updateDatabase(databaseId, balanceInEuroColumn)
   }
 
+  private def retrieveDatabaseRows(databaseId: String): ZIO[Notion, NotionError, Seq[Page]] =
+    Notion.queryAllDatabase(databaseId).map(_.results)
+
   def example: ZIO[Notion with ExchangeRateAPI, NotionError, Unit] = {
-    val createToEurosColumn = $$"ToEuros".create.as(euro)
-    val dbId                = "xxx" // Insert your own page ID
+    val databaseId = "87dc8f64736344d7a5d1784e831dc83c" // Insert your own page ID
 
     for {
-      rates    <- ZIO.service[ExchangeRateAPI]
-      convRate <- rates.getUSDtoEURRate.orDie
-      _        <- Notion.updateDatabase(dbId, createToEurosColumn) // creates a column named "ToEuros"
-      db       <- Notion.queryAllDatabase(dbId)                    // returns the whole database (all pages included)
-      effects = db.results.map(updateToEurosColumn(_, convRate))
+      rates          <- ZIO.service[ExchangeRateAPI]
+      conversionRate <- rates.getUSDtoEURRate.orDie
+      _              <- addBalanceInEuroColumn(databaseId)
+      rows           <- retrieveDatabaseRows(databaseId)
+      effects = rows.map(updateBalanceInEuroColumn(_, conversionRate))
       _ <- ZIO.collectAllPar(effects)
 
     } yield ()
   }
 
-  val sttpLayer: Layer[Throwable, SttpBackend[Task, ZioStreams with capabilities.WebSockets]] = AsyncHttpClientZioBackend.layer()
-
   override def run: ZIO[Any with ZIOAppArgs with Scope, Any, Any] =
-    example
-      .tapError(e => Console.printLine(e.humanize))
-      .provide(
-        Notion.layerWith("secret_xxx"), // Insert your own bearer
-        sttpLayer,
+    example.provide(
+        Notion.layerWith("secret_CLKAMYAWhllAe0UG7d9oM64C4PsxFz7ZF7q5RbxFkcx"), // Insert your own bearer
+        HttpClientZioBackend.layer(),
         ExchangeRateAPI.live
       )
 
