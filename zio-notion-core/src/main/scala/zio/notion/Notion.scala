@@ -3,6 +3,7 @@ package zio.notion
 import io.circe.Decoder
 import io.circe.parser.decode
 import sttp.client3.httpclient.zio.HttpClientZioBackend
+
 import zio._
 import zio.notion.NotionClient.NotionResponse
 import zio.notion.NotionError.JsonError
