@@ -28,6 +28,7 @@ object PatchedProperty {
   final case class PatchedUrl(url: String)                                                                       extends PatchedProperty
   final case class PatchedEmail(email: String)                                                                   extends PatchedProperty
   final case class PatchedPhoneNumber(phoneNumber: String)                                                       extends PatchedProperty
+  final case class PatchedStatus(id: Option[String], name: Option[String])                                       extends PatchedProperty
 
   object PatchedTitle {
     implicit val encoder: Encoder[PatchedTitle] = PatchedPropertyEncoderDerivation.gen[PatchedTitle]
@@ -47,6 +48,10 @@ object PatchedProperty {
 
   object PatchedSelect {
     implicit val encoder: Encoder[PatchedSelect] = PatchedPropertyEncoderDerivation.gen[PatchedSelect]
+  }
+
+  object PatchedStatus {
+    implicit val encoder: Encoder[PatchedStatus] = PatchedPropertyEncoderDerivation.gen[PatchedStatus]
   }
 
   object PatchedMultiSelect {

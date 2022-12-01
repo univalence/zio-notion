@@ -89,6 +89,13 @@ object PatchedColumn {
     def setUsingName(name: String): SetProperty = set(None, Some(name))
   }
 
+  final case class PatchedColumnStatus(columnName: String) {
+    def set(id: Option[String], name: Option[String]): SetProperty = SetProperty(columnName, PatchedStatus(id, name))
+
+    def setUsingId(id: String): SetProperty     = set(Some(id), None)
+    def setUsingName(name: String): SetProperty = set(None, Some(name))
+  }
+
   final case class PatchedColumnMultiSelect(columnName: String) {
     def set(selects: List[PatchedSelect]): SetProperty = SetProperty(columnName, PatchedMultiSelect(selects))
 

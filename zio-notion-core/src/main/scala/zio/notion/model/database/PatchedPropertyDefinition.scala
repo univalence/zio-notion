@@ -31,6 +31,9 @@ object PatchedPropertyDefinition {
     final case class Formula(expression: String)             extends PropertySchema
     final case class Relation(databaseId: String)            extends PropertySchema
 
+    final case object Status
+        extends PropertySchema // TODO: 12/10/22 undocumented yet https://developers.notion.com/reference/update-a-database
+
     final case class Rollup(
         rollupPropertyName:   Option[String],
         relationPropertyName: Option[String],

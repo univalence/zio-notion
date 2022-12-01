@@ -1,4 +1,4 @@
-lazy val scala213 = "2.13.8"
+lazy val scala213 = "2.13.10"
 
 lazy val supportedScalaVersions = List(scala213)
 
@@ -70,12 +70,12 @@ addCommandAlias("testSpecific", "; clean; test;")
 addCommandAlias("testSpecificWithCoverage", "; clean; coverage; test; coverageReport;")
 
 // -- Lib versions
-val zio          = "2.0.2"
-val zioPrelude   = "1.0.0-RC15"
-val circe        = "0.14.2"
-val sttp         = "3.7.6"
+val zio          = "2.0.4"
+val zioPrelude   = "1.0.0-RC16"
+val circe        = "0.14.3"
+val sttp         = "3.8.3"
 val magnolia     = "1.1.2"
-val scalaReflect = "2.13.8"
+val scalaReflect = "2.13.10"
 
 // -- Main project settings
 lazy val core =
@@ -84,18 +84,18 @@ lazy val core =
       name := "zio-notion",
       scalacOptions ~= fatalWarningsAsProperties,
       libraryDependencies ++= Seq(
-        "com.softwaremill.sttp.client3" %% "async-http-client-backend-zio" % sttp,
-        "com.softwaremill.sttp.client3" %% "core"                          % sttp,
-        "dev.zio"                       %% "zio"                           % zio,
-        "dev.zio"                       %% "zio-prelude"                   % zioPrelude,
-        "io.circe"                      %% "circe-core"                    % circe,
-        "io.circe"                      %% "circe-parser"                  % circe,
-        "io.circe"                      %% "circe-generic"                 % circe,
-        "io.circe"                      %% "circe-generic-extras"          % circe,
-        "dev.zio"                       %% "zio-test"                      % zio % Test,
-        "dev.zio"                       %% "zio-test-sbt"                  % zio % Test,
-        "com.softwaremill.magnolia1_2"  %% "magnolia"                      % magnolia,
-        "org.scala-lang"                 % "scala-reflect"                 % scalaReflect
+        "com.softwaremill.sttp.client3" %% "zio"                  % sttp,
+        "com.softwaremill.sttp.client3" %% "core"                 % sttp,
+        "dev.zio"                       %% "zio"                  % zio,
+        "dev.zio"                       %% "zio-prelude"          % zioPrelude,
+        "io.circe"                      %% "circe-core"           % circe,
+        "io.circe"                      %% "circe-parser"         % circe,
+        "io.circe"                      %% "circe-generic"        % circe,
+        "io.circe"                      %% "circe-generic-extras" % circe,
+        "dev.zio"                       %% "zio-test"             % zio % Test,
+        "dev.zio"                       %% "zio-test-sbt"         % zio % Test,
+        "com.softwaremill.magnolia1_2"  %% "magnolia"             % magnolia,
+        "org.scala-lang"                 % "scala-reflect"        % scalaReflect
       ),
       testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")),
       scalacOptions ++= Seq("-Ymacro-annotations")
@@ -103,9 +103,10 @@ lazy val core =
 
 def example(project: Project): Project = project.dependsOn(core)
 
-lazy val exampleUpdatePage    = (project in file("examples/update-page")).configure(example)
-lazy val exampleRetrievePage  = (project in file("examples/retrieve-page")).configure(example)
-lazy val exampleQueryDatabase = (project in file("examples/query-database")).configure(example)
+lazy val exampleUpdatePage     = (project in file("examples/update-page")).configure(example)
+lazy val exampleRetrievePage   = (project in file("examples/retrieve-page")).configure(example)
+lazy val exampleQueryDatabase  = (project in file("examples/query-database")).configure(example)
+lazy val exampleUpdateDatabase = (project in file("examples/update-database")).configure(example)
 
 lazy val examples = (project in file("examples")).aggregate(exampleUpdatePage, exampleRetrievePage, exampleQueryDatabase)
 
