@@ -1,10 +1,11 @@
 package example
 
 import sttp.client3.httpclient.zio.HttpClientZioBackend
+
 import zio._
-import zio.notion.NotionError.PropertyWrongType
 import zio.notion._
-import zio.notion.dsl.{ColumnContext, euro}
+import zio.notion.NotionError.PropertyWrongType
+import zio.notion.dsl.{euro, ColumnContext}
 import zio.notion.model.database.Database
 import zio.notion.model.page.{Page, Property}
 
@@ -67,7 +68,7 @@ object UpdateDatabase extends ZIOAppDefault {
     Notion.queryAllDatabase(databaseId).map(_.results)
 
   def example: ZIO[Notion with ExchangeRateAPI, NotionError, Unit] = {
-    val databaseId = "87dc8f64736344d7a5d1784e831dc83c" // Insert your own page ID
+    val databaseId = "***" // Insert your own page ID
 
     for {
       rates          <- ZIO.service[ExchangeRateAPI]
@@ -82,9 +83,9 @@ object UpdateDatabase extends ZIOAppDefault {
 
   override def run: ZIO[Any with ZIOAppArgs with Scope, Any, Any] =
     example.provide(
-        Notion.layerWith("secret_CLKAMYAWhllAe0UG7d9oM64C4PsxFz7ZF7q5RbxFkcx"), // Insert your own bearer
-        HttpClientZioBackend.layer(),
-        ExchangeRateAPI.live
-      )
+      Notion.layerWith("secret_***"), // Insert your own bearer
+      HttpClientZioBackend.layer(),
+      ExchangeRateAPI.live
+    )
 
 }
