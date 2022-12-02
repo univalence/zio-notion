@@ -78,9 +78,9 @@ We provide [other examples](https://github.com/univalence/zio-notion/tree/master
 
 - You can retrieve a block
 - You can retrieve blocks of a page
-- ~~You can retrieve update a block~~ 🕦 COMING SOON
-- ~~You can retrieve delete a block~~ 🕦 COMING SOON
-- ~~You can append a block to a page~~ 🕦 COMING SOON
+- ~~You can update a block~~ 🕦 COMING SOON
+- ~~You can delete a block~~ 🕦 COMING SOON
+- ~~You can append a block~~ 🕦 COMING SOON
 
 ### User
 

@@ -53,7 +53,7 @@ const config = {
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       navbar: {
-        title: 'ZIO for Notion',
+        title: 'ZIO Notion',
         items: [
           {
             href: repoUrl,
@@ -75,7 +75,7 @@ const config = {
             ],
           },
           {
-            title: 'More',
+            title: 'Useful links',
             items: [
               {
                 label: 'ZIO',

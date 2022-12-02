@@ -100,6 +100,7 @@ object Database {
         sealed trait Stateful extends Operation { self =>
           def ++(operation: Operation): Operations = Operations(List(self, operation))
         }
+
         final case class RemoveColumn(name: String)                         extends Stateless
         final case class SetTitle(title: Seq[RichTextFragment])             extends Stateless
         final case class CreateColumn(name: String, schema: PropertySchema) extends Stateless
