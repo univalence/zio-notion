@@ -65,9 +65,8 @@ addCommandAlias("lintCheck", "scalafixAll --check")
 addCommandAlias("check", "; fmtCheck; lintCheck;")
 addCommandAlias("fixStyle", "; scalafmtAll; scalafixAll;")
 addCommandAlias("prepare", "fixStyle")
-addCommandAlias("testAll", "; clean;+ test;")
-addCommandAlias("testSpecific", "; clean; test;")
-addCommandAlias("testSpecificWithCoverage", "; clean; coverage; test; coverageReport;")
+addCommandAlias("test", "; clean;+ test;")
+addCommandAlias("testWithCoverage", "; clean; coverage; test; coverageReport;")
 
 // -- Lib versions
 val zio          = "2.0.4"
