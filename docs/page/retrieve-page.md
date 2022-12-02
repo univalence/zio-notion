@@ -12,7 +12,7 @@ This function does not retrieve the content of a page but only the metadata. We 
 don't provide this information when you retrieve a page. Instead, you have to call
 [this endpoint](https://developers.notion.com/reference/get-block-children) which is not implement in ZIO Notion yet.
 
-For more information, you can check the [notion documentation](https://developers.notion.com/reference/retrieve-a-database).
+For more information, you can check the [notion documentation](https://developers.notion.com/reference/retrieve-a-page).
 
 ## Deal with properties
 
@@ -29,12 +29,17 @@ You will easily have to write something like this:
 ```scala
 val maybeProperty: Option[Property] = page.properties.get("name")
 
-maybeProperty.collect{
-  case number: Property.Number => number.number match {
-    case Some(value) => // we can finally do something with the value
-    case None => // the value exists in the database but the row has no data in it
-  }
-}
+maybeProperty.map {
+  case Some(property) =>
+    property match {
+      case number: Property.Number => number.number match {
+        case Some(value) => // 🎉🎉🎉
+        case None => // the property "name" exists, it is a number but the row has no data in it
+      }
+      case _ => // the property "name" exists but it is not a number
+    }
+  case None => // the property "name" does not exist
+} 
 ```
 
 That's why you can use the page function `propertiesAs[A]` to convert your properties into a defined case class.

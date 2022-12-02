@@ -25,11 +25,11 @@ update methods :
 ```scala
 def updatePage(pageId: String, operations: StatelessOperations): IO[NotionError, Page]
 def updatePage(page: Page, operations: Operations): IO[NotionError, Page]
-def updatePage(pageId: String, operations: Operation.Stateless): IO[NotionError, Page]
-def updatePage(page: Page, operations: Operation): IO[NotionError, Page]
+def updatePage(pageId: String, operation: Operation.Stateless): IO[NotionError, Page]
+def updatePage(page: Page, operation: Operation): IO[NotionError, Page]
 ```
 
-We provide several kind of operations that can compose:
+We provide several kind of operations that can compose multiple operations:
 
 ```scala
 import zio.notion.dsl._ // We advise you to import the dsl
@@ -46,7 +46,7 @@ val operation = removeIcon                     // Remove the current icon of the
 val operation = removeCover                    // Remove the current cover of the page (Stateless)
 val operation = setIcon(newIcon)               // Set a new icon to the page (Stateless)
 val operation = setCover(newCover)             // Set a new cover to the page (Stateless)
-val operation = removeProperty(propertyName)   // Remove the propertyName property of the page (Stateless)
+val operation = removeProperty("name")         // Remove the property "name" of the page (Stateless)
 val operation = $"col1".asCheckbox.patch.check // Check the col1 checkbox property (Stateless)
 val operation = $"col1".asNumber.patch.ceil    // Apply a transformation to the col1 number property (Stateful)
 ```
