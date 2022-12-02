@@ -37,7 +37,12 @@ import java.time.LocalDate
 
 object UpdatePage extends ZIOAppDefault {
   def example: ZIO[Notion, NotionError, Unit] = {
-    val date       = LocalDate.of(2022, 2, 2)
+    val date = LocalDate.of(2022, 2, 2)
+    
+    // Apply the following operations to the page:
+    //   - Apply the ceil function to the value contained in "col1"
+    //   - Set the date between 2022-02-02 and 2022-02-16 in "col2"
+    //   - Archive the page
     val operations = $"col1".asNumber.patch.ceil ++ $"col2".asDate.patch.between(date, date.plusDays(14)) ++ archive
 
     for {
@@ -46,7 +51,7 @@ object UpdatePage extends ZIOAppDefault {
     } yield ()
   }
 
-  override def run: ZIO[Any with ZIOAppArgs with Scope, Any, Any] =
+  override def run =
     example.provide(Notion.layerWith("6A074793-D735-4BF6-9159-24351D239BBC")) // Insert your own bearer
 }
 ```
@@ -73,9 +78,9 @@ We provide [other examples](https://github.com/univalence/zio-notion/tree/master
 
 - You can retrieve a block
 - You can retrieve blocks of a page
-- ~~You can retrieve update a block~~ 🕦 COMING SOON
-- ~~You can retrieve delete a block~~ 🕦 COMING SOON
-- ~~You can append a block to a page~~ 🕦 COMING SOON
+- ~~You can update a block~~ 🕦 COMING SOON
+- ~~You can delete a block~~ 🕦 COMING SOON
+- ~~You can append a block~~ 🕦 COMING SOON
 
 ### User
 
@@ -92,7 +97,7 @@ We provide [other examples](https://github.com/univalence/zio-notion/tree/master
 If you want to get the very last version of this library you can still download it using:
 
 ```scala
-libraryDependencies += "io.univalence" %% "zio-notion" % "0.9.0"
+libraryDependencies += "io.univalence" %% "zio-notion" % "0.9.2"
 ```
 
 ### Snapshots

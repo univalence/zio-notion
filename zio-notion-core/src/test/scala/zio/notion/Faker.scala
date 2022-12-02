@@ -4,7 +4,7 @@ import zio.notion.Faker.FakeProperty.{fakeCheckbox, fakeTitle}
 import zio.notion.model.block.{Block, BlockContent}
 import zio.notion.model.block.BlockContent._
 import zio.notion.model.common
-import zio.notion.model.common.{Icon, Id, Parent}
+import zio.notion.model.common.{Icon, Id, Parent, Url}
 import zio.notion.model.common.enumeration.{Color, Language}
 import zio.notion.model.common.richtext.{Annotations, RichTextFragment}
 import zio.notion.model.database.{Database, PropertyDefinition}
@@ -12,6 +12,7 @@ import zio.notion.model.database.PatchedPropertyDefinition.PropertySchema
 import zio.notion.model.page.Page
 import zio.notion.model.page.PatchedProperty.{PatchedNumber, PatchedTitle}
 import zio.notion.model.page.Property.{Checkbox, Date, Title}
+import zio.notion.model.page.property.Link
 
 import java.time.{LocalDate, OffsetDateTime, OffsetTime, ZoneOffset}
 
@@ -29,6 +30,8 @@ object Faker {
   val fakePhoneNumber: String = "+1-202-555-0164"
 
   val fakeDate: LocalDate = LocalDate.of(2022, 12, 24)
+
+  val fakeExternalLink: Link = Link.External("fakeName", Url(fakeUrl))
 
   val fakeDatetime: OffsetDateTime = fakeDate.atTime(OffsetTime.of(15, 10, 0, 0, ZoneOffset.UTC))
 

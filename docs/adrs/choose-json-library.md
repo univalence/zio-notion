@@ -55,8 +55,6 @@ Chosen option: "Circe", because it is a library :
 
 ### ZIO Json
 
-[example | description | pointer to more information | …] <!-- optional -->
-
 * Good, because it belongs to the zio ecosystem (and it is ZIO Notion after all)
 * Good, because it is the fastest solution (at compile time AND at run time)
 * Bad, because it is hard to write our own encoder due to the optimizations
