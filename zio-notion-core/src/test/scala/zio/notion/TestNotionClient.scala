@@ -575,7 +575,8 @@ final case class TestNotionClient() extends NotionClient {
          |  "has_more": false,
          |  "type": "block",
          |  "block": {}
-         |}""".stripMargin)
+         |}""".stripMargin
+    )
 
   override def createDatabase(
       pageId: String,

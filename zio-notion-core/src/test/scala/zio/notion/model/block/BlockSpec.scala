@@ -4,11 +4,9 @@ import io.circe.jawn.decode
 import io.circe.syntax.EncoderOps
 
 import zio._
-import zio.notion.Faker.FakeBlock._
 import zio.notion.Faker.fakeBlock
 import zio.notion.model.block.BlockContent._
 import zio.notion.model.printer
-import zio.notion.utils.StringOps.notionify
 import zio.test._
 
 object BlockSpec extends ZIOSpecDefault {
