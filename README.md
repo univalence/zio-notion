@@ -80,7 +80,7 @@ We provide [other examples](https://github.com/univalence/zio-notion/tree/master
 - You can retrieve blocks of a page
 - ~~You can update a block~~ 🕦 COMING SOON
 - ~~You can delete a block~~ 🕦 COMING SOON
-- ~~You can append a block~~ 🕦 COMING SOON
+- You can append a block
 
 ### User
 

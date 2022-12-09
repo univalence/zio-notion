@@ -66,6 +66,11 @@ object NotionSpec extends ZIOSpecDefault {
 
         effect.map(res => assertTrue(res.id == fakeUUID))
       },
+      test("User can append blocks") {
+        val effect: ZIO[Notion, NotionError, Blocks] = Notion.appendBlocks(fakeDatabase.id, List.empty)
+
+        effect.map(res => assertTrue(res.results.length == 2))
+      },
       test("User can create a database") {
         val effect: ZIO[Notion, NotionError, Database] =
           Notion.createDatabase(fakeUUID, fakeDatabase.title, None, None, fakePropertyDefinitions)

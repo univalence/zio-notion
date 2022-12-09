@@ -53,7 +53,7 @@ object BlockContent {
     }
   }
 
-  implicit val encoder: Encoder[BlockContent] = EncoderDerivation.gen[BlockContent]
+  implicit val encoder: Encoder[BlockContent] = EncoderDerivation.gen[BlockContent].mapJson(_ deepMerge Map("object" -> "block").asJson)
   implicit val encoderColumn: Encoder[Column] = NoDiscriminantNoNullEncoderDerivation.gen[Column]
   implicit val encoderImage: Encoder[Image]   = Encoder[common.File].contramap(_.file)
   implicit val encoderVideo: Encoder[Video]   = Encoder[common.File].contramap(_.file)

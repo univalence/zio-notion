@@ -39,6 +39,11 @@ trait NotionClient {
   )(implicit trace: Trace): IO[NotionError, NotionResponse]
   def updateDatabase(database: Database, operations: Database.Patch.Operations)(implicit trace: Trace): IO[NotionError, NotionResponse]
 
+  def appendBlocks(
+      blockId: String,
+      blocks: List[BlockContent]
+  )(implicit trace: Trace): IO[NotionError, NotionResponse]
+
   def createDatabase(
       pageId: String,
       title: Seq[RichTextFragment],
@@ -242,6 +247,17 @@ object NotionClient {
             .body(printer.print(patch.asJson))
             .handle
       } yield response
+
+    override def appendBlocks(blockId: NotionResponse, blocks: List[BlockContent])(implicit
+        trace: Trace
+    ): IO[NotionError, NotionResponse] = {
+      val json = Json.obj("children" -> blocks.asJson)
+
+      defaultRequest
+        .patch(uri"$endpoint/blocks/$blockId/children")
+        .body(printer.print(json))
+        .handle
+    }
 
     override def createDatabase(
         pageId: String,

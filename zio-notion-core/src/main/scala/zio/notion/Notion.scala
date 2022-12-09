@@ -42,6 +42,8 @@ sealed trait Notion {
   def updateDatabase(databaseId: String, operations: Database.Patch.StatelessOperations)(implicit trace: Trace): IO[NotionError, Database]
   def updateDatabase(database: Database, operations: Database.Patch.Operations)(implicit trace: Trace): IO[NotionError, Database]
 
+  def appendBlocks(blockId: String, blocks: List[BlockContent])(implicit trace: Trace): IO[NotionError, Blocks]
+
   def createDatabase(
       pageId: String,
       title: Seq[RichTextFragment],
@@ -268,6 +270,9 @@ object Notion {
       operation: Database.Patch.Operations.Operation
   )(implicit trace: Trace): ZIO[Notion, NotionError, Database] = updateDatabase(database, Database.Patch.Operations(List(operation)))
 
+  def appendBlocks(blockId: NotionResponse, blocks: List[BlockContent])(implicit trace: Trace): ZIO[Notion, NotionError, Blocks] =
+    ZIO.serviceWithZIO[Notion](_.appendBlocks(blockId, blocks))
+
   def deletePage(pageId: String)(implicit trace: Trace): ZIO[Notion, NotionError, Unit] = Notion.updatePage(pageId, archive).unit
 
   def createDatabase(
@@ -345,6 +350,9 @@ object Notion {
         database: Database,
         operations: Database.Patch.Operations
     )(implicit trace: Trace): IO[NotionError, Database] = decodeResponse[Database](notionClient.updateDatabase(database, operations))
+
+    override def appendBlocks(blockId: NotionResponse, blocks: List[BlockContent])(implicit trace: Trace): IO[NotionError, Blocks] =
+      decodeResponse[Blocks](notionClient.appendBlocks(blockId, blocks))
 
     override def createDatabase(
         pageId: String,
