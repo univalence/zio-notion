@@ -4,25 +4,12 @@ import io.circe.jawn.decode
 import io.circe.syntax.EncoderOps
 
 import zio._
-import zio.notion.Faker.FakeBlock._
 import zio.notion.Faker.fakeBlock
 import zio.notion.model.block.BlockContent._
 import zio.notion.model.printer
-import zio.notion.utils.StringOps.notionify
 import zio.test._
 
 object BlockSpec extends ZIOSpecDefault {
-
-  def testBlockContentDeserialization(content: BlockContent): Spec[Any, Nothing] = {
-    val contentName: String = notionify(content.getClass.getSimpleName.split('$').head)
-    val block               = fakeBlock.copy(content = content)
-
-    test(s"We should be able to encode then decode again a block with a $contentName") {
-      val json          = printer.print(block.asJson)
-      val maybeNewBlock = decode[Block](json)
-      assertTrue(maybeNewBlock == Right(block))
-    }
-  }
 
   override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("Block serde suite")(
@@ -40,6 +27,7 @@ object BlockSpec extends ZIOSpecDefault {
             |  },
             |  "archived" : true,
             |  "has_children" : true,
+            |  "object" : "block",
             |  "type" : "to_do",
             |  "to_do" : {
             |    "rich_text" : [
@@ -56,7 +44,6 @@ object BlockSpec extends ZIOSpecDefault {
       test("We should be able to decode a block") {
         val json =
           """{
-            |  "object": "block",
             |  "id": "9bc30ad4-9373-46a5-84ab-0a7845ee52e6",
             |  "created_time": "2021-03-16T16:31:00.000Z",
             |  "created_by": {
@@ -69,6 +56,7 @@ object BlockSpec extends ZIOSpecDefault {
             |    "id": "e79a0b74-3aba-4149-9f74-0bb5791a6ee6"
             |  },
             |  "has_children": false,
+            |  "object" : "block",
             |  "type": "to_do",
             |  "archived": false,
             |  "to_do": {
@@ -107,7 +95,6 @@ object BlockSpec extends ZIOSpecDefault {
       test("We should be able to parse any supported block content from json") {
         val json =
           """{
-            |  "object": "block",
             |  "id": "9bc30ad4-9373-46a5-84ab-0a7845ee52e6",
             |  "created_time": "2021-03-16T16:31:00.000Z",
             |  "created_by": {
@@ -120,6 +107,7 @@ object BlockSpec extends ZIOSpecDefault {
             |    "id": "e79a0b74-3aba-4149-9f74-0bb5791a6ee6"
             |  },
             |  "has_children": false,
+            |  "object" : "block",
             |  "type": "to_do",
             |  "archived": false,
             |  "to_do": {
@@ -154,34 +142,6 @@ object BlockSpec extends ZIOSpecDefault {
               assertTrue(block.content.asInstanceOf[ToDo].checked) &&
               assertTrue(!block.archived)
           )
-      },
-      testBlockContentDeserialization(Unsupported),
-      testBlockContentDeserialization(fakeParagraph),
-      testBlockContentDeserialization(fakeHeadingOne),
-      testBlockContentDeserialization(fakeHeadingTwo),
-      testBlockContentDeserialization(fakeHeadingThree),
-      testBlockContentDeserialization(fakeCallout),
-      testBlockContentDeserialization(fakeQuote),
-      testBlockContentDeserialization(fakeBulletedListItem),
-      testBlockContentDeserialization(fakeNumberedListItem),
-      testBlockContentDeserialization(fakeToggle),
-      testBlockContentDeserialization(fakeCode),
-      testBlockContentDeserialization(fakeChildPage),
-      testBlockContentDeserialization(fakeChildDatabase),
-      testBlockContentDeserialization(fakeEmbed),
-      testBlockContentDeserialization(fakeImage),
-      testBlockContentDeserialization(fakeVideo),
-      testBlockContentDeserialization(fakeFile),
-      testBlockContentDeserialization(fakePdf),
-      testBlockContentDeserialization(fakeBookmark),
-      testBlockContentDeserialization(fakeEquation),
-      testBlockContentDeserialization(Divider),
-      testBlockContentDeserialization(fakeTableOfContents),
-      testBlockContentDeserialization(Breadcrumb),
-      testBlockContentDeserialization(fakeColumn),
-      testBlockContentDeserialization(fakeColumnList),
-      testBlockContentDeserialization(fakeLinkPreview),
-      testBlockContentDeserialization(fakeTemplate),
-      testBlockContentDeserialization(fakeLinkToPage)
+      }
     )
 }

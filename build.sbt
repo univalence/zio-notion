@@ -106,8 +106,9 @@ lazy val exampleUpdatePage     = (project in file("examples/update-page")).confi
 lazy val exampleRetrievePage   = (project in file("examples/retrieve-page")).configure(example)
 lazy val exampleQueryDatabase  = (project in file("examples/query-database")).configure(example)
 lazy val exampleUpdateDatabase = (project in file("examples/update-database")).configure(example)
+lazy val exampleAppendBlocks = (project in file("examples/append-blocks")).configure(example)
 
-lazy val examples = (project in file("examples")).aggregate(exampleUpdatePage, exampleRetrievePage, exampleQueryDatabase)
+lazy val examples = (project in file("examples")).aggregate(exampleUpdatePage, exampleRetrievePage, exampleQueryDatabase, exampleAppendBlocks)
 
 /**
  * Don't fail the compilation for warnings by default, you can still
