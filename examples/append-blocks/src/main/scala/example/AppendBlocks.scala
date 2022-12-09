@@ -3,12 +3,13 @@ package example
 import zio._
 import zio.notion._
 import zio.notion.dsl._
+import zio.notion.model.block.BlockContent
 
 object AppendBlocks extends ZIOAppDefault {
   val apiToken: String = "secret_XXXX" // Insert your own bearer
   val blockId: String  = "XXX"         // Insert your own page or database
 
-  val blocks =
+  val blocks: List[BlockContent] =
     List(
       h1"My beautiful documentation",
       h2"My subtitle",
