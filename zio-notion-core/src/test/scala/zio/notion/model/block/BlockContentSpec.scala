@@ -4,8 +4,8 @@ import io.circe.jawn.decode
 import io.circe.syntax.EncoderOps
 
 import zio._
-import zio.notion.Faker.fakeBlock
 import zio.notion.Faker.FakeBlock._
+import zio.notion.Faker.fakeBlock
 import zio.notion.dsl.BlockContentContext
 import zio.notion.model.block.BlockContent._
 import zio.notion.model.printer
