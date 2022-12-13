@@ -190,11 +190,18 @@ object NotionClient {
         .get(uri"$endpoint/blocks/$blockId")
         .handle
 
-    override def retrieveBlocks(pageId: String, pagination: Pagination)(implicit trace: Trace): IO[NotionError, NotionResponse] =
+    override def retrieveBlocks(pageId: String, pagination: Pagination)(implicit trace: Trace): IO[NotionError, NotionResponse] = {
+      val queryParameters: Map[String, String] = {
+        val default = Map("page_size" -> pagination.pageSize.toString)
+        pagination.startCursor match {
+          case Some(cursor) => default + ("start_cursor" -> cursor)
+          case None         => default
+        }
+      }
       defaultRequest
-        .get(uri"$endpoint/blocks/$pageId/children")
-        .body(printer.print(pagination.asJson))
+        .get(uri"$endpoint/blocks/$pageId/children".addParams(queryParameters))
         .handle
+    }
 
     override def queryDatabase(databaseId: String, query: Query, pagination: Pagination)(implicit
         trace: Trace
