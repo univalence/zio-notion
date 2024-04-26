@@ -73,7 +73,7 @@ val zio          = "2.0.22"
 val zioPrelude   = "1.0.0-RC23"
 val circe        = "0.14.3"
 val sttp         = "3.9.5"
-val magnolia     = "1.1.8"
+val magnolia     = "1.1.9"
 val scalaReflect = "2.13.13"
 
 // -- Main project settings
