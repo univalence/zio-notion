@@ -1,4 +1,4 @@
-lazy val scala213 = "2.13.12"
+lazy val scala213 = "2.13.14"
 
 lazy val supportedScalaVersions = List(scala213)
 
