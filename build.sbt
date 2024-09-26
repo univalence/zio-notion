@@ -74,7 +74,7 @@ val zioPrelude   = "1.0.0-RC31"
 val circe        = "0.14.4"
 val sttp         = "3.9.8"
 val magnolia     = "1.1.10"
-val scalaReflect = "2.13.14"
+val scalaReflect = "2.13.15"
 
 // -- Main project settings
 lazy val core =
