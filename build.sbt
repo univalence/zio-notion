@@ -69,7 +69,7 @@ addCommandAlias("test", "; clean;+ test;")
 addCommandAlias("testWithCoverage", "; clean; coverage; test; coverageReport;")
 
 // -- Lib versions
-val zio          = "2.1.12"
+val zio          = "2.1.13"
 val zioPrelude   = "1.0.0-RC35"
 val circe        = "0.14.4"
 val sttp         = "3.10.1"
