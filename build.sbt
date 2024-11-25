@@ -71,7 +71,7 @@ addCommandAlias("testWithCoverage", "; clean; coverage; test; coverageReport;")
 // -- Lib versions
 val zio          = "2.1.12"
 val zioPrelude   = "1.0.0-RC35"
-val circe        = "0.14.4"
+val circe        = "0.14.10"
 val sttp         = "3.10.1"
 val magnolia     = "1.1.10"
 val scalaReflect = "2.13.14"
